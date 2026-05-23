@@ -19,7 +19,7 @@ marked.use({
 // Helper to parse description - handles both HTML and markdown
 function parseDescription(description: string): string {
   if (!description) return '';
-  
+
   // If already HTML, return as-is but with link styling
   if (description.includes('<p>') || description.includes('<br') || description.includes('<ul>')) {
     // Add styling to links
@@ -29,10 +29,15 @@ function parseDescription(description: string): string {
       .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
       .replace(/<li>/g, '<li class="text-neutral-300">');
   }
-  
+
+  // Pre-process: ensure list items have a blank line before them for proper markdown parsing
+  let processed = description
+    .replace(/(?<!\n)\n([-*] )/g, '\n\n$1')  // ensure blank line before lists
+    .replace(/\*\*(.*?)\*\*/g, '**$1**');     // keep bold as-is (marked handles it)
+
   // Parse as markdown
-  const html = marked.parse(description, { async: false }) as string;
-  
+  const html = marked.parse(processed, { async: false }) as string;
+
   // Add styling classes
   return html
     .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
@@ -203,6 +208,31 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 )}
               </div>
               <p className="text-neutral-500 text-sm mt-1">Tax included</p>
+            </div>
+
+            {/* Trust badges */}
+            <div className="flex flex-wrap gap-4 mb-6 text-sm text-neutral-400">
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+                  <path d="M9 12l2 2l4 -4"/>
+                </svg>
+                <span>7 day money-back guarantee</span>
+                <sup className="text-blue-400 font-normal text-[10px] flex items-center gap-0.5 cursor-pointer">
+                  <Link href="/refunds" className="hover:text-blue-300">Subject to T&Cs</Link>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                  </svg>
+                </sup>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/>
+                  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/>
+                  <path d="M8 11v-4a4 4 0 1 1 8 0v4"/>
+                </svg>
+                <span>Protected by Cfx.re asset escrow</span>
+              </div>
             </div>
 
             {/* Description with proper markdown rendering */}
