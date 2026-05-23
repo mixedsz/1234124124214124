@@ -1,0 +1,117 @@
+'use client';
+
+// Orders page with basket context
+
+import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
+import { useBasket } from '@/contexts/basket-context';
+import { ExternalLink, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
+export default function OrdersPage() {
+  const { isAuthenticated, username, basket } = useBasket();
+
+  return (
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
+      <Header />
+
+      <main className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 w-full">
+        <Link
+          href="/store"
+          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Store
+        </Link>
+
+        <h1 className="text-4xl font-bold text-white mb-4">Manage Orders & Subscriptions</h1>
+        <p className="text-neutral-400 mb-12">View your purchase history and manage your subscriptions.</p>
+
+        {!isAuthenticated ? (
+          <div className="bg-neutral-800/50 border border-neutral-700 rounded-2xl p-12 text-center">
+            <ShoppingBag className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-white mb-2">Login Required</h2>
+            <p className="text-neutral-400 mb-6">
+              Please login with FiveM to view your orders and subscriptions.
+            </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition font-semibold"
+            >
+              Login with FiveM
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* User Info */}
+            <div className="bg-neutral-800/50 border border-neutral-700 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Package className="w-5 h-5" />
+                Account Information
+              </h2>
+              <div className="space-y-2 text-neutral-300">
+                <p><span className="text-neutral-500">Username:</span> {username}</p>
+                <p><span className="text-neutral-500">Account ID:</span> {basket?.username_id || 'N/A'}</p>
+              </div>
+            </div>
+
+            {/* Tebex Order History Link */}
+            <div className="bg-neutral-800/50 border border-neutral-700 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Order History</h2>
+              <p className="text-neutral-400 mb-4">
+                View your complete purchase history and download your scripts from the Tebex account portal.
+              </p>
+              <a
+                href="https://checkout.tebex.io/account"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition font-medium"
+              >
+                View Orders on Tebex
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Subscriptions */}
+            <div className="bg-neutral-800/50 border border-neutral-700 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Active Subscriptions</h2>
+              <p className="text-neutral-400 mb-4">
+                Manage your active subscriptions, update payment methods, or cancel recurring payments.
+              </p>
+              <a
+                href="https://checkout.tebex.io/account"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-neutral-700 hover:bg-neutral-600 text-white rounded-lg transition font-medium"
+              >
+                Manage Subscriptions
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+
+            {/* Support */}
+            <div className="bg-neutral-800/50 border border-neutral-700 rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-white mb-4">Need Help?</h2>
+              <p className="text-neutral-400 mb-4">
+                Having issues with your orders or need assistance? Join our Discord for support.
+              </p>
+              <a
+                href="https://discord.gg/flakedevelopment"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition font-medium"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                </svg>
+                Join Discord
+              </a>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
