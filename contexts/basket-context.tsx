@@ -106,25 +106,24 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     try {
       setAdding(true);
 
-      // Game server command packages require username_id in variable_data.
-      // Try with it first (if authenticated and not already provided by caller).
-      // If Tebex rejects because the package doesn't accept it, fall back without.
-      if (basket.username_id && !variableData?.username_id) {
-        const varsWithId = { ...variableData, username_id: String(basket.username_id) };
-        try {
-          return await attemptAdd(varsWithId);
-        } catch (err) {
-          const msg = err instanceof Error ? err.message.toLowerCase() : '';
-          // "invalid options" / "does not have" means package doesn't accept username_id → retry without
-          if (msg.includes('invalid option') || msg.includes('does not have') || msg.includes('product has invalid')) {
-            console.log('[BasketProvider] Package does not accept username_id, retrying without it');
-            return await attemptAdd(variableData);
-          }
-          throw err;
-        }
-      }
+      // First attempt without username_id (works for most package types).
+      try {
+        return await attemptAdd(variableData);
+      } catch (firstErr) {
+        const detail = (
+          (firstErr as Error & { tebexDetail?: { body?: { detail?: string } } })
+            .tebexDetail?.body?.detail ?? (firstErr instanceof Error ? firstErr.message : '')
+        ).toLowerCase();
 
-      return await attemptAdd(variableData);
+        // "One of the options provided is invalid" on game server command packages
+        // means username_id is required. Retry with it if we have it.
+        if (detail.includes('options provided is invalid') && basket.username_id) {
+          console.log('[BasketProvider] Retrying with username_id for game server command package');
+          return await attemptAdd({ ...variableData, username_id: String(basket.username_id) });
+        }
+
+        throw firstErr;
+      }
     } catch (err) {
       console.error('[BasketProvider] Error adding item:', err);
       throw err;
