@@ -3,7 +3,8 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { useBasket } from '@/contexts/basket-context';
-import { formatPrice, TEBEX_PROJECT_ID } from '@/lib/tebex';
+import { TEBEX_PROJECT_ID } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
 import { Trash2, ArrowLeft, AlertCircle, ShoppingBag, LogIn, X, Lock } from 'lucide-react';
@@ -24,6 +25,7 @@ declare global {
 
 export default function CartPage() {
   const { basket, loading, removeItem, itemCount, isAuthenticated, refreshBasket } = useBasket();
+  const { formatPrice } = useCurrency();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
@@ -250,7 +252,7 @@ export default function CartPage() {
                         <div className="flex items-start justify-between gap-2">
                           <h3 className="font-bold text-lg text-white leading-tight">{item.name}</h3>
                           <p className="text-xl font-bold text-white flex-shrink-0">
-                            {formatPrice(item.in_basket.price, basket?.currency || 'USD')}
+                            {formatPrice(item.in_basket.price)}
                           </p>
                         </div>
 
@@ -389,20 +391,20 @@ export default function CartPage() {
                 <div className="space-y-3 mb-5">
                   <div className="flex justify-between text-neutral-400 text-sm">
                     <span>Sub total</span>
-                    <span>{formatPrice(basket?.base_price || 0, basket?.currency || 'USD')}</span>
+                    <span>{formatPrice(basket?.base_price || 0)}</span>
                   </div>
                   <div className="flex justify-between text-neutral-400 text-sm">
                     <span>Sales Tax</span>
                     <span>
                       {(basket?.sales_tax || 0) === 0
                         ? 'Free'
-                        : formatPrice(basket?.sales_tax || 0, basket?.currency || 'USD')}
+                        : formatPrice(basket?.sales_tax || 0)}
                     </span>
                   </div>
                   <div className="border-t border-neutral-800 pt-3 flex justify-between">
                     <span className="font-bold text-white">Total Price</span>
                     <span className="text-xl font-bold text-white">
-                      {formatPrice(basket?.total_price || 0, basket?.currency || 'USD')}
+                      {formatPrice(basket?.total_price || 0)}
                     </span>
                   </div>
                 </div>

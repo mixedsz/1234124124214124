@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
+import { useCurrency } from '@/contexts/currency-context';
 
 interface FooterProps {
   storeName?: string;
@@ -18,7 +19,7 @@ const currencies = [
 ];
 
 export function Footer({ storeName = 'Flake Development' }: FooterProps) {
-  const [selectedCurrency, setSelectedCurrency] = useState('USD');
+  const { currency: selectedCurrency, setCurrency } = useCurrency();
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +96,7 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
                     {currencies.map(c => (
                       <button
                         key={c.code}
-                        onClick={() => { setSelectedCurrency(c.code); setCurrencyOpen(false); }}
+                        onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
                         className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-700 transition text-left ${selectedCurrency === c.code ? 'text-blue-400' : 'text-neutral-300'}`}
                       >
                         <span>{c.flag}</span>

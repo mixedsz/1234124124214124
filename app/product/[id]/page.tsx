@@ -2,12 +2,13 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { getPackage, formatPrice, TebexPackage, TebexPackageVariable } from '@/lib/tebex';
-import React, { useEffect, useState } from 'react';
+import { getPackage, TebexPackage, TebexPackageVariable } from '@/lib/tebex';
+import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
+import { useCurrency } from '@/contexts/currency-context';
 import { marked } from 'marked';
 
 // Configure marked for safe rendering
@@ -62,8 +63,43 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const [errorDetail, setErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
   const [showErrorDetail, setShowErrorDetail] = useState(false);
+  const [discordId, setDiscordId] = useState<string | null>(null);
+  const [discordUsername, setDiscordUsername] = useState<string | null>(null);
+  const [needsDiscord, setNeedsDiscord] = useState(false);
   const { addItem, isAuthenticated, username } = useBasket();
+  const { formatPrice } = useCurrency();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Persist discord_id from OAuth callback into localStorage and state
+  useEffect(() => {
+    const paramId = searchParams.get('discord_id');
+    const paramUser = searchParams.get('discord_username');
+    const discordError = searchParams.get('discord_error');
+
+    if (discordError) {
+      setError('Discord connection failed. Please try again.');
+    }
+
+    if (paramId) {
+      localStorage.setItem('discord_user_id', paramId);
+      if (paramUser) localStorage.setItem('discord_username', paramUser);
+      setDiscordId(paramId);
+      setDiscordUsername(paramUser);
+      // Clean URL params without reload
+      const url = new URL(window.location.href);
+      url.searchParams.delete('discord_id');
+      url.searchParams.delete('discord_username');
+      url.searchParams.delete('discord_error');
+      window.history.replaceState({}, '', url.toString());
+    } else {
+      const stored = localStorage.getItem('discord_user_id');
+      if (stored) {
+        setDiscordId(stored);
+        setDiscordUsername(localStorage.getItem('discord_username'));
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const loadPackage = async () => {
@@ -72,6 +108,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         const resolvedParams = await params;
         const data = await getPackage(Number(resolvedParams.id));
         setPkg(data);
+        // Detect Discord requirement from package variables
+        if (data?.variables?.some((v: TebexPackageVariable) =>
+          v.identifier?.toLowerCase().includes('discord') ||
+          v.description?.toLowerCase().includes('discord')
+        )) {
+          setNeedsDiscord(true);
+        }
       } catch (err) {
         console.error('[ProductPage] Error:', err);
         setError('Failed to load product');
@@ -83,9 +126,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     loadPackage();
   }, [params]);
 
-  const requiredVariables: TebexPackageVariable[] = (pkg?.variables ?? []).filter((v: TebexPackageVariable) => v.required || v.required === 1);
+  // Variables that are NOT discord (those get the OAuth button, not a text input)
+  const requiredVariables: TebexPackageVariable[] = (pkg?.variables ?? []).filter(
+    (v: TebexPackageVariable) =>
+      (v.required || v.required === 1) &&
+      !v.identifier?.toLowerCase().includes('discord') &&
+      !v.description?.toLowerCase().includes('discord'),
+  );
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = useCallback(async () => {
     if (!pkg) return;
 
     if (!isAuthenticated) {
@@ -93,7 +142,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       return;
     }
 
-    // Validate required variables
+    // Validate non-discord required variables
     for (const variable of requiredVariables) {
       if (!variableValues[variable.identifier]?.trim()) {
         setError(`Please fill in "${variable.description || variable.identifier}" before adding to cart.`);
@@ -101,24 +150,40 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       }
     }
 
+    // If Discord is needed but not connected yet, block and prompt
+    if (needsDiscord && !discordId) {
+      setError('This package requires your Discord account. Connect Discord below to continue.');
+      return;
+    }
+
     try {
       setAdding(true);
       setError(null);
       setErrorDetail(null);
       setShowErrorDetail(false);
-      const varData = Object.keys(variableValues).length > 0 ? variableValues : undefined;
-      await addItem(pkg.id, quantity, varData);
+
+      const varData: Record<string, string> = { ...variableValues };
+      if (discordId) varData.discord_id = discordId;
+
+      await addItem(pkg.id, quantity, Object.keys(varData).length > 0 ? varData : undefined);
       setAdded(true);
       setTimeout(() => setAdded(false), 3000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to add to cart';
-      const detail = (err as Error & { tebexDetail?: { status: number; body: unknown; raw: string } }).tebexDetail;
+      const detail = (err as Error & { tebexDetail?: { status: number; body: { title?: string; detail?: string }; raw: string } }).tebexDetail;
       setError(message);
-      if (detail) setErrorDetail(detail);
+      if (detail) {
+        setErrorDetail(detail as { status: number; body: unknown; raw: string });
+        // Detect Discord requirement from Tebex error title
+        const title = (detail.body as { title?: string }).title?.toLowerCase() ?? '';
+        if (title.includes('discord')) {
+          setNeedsDiscord(true);
+        }
+      }
     } finally {
       setAdding(false);
     }
-  };
+  }, [pkg, isAuthenticated, router, requiredVariables, variableValues, needsDiscord, discordId, addItem, quantity]);
 
   if (loading) {
     return (
@@ -207,11 +272,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="mb-8 pb-8 border-b border-neutral-800">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-black text-white">
-                  {pkg.total_price === 0 ? 'Free' : formatPrice(pkg.total_price, pkg.currency)}
+                  {pkg.total_price === 0 ? 'Free' : formatPrice(pkg.total_price)}
                 </span>
                 {hasDiscount && (
                   <span className="text-xl text-neutral-600 line-through">
-                    {formatPrice(pkg.base_price, pkg.currency)}
+                    {formatPrice(pkg.base_price)}
                   </span>
                 )}
               </div>
@@ -297,7 +362,47 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             )}
 
-            {/* Required package variables */}
+            {/* Discord connect — shown when package needs Discord ID */}
+            {needsDiscord && (
+              <div className="mb-5">
+                {discordId ? (
+                  <div className="flex items-center justify-between bg-[#5865F2]/10 border border-[#5865F2]/30 rounded-xl px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5 text-[#5865F2] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                      </svg>
+                      <div>
+                        <p className="text-sm text-white font-medium">Discord connected</p>
+                        <p className="text-xs text-neutral-400">{discordUsername || discordId}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('discord_user_id');
+                        localStorage.removeItem('discord_username');
+                        setDiscordId(null);
+                        setDiscordUsername(null);
+                      }}
+                      className="text-xs text-neutral-500 hover:text-white transition"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                ) : (
+                  <a
+                    href={`/api/discord/oauth?returnTo=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')}`}
+                    className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold transition"
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                    </svg>
+                    Connect Discord to Purchase
+                  </a>
+                )}
+              </div>
+            )}
+
+            {/* Required package variables (non-discord) */}
             {requiredVariables.length > 0 && (
               <div className="mb-6 space-y-3">
                 <p className="text-neutral-300 text-sm font-medium">Required information:</p>
