@@ -2,16 +2,18 @@
 
 import { Header } from '@/components/header';
 import { useBasket } from '@/hooks/use-basket';
+import { formatPrice } from '@/lib/tebex';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Trash2, ArrowLeft, AlertCircle } from 'lucide-react';
+import { Trash2, ArrowLeft, AlertCircle, ShoppingBag } from 'lucide-react';
 
 export default function CartPage() {
-  const { basket, loading, removeItem, updateUsername } = useBasket();
+  const { basket, loading, removeItem, updateUsername, itemCount } = useBasket();
   const [username, setUsername] = useState('');
   const [usernameInput, setUsernameInput] = useState('');
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<number | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('tebex_username');
@@ -31,7 +33,7 @@ export default function CartPage() {
       setError(null);
       await updateUsername(usernameInput);
       setUsername(usernameInput);
-    } catch (err) {
+    } catch {
       setError('Failed to update username');
     }
   };
@@ -60,35 +62,40 @@ export default function CartPage() {
     }
   };
 
-  const handleRemoveItem = async (itemId: string) => {
+  const handleRemoveItem = async (packageId: number) => {
     try {
-      await removeItem(itemId);
-    } catch (err) {
+      setRemovingId(packageId);
+      setError(null);
+      await removeItem(packageId);
+    } catch {
       setError('Failed to remove item');
+    } finally {
+      setRemovingId(null);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950">
-        <Header />
+      <div className="min-h-screen bg-black">
+        <Header basketCount={itemCount} />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-slate-400">Loading cart...</div>
+          <div className="text-neutral-400">Loading cart...</div>
         </div>
       </div>
     );
   }
 
-  const isCartEmpty = !basket || basket.items.length === 0;
+  const packages = basket?.packages || [];
+  const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-slate-950">
-      <Header basketItemCount={basket?.items.length || 0} />
+    <div className="min-h-screen bg-black">
+      <Header basketCount={itemCount} />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <Link
           href="/store"
-          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
+          className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Continue Shopping
@@ -107,42 +114,54 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2">
             {isCartEmpty ? (
-              <div className="bg-slate-900 rounded-lg border border-slate-800 p-12 text-center">
-                <p className="text-slate-400 mb-4">Your cart is empty</p>
+              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-12 text-center">
+                <ShoppingBag className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
+                <p className="text-neutral-400 mb-4">Your cart is empty</p>
                 <Link
                   href="/store"
-                  className="inline-block px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+                  className="inline-block px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition font-medium"
                 >
                   Browse Products
                 </Link>
               </div>
             ) : (
               <div className="space-y-4">
-                {basket!.items.map((item) => (
+                {packages.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-slate-900 rounded-lg border border-slate-800 p-6 flex items-center justify-between"
+                    className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 flex items-center gap-4"
                   >
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white">{item.name}</h3>
-                      <p className="text-slate-400 text-sm">
-                        Quantity: <span className="font-medium">{item.quantity}</span>
+                    {/* Image */}
+                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
+                      {item.image ? (
+                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500/20 to-orange-600/10">
+                          <span className="text-xl font-bold text-orange-500/50">{item.name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Details */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-white truncate">{item.name}</h3>
+                      <p className="text-neutral-400 text-sm">
+                        Qty: <span className="font-medium">{item.in_basket.quantity}</span>
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-8">
+                    {/* Price & Remove */}
+                    <div className="flex items-center gap-6">
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-400">
-                          ${item.price.toFixed(2)}
-                        </p>
-                        <p className="text-slate-400 text-sm">
-                          ${(item.price * item.quantity).toFixed(2)} total
+                        <p className="text-xl font-bold text-orange-500">
+                          {formatPrice(item.in_basket.price, basket?.currency || 'USD')}
                         </p>
                       </div>
 
                       <button
                         onClick={() => handleRemoveItem(item.id)}
-                        className="p-2 hover:bg-red-900/20 rounded transition text-red-400 hover:text-red-300"
+                        disabled={removingId === item.id}
+                        className="p-2 hover:bg-red-900/20 rounded-lg transition text-red-400 hover:text-red-300 disabled:opacity-50"
                       >
                         <Trash2 className="w-5 h-5" />
                       </button>
@@ -155,10 +174,10 @@ export default function CartPage() {
 
           {/* Checkout Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-slate-900 rounded-lg border border-slate-800 p-6 space-y-6 sticky top-24">
+            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 space-y-6 sticky top-24">
               {/* Username Section */}
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Minecraft Username</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Your Username</h3>
                 <div className="space-y-3">
                   {!username ? (
                     <>
@@ -167,26 +186,27 @@ export default function CartPage() {
                         value={usernameInput}
                         onChange={(e) => setUsernameInput(e.target.value)}
                         placeholder="Enter your username"
-                        className="w-full bg-slate-800 text-white px-4 py-3 rounded border border-slate-700 placeholder-slate-500 focus:border-blue-600 focus:outline-none transition"
+                        className="w-full bg-neutral-800 text-white px-4 py-3 rounded-lg border border-neutral-700 placeholder-neutral-500 focus:border-orange-500 focus:outline-none transition"
                       />
                       <button
                         onClick={handleUpdateUsername}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition"
+                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
                       >
                         Set Username
                       </button>
                     </>
                   ) : (
                     <>
-                      <div className="bg-slate-800 px-4 py-3 rounded border border-slate-700 text-white font-medium">
+                      <div className="bg-neutral-800 px-4 py-3 rounded-lg border border-neutral-700 text-white font-medium">
                         {username}
                       </div>
                       <button
                         onClick={() => {
                           setUsername('');
                           setUsernameInput('');
+                          localStorage.removeItem('tebex_username');
                         }}
-                        className="w-full text-blue-400 hover:text-blue-300 text-sm font-medium"
+                        className="w-full text-orange-400 hover:text-orange-300 text-sm font-medium"
                       >
                         Change Username
                       </button>
@@ -196,36 +216,36 @@ export default function CartPage() {
               </div>
 
               {/* Order Summary */}
-              <div className="border-t border-slate-700 pt-6">
+              <div className="border-t border-neutral-700 pt-6">
                 <h3 className="text-lg font-semibold text-white mb-4">Order Summary</h3>
 
                 <div className="space-y-3 mb-4">
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-neutral-400">
                     <span>Subtotal</span>
-                    <span>${basket?.complete_price.toFixed(2) || '0.00'}</span>
+                    <span>{formatPrice(basket?.base_price || 0, basket?.currency || 'USD')}</span>
                   </div>
-                  <div className="flex justify-between text-slate-400">
+                  <div className="flex justify-between text-neutral-400">
                     <span>Tax</span>
-                    <span>$0.00</span>
+                    <span>{formatPrice(basket?.sales_tax || 0, basket?.currency || 'USD')}</span>
                   </div>
                 </div>
 
-                <div className="border-t border-slate-700 pt-4 flex justify-between mb-6">
+                <div className="border-t border-neutral-700 pt-4 flex justify-between mb-6">
                   <span className="text-lg font-semibold text-white">Total</span>
-                  <span className="text-2xl font-bold text-blue-400">
-                    ${basket?.complete_price.toFixed(2) || '0.00'}
+                  <span className="text-2xl font-bold text-orange-500">
+                    {formatPrice(basket?.total_price || 0, basket?.currency || 'USD')}
                   </span>
                 </div>
 
                 <button
                   onClick={handleCheckout}
                   disabled={isCartEmpty || !username || processing}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-semibold py-3 rounded transition"
+                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-700 disabled:text-neutral-500 text-white font-semibold py-3 rounded-lg transition"
                 >
                   {processing ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
 
-                <p className="text-xs text-slate-500 text-center mt-4">
+                <p className="text-xs text-neutral-500 text-center mt-4">
                   Secure checkout powered by Tebex
                 </p>
               </div>
@@ -235,9 +255,9 @@ export default function CartPage() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="mx-auto max-w-7xl text-center text-slate-400">
-          <p>© 2024 FiveM Store. All rights reserved. Powered by Tebex.</p>
+      <footer className="border-t border-neutral-800 bg-black py-12 px-4 sm:px-6 lg:px-8 mt-16">
+        <div className="mx-auto max-w-7xl text-center text-neutral-400">
+          <p>Powered by Tebex</p>
         </div>
       </footer>
     </div>

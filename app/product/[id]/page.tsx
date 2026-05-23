@@ -1,26 +1,28 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { getPackage } from '@/lib/tebex';
+import { getPackage, formatPrice } from '@/lib/tebex';
 import { useEffect, useState } from 'react';
 import { TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
 import { useBasket } from '@/hooks/use-basket';
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
-  const { addItem, basket } = useBasket();
+  const [added, setAdded] = useState(false);
+  const { addItem, basket, itemCount } = useBasket();
 
   useEffect(() => {
     const loadPackage = async () => {
       try {
         setLoading(true);
-        const data = await getPackage(Number(params.id));
+        const resolvedParams = await params;
+        const data = await getPackage(Number(resolvedParams.id));
         setPkg(data);
       } catch (err) {
         console.error('[ProductPage] Error:', err);
@@ -31,15 +33,17 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     };
 
     loadPackage();
-  }, [params.id]);
+  }, [params]);
 
   const handleAddToCart = async () => {
     if (!pkg || !basket) return;
 
     try {
       setAdding(true);
+      setError(null);
       await addItem(pkg.id, quantity);
-      alert('Product added to cart!');
+      setAdded(true);
+      setTimeout(() => setAdded(false), 3000);
     } catch (err) {
       setError('Failed to add to cart. Please try again.');
     } finally {
@@ -49,10 +53,10 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950">
-        <Header />
+      <div className="min-h-screen bg-black">
+        <Header basketCount={itemCount} />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-slate-400">Loading product...</div>
+          <div className="text-neutral-400">Loading product...</div>
         </div>
       </div>
     );
@@ -60,12 +64,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
   if (error || !pkg) {
     return (
-      <div className="min-h-screen bg-slate-950">
-        <Header />
+      <div className="min-h-screen bg-black">
+        <Header basketCount={itemCount} />
         <div className="mx-auto max-w-7xl px-4 py-12">
           <Link
             href="/store"
-            className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
+            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Store
@@ -84,14 +88,16 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const hasDiscount = pkg.discount > 0;
+
   return (
-    <div className="min-h-screen bg-slate-950">
-      <Header />
+    <div className="min-h-screen bg-black">
+      <Header basketCount={itemCount} />
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
         <Link
           href="/store"
-          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
+          className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 mb-8"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Store
@@ -100,7 +106,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           {/* Image */}
           <div>
-            <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-lg aspect-square flex items-center justify-center overflow-hidden">
+            <div className="bg-neutral-900 rounded-xl aspect-square flex items-center justify-center overflow-hidden border border-neutral-800">
               {pkg.image ? (
                 <img
                   src={pkg.image}
@@ -108,7 +114,9 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="text-slate-400">No image available</div>
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500/20 to-orange-600/10">
+                  <span className="text-6xl font-bold text-orange-500/50">{pkg.name.charAt(0)}</span>
+                </div>
               )}
             </div>
           </div>
@@ -119,38 +127,38 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-4xl font-bold text-white mb-2">{pkg.name}</h1>
-                  <p className="text-slate-400">{pkg.category.name}</p>
+                  <p className="text-neutral-400">{pkg.category?.name}</p>
                 </div>
-                {pkg.quantity > 0 ? (
-                  <span className="bg-green-900/30 text-green-300 px-3 py-1 rounded">
-                    In Stock
-                  </span>
-                ) : (
-                  <span className="bg-red-900/30 text-red-300 px-3 py-1 rounded">
-                    Out of Stock
+                {hasDiscount && (
+                  <span className="bg-orange-500 text-white px-3 py-1 rounded text-sm font-bold">
+                    SALE
                   </span>
                 )}
               </div>
             </div>
 
             {/* Price */}
-            <div className="mb-8 pb-8 border-b border-slate-800">
-              <div className="text-5xl font-bold text-blue-400 mb-2">
-                ${pkg.price.toFixed(2)}
+            <div className="mb-8 pb-8 border-b border-neutral-800">
+              <div className="flex items-center gap-3">
+                <span className="text-5xl font-bold text-orange-500">
+                  {formatPrice(pkg.total_price, pkg.currency)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-2xl text-neutral-500 line-through">
+                    {formatPrice(pkg.base_price, pkg.currency)}
+                  </span>
+                )}
               </div>
-              {pkg.expireHours && (
-                <p className="text-slate-400 text-sm">
-                  Valid for {pkg.expireHours} hours after purchase
-                </p>
-              )}
+              <p className="text-neutral-500 text-sm mt-2">Tax included</p>
             </div>
 
             {/* Description */}
             <div className="mb-8">
               <h2 className="text-xl font-semibold text-white mb-4">Description</h2>
-              <p className="text-slate-400 leading-relaxed">
-                {pkg.description}
-              </p>
+              <div 
+                className="text-neutral-400 leading-relaxed prose prose-invert prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: pkg.description }}
+              />
             </div>
 
             {/* Add to Cart */}
@@ -161,16 +169,23 @@ export default function ProductPage({ params }: { params: { id: string } }) {
               </div>
             )}
 
-            {pkg.quantity > 0 ? (
-              <div className="space-y-4">
+            {added && (
+              <div className="mb-6 bg-green-900/20 border border-green-900 rounded p-4 text-green-200 text-sm flex gap-2">
+                <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                Added to cart successfully!
+              </div>
+            )}
+
+            <div className="space-y-4">
+              {!pkg.disable_quantity && (
                 <div className="flex items-center gap-4">
-                  <label className="text-slate-300 font-medium">Quantity:</label>
-                  <div className="flex items-center border border-slate-700 rounded">
+                  <label className="text-neutral-300 font-medium">Quantity:</label>
+                  <div className="flex items-center border border-neutral-700 rounded-lg overflow-hidden">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="px-4 py-2 text-slate-400 hover:text-white transition"
+                      className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
                     >
-                      −
+                      -
                     </button>
                     <input
                       type="number"
@@ -178,57 +193,43 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                       onChange={(e) =>
                         setQuantity(Math.max(1, parseInt(e.target.value) || 1))
                       }
-                      className="w-16 py-2 text-center bg-transparent text-white border-0 border-l border-r border-slate-700"
+                      className="w-16 py-2 text-center bg-transparent text-white border-0 border-l border-r border-neutral-700 focus:outline-none"
                       min="1"
                     />
                     <button
                       onClick={() => setQuantity(quantity + 1)}
-                      className="px-4 py-2 text-slate-400 hover:text-white transition"
+                      className="px-4 py-2 text-neutral-400 hover:text-white hover:bg-neutral-800 transition"
                     >
                       +
                     </button>
                   </div>
                 </div>
-
-                <button
-                  onClick={handleAddToCart}
-                  disabled={adding}
-                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  {adding ? 'Adding to Cart...' : 'Add to Cart'}
-                </button>
-              </div>
-            ) : (
-              <button
-                disabled
-                className="w-full bg-slate-700 text-slate-400 font-semibold py-4 rounded-lg cursor-not-allowed"
-              >
-                Out of Stock
-              </button>
-            )}
-
-            {/* Additional Info */}
-            <div className="mt-8 pt-8 border-t border-slate-800 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-slate-400">Availability</span>
-                <span className="text-white font-medium">{pkg.quantity} in stock</span>
-              </div>
-              {pkg.global && (
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Global</span>
-                  <span className="text-green-400 font-medium">Yes</span>
-                </div>
               )}
+
+              <button
+                onClick={handleAddToCart}
+                disabled={adding}
+                className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-700 text-white font-semibold py-4 rounded-lg transition flex items-center justify-center gap-2"
+              >
+                <ShoppingCart className="w-5 h-5" />
+                {adding ? 'Adding to Cart...' : 'Add to Cart'}
+              </button>
+
+              <Link
+                href="/cart"
+                className="w-full block text-center border border-neutral-700 hover:border-neutral-600 text-neutral-300 hover:text-white font-medium py-3 rounded-lg transition"
+              >
+                View Cart
+              </Link>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 bg-slate-950 py-12 px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="mx-auto max-w-7xl text-center text-slate-400">
-          <p>© 2024 FiveM Store. All rights reserved. Powered by Tebex.</p>
+      <footer className="border-t border-neutral-800 bg-black py-12 px-4 sm:px-6 lg:px-8 mt-16">
+        <div className="mx-auto max-w-7xl text-center text-neutral-400">
+          <p>Powered by Tebex</p>
         </div>
       </footer>
     </div>
