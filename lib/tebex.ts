@@ -1,6 +1,8 @@
 const TEBEX_API_BASE = 'https://headless.tebex.io/api';
 const PUBLIC_TOKEN = process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN;
 const PRIVATE_KEY = process.env.TEBEX_PRIVATE_KEY;
+// Project ID for Checkout API authentication
+export const TEBEX_PROJECT_ID = '1426490';
 
 export interface TebexCategory {
   id: number;
