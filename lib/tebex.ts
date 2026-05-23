@@ -308,35 +308,20 @@ export async function removeFromBasket(ident: string, packageId: number): Promis
   }
 }
 
-// Get auth URL for username - uses basket auth endpoint
+// Get auth URL for username
 export async function getAuthUrl(ident: string, returnUrl: string): Promise<string | null> {
   try {
-    // The Tebex Headless API provides auth through the basket endpoint
-    // We construct the auth URL for cfx.re authentication
     const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/auth?returnUrl=${encodeURIComponent(returnUrl)}`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
 
     if (!response.ok) {
-      // If auth endpoint doesn't work, fallback to basket links
-      const basketResponse = await fetch(`${TEBEX_API_BASE}/baskets/${ident}`, {
-        cache: 'no-store',
-      });
-      
-      if (basketResponse.ok) {
-        const basketData = await basketResponse.json();
-        // Return the checkout URL which will prompt for FiveM auth
-        return basketData.data?.links?.checkout || null;
-      }
       console.error('[Tebex] Failed to get auth URL:', response.status, response.statusText);
       return null;
     }
 
     const data = await response.json();
-    return data.url || data.data?.url || null;
+    return data.url || null;
   } catch (error) {
     console.error('[Tebex] Error getting auth URL:', error);
     return null;

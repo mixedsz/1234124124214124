@@ -3,36 +3,9 @@ import { Footer } from '@/components/footer';
 import { ProductCard } from '@/components/product-card';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
-import { Star, ArrowRight, CloudDownload, Heart, Headphones, Code } from 'lucide-react';
+import { Star, ArrowRight } from 'lucide-react';
 
 export const revalidate = 60;
-
-const reviews = [
-  {
-    text: "I want to express my deep appreciation for the staff. They are always respectful and kind to us members, and truly admire the hard work they put into these scripts. They're simply amazing - the best I've ever come across. Much love to all the staff!",
-    author: "@f_xzz",
-  },
-  {
-    text: "I had far more issues than just implementing the script. The support team went way beyond and helped me not only add the script but made sure ALL aspects were working correctly! Amazing support and amazing scripts.",
-    author: "@whodeyreloaded",
-  },
-  {
-    text: "I am truly impressed with both scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations.",
-    author: "@gcp137",
-  },
-  {
-    text: "Best scripts on the market hands down. The attention to detail is incredible and the support team is always there when you need them. Worth every penny!",
-    author: "@serverowner42",
-  },
-  {
-    text: "These scripts transformed my server completely. Players love the new features and I couldn't be happier with the quality. Highly recommend to anyone serious about their FiveM server.",
-    author: "@fivemdev",
-  },
-  {
-    text: "Outstanding quality and even better support. The documentation is thorough and the Discord community is super helpful. This is what premium should look like.",
-    author: "@rpworld",
-  },
-];
 
 export default async function HomePage() {
   const [webstore, categories] = await Promise.all([
@@ -40,7 +13,8 @@ export default async function HomePage() {
     getCategories(),
   ]);
 
-  const storeName = webstore?.name || 'Flake Development';
+  const storeName = webstore?.name || 'FiveM Store';
+  const storeLogo = webstore?.logo;
 
   // Get all packages from all categories
   const allPackages: TebexPackage[] = [];
@@ -55,9 +29,22 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-black flex flex-col">
-      <Header basketCount={0} />
+      <Header basketCount={0} storeName={storeName} logo={storeLogo} />
 
       <main className="flex-1">
+        {/* Announcement Bar */}
+        <div className="bg-black py-3 border-b border-neutral-800">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col lg:flex-row gap-4 lg:gap-10 text-center lg:text-left justify-between items-center">
+              <Link href="/subscription" className="flex items-center gap-2 text-orange-500 hover:text-orange-400 transition">
+                <span className="text-yellow-500">🏆</span>
+                <span className="text-sm font-medium">Tebex Top Creator</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Hero Section */}
         <section className="relative py-16 lg:py-24 overflow-hidden bg-black">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -77,84 +64,31 @@ export default async function HomePage() {
                   </Link>
                   <Link
                     href="/subscription"
-                    className="text-blue-500 hover:text-blue-400 transition text-sm"
+                    className="text-orange-500 hover:text-orange-400 transition text-sm"
                   >
                     Get our full collection for £35/month.{' '}
-                    <span className="underline">Learn more</span>
+                    <span className="underline">Learn more →</span>
                   </Link>
                 </div>
               </div>
 
-              {/* Right - Product Preview */}
+              {/* Right - Hero Image/Visual */}
               <div className="relative">
-                {bestSellers.length > 0 && (
-                  <div className="grid grid-cols-2 gap-4">
-                    {bestSellers.slice(0, 4).map((pkg) => (
-                      <Link
-                        key={pkg.id}
-                        href={`/product/${pkg.id}`}
-                        className="bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-blue-500/50 transition group"
-                      >
-                        {pkg.image && (
-                          <img
-                            src={pkg.image}
-                            alt={pkg.name}
-                            className="w-full aspect-video object-cover group-hover:scale-105 transition"
-                          />
-                        )}
-                        <div className="p-3">
-                          <p className="text-white text-sm font-medium truncate">{pkg.name}</p>
-                          <p className="text-blue-500 text-sm">
-                            {pkg.currency} {pkg.total_price.toFixed(2)}
-                          </p>
+                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-orange-500/20 to-orange-600/5 border border-neutral-800 overflow-hidden">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="grid grid-cols-2 gap-4 p-8">
+                      <div className="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+                        <div className="text-xs text-neutral-500 mb-1">Vehicle Colours</div>
+                        <div className="h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg"></div>
+                      </div>
+                      <div className="bg-neutral-900 rounded-xl p-4 border border-neutral-800">
+                        <div className="text-xs text-neutral-500 mb-1">Acceleration</div>
+                        <div className="h-20 bg-gradient-to-t from-neutral-800 to-neutral-700 rounded-lg flex items-end justify-center pb-2">
+                          <div className="w-16 h-12 bg-orange-500/20 rounded"></div>
                         </div>
-                      </Link>
-                    ))}
+                      </div>
+                    </div>
                   </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features Grid */}
-        <section className="py-16 bg-black border-t border-neutral-800">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
-              <div className="flex gap-4 items-center">
-                <div className="w-16 h-16 flex flex-shrink-0 justify-center items-center text-blue-500">
-                  <CloudDownload className="w-12 h-12" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-lg">Instant Delivery</p>
-                  <p className="text-sm text-neutral-500">Available within minutes in your Cfx.re Portal account.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 items-center">
-                <div className="w-16 h-16 flex flex-shrink-0 justify-center items-center text-blue-500">
-                  <Heart className="w-12 h-12" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-lg">Free Updates Forever</p>
-                  <p className="text-sm text-neutral-500">We promise to never charge you for an update, not even a v2.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 items-center">
-                <div className="w-16 h-16 flex flex-shrink-0 justify-center items-center text-blue-500">
-                  <Headphones className="w-12 h-12" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-lg">Unmatched Support</p>
-                  <p className="text-sm text-neutral-500">We aim to answer all tickets within 24 hours on Discord.</p>
-                </div>
-              </div>
-              <div className="flex gap-4 items-center">
-                <div className="w-16 h-16 flex flex-shrink-0 justify-center items-center text-blue-500">
-                  <Code className="w-12 h-12" strokeWidth={1.3} />
-                </div>
-                <div>
-                  <p className="text-white font-bold text-lg">Escrow Protected</p>
-                  <p className="text-sm text-neutral-500">Code is protected with FiveM asset escrow.</p>
                 </div>
               </div>
             </div>
@@ -162,11 +96,11 @@ export default async function HomePage() {
         </section>
 
         {/* Best Sellers Section */}
-        <section className="py-16 bg-black">
+        <section className="py-16 bg-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-8">
-              <span className="text-xl text-blue-500">&#x1F525;</span>
-              <h2 className="text-2xl font-bold text-white">Best Sellers</h2>
+              <span className="text-xl">🔥</span>
+              <h2 className="text-2xl font-bold text-black">Best Sellers</h2>
             </div>
 
             {bestSellers.length > 0 ? (
@@ -176,10 +110,10 @@ export default async function HomePage() {
                     <ProductCard key={pkg.id} package_={pkg} />
                   ))}
                 </div>
-                <div className="flex justify-center mt-8">
+                <div className="mt-8 text-center">
                   <Link
                     href="/store"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500/10 text-blue-500 font-semibold hover:bg-blue-500/20 transition"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-neutral-900 text-white font-semibold hover:bg-neutral-800 transition"
                   >
                     View All
                     <ArrowRight className="w-4 h-4" />
@@ -187,7 +121,7 @@ export default async function HomePage() {
                 </div>
               </>
             ) : (
-              <div className="text-center py-12 bg-neutral-900 rounded-xl border border-neutral-800">
+              <div className="text-center py-12 bg-neutral-100 rounded-xl">
                 <p className="text-neutral-500">
                   {process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN
                     ? 'No products available yet. Add products to your Tebex store.'
@@ -213,7 +147,7 @@ export default async function HomePage() {
                   <input
                     type="email"
                     placeholder="handle@example.info"
-                    className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+                    className="flex-1 px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500"
                   />
                   <button
                     type="submit"
@@ -227,7 +161,7 @@ export default async function HomePage() {
                 </p>
               </div>
               <div className="hidden lg:block">
-                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-blue-500/10 to-transparent border border-neutral-800 flex items-center justify-center">
+                <div className="aspect-[4/3] rounded-2xl bg-gradient-to-br from-orange-500/10 to-transparent border border-neutral-800 flex items-center justify-center">
                   <div className="bg-neutral-800 rounded-xl p-6 shadow-2xl">
                     <div className="text-sm text-neutral-400 mb-2">2200</div>
                     <div className="text-xl font-bold text-white">Contacts</div>
@@ -239,89 +173,88 @@ export default async function HomePage() {
         </section>
 
         {/* Achievements Section */}
-        <section className="py-24 bg-black">
+        <section className="py-16 bg-white">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">Achievements</h2>
-            <p className="text-neutral-500 mb-16">
+            <h2 className="text-3xl font-bold text-black mb-4">Achievements</h2>
+            <p className="text-neutral-500 mb-12">
               {"We've been around for over 3 years and are one of the fastest growing creators on the platform."}
             </p>
-            <div className="grid md:grid-cols-3 gap-8 lg:gap-2">
-              <div className="text-center">
-                <div className="font-black text-6xl lg:text-8xl xl:text-[120px] bg-gradient-to-br from-blue-400 to-blue-800 inline-block text-transparent bg-clip-text leading-none">
-                  <span>40</span><span className="text-5xl lg:text-6xl xl:text-[80px]">K</span>
-                </div>
-                <p className="font-medium text-neutral-500 text-base xl:text-xl mt-4 xl:mt-8">Sales</p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div>
+                <div className="text-5xl font-bold text-black mb-2">0k</div>
+                <div className="text-neutral-500">Sales</div>
               </div>
-              <div className="text-center">
-                <div className="font-black text-6xl lg:text-8xl xl:text-[120px] bg-gradient-to-br from-blue-400 to-blue-800 inline-block text-transparent bg-clip-text leading-none">
-                  <span>42</span><span className="text-5xl lg:text-6xl xl:text-[80px]">K</span>
-                </div>
-                <p className="font-medium text-neutral-500 text-base xl:text-xl mt-4 xl:mt-8">Servers using Flake scripts*</p>
+              <div>
+                <div className="text-5xl font-bold text-black mb-2">0k</div>
+                <div className="text-neutral-500">Servers using scripts*</div>
               </div>
-              <div className="text-center">
-                <div className="font-black text-6xl lg:text-8xl xl:text-[120px] bg-gradient-to-br from-blue-400 to-blue-800 inline-block text-transparent bg-clip-text leading-none">
-                  <span>158</span><span className="text-5xl lg:text-6xl xl:text-[80px]">K</span>
-                </div>
-                <p className="font-medium text-neutral-500 text-base xl:text-xl mt-4 xl:mt-8">Players enjoying Flake scripts*</p>
+              <div>
+                <div className="text-5xl font-bold text-black mb-2">0k</div>
+                <div className="text-neutral-500">Players enjoying scripts*</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* Reviews Section */}
-        <section className="py-24 bg-black overflow-hidden">
+        <section className="py-16 bg-white border-t border-neutral-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-4xl font-bold text-white mb-4">Reviews</h2>
+              <h2 className="text-3xl font-bold text-black mb-4">Reviews</h2>
               <p className="text-neutral-500">
                 {"We've received 400+ five star reviews from our customers."}
               </p>
             </div>
 
-            {/* Marquee Reviews */}
-            <div className="relative overflow-hidden">
-              <div className="flex gap-4 animate-marquee">
-                {[...reviews, ...reviews].map((review, i) => (
-                  <div
-                    key={i}
-                    className="w-[320px] lg:w-[350px] flex-shrink-0 bg-neutral-900 rounded-xl p-6 border border-neutral-800"
-                  >
-                    <div className="flex gap-1 mb-4">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className="w-5 h-5 fill-blue-500 text-blue-500" />
-                      ))}
-                    </div>
-                    <p className="text-neutral-300 text-sm mb-4 line-clamp-5">
-                      {review.text}
-                    </p>
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-neutral-600">{review.author}</span>
-                    </div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  text: "I want to express my deep appreciation for the staff. They are always respectful and kind to us members, and truly admire the hard work they put into these scripts. They're simply amazing – the best I've ever come across. [...] Much love to all the staff, especially the creator of these incredible scripts!",
+                  author: "@f_xzz",
+                  platform: "Discord"
+                },
+                {
+                  text: "I had far more issues than just implementing the script. The support team went way beyond and helped me not only add the script but made sure ALL aspects [of my server] were working correctly! Amazing support and amazing scripts, what more could you ask for?",
+                  author: "@whodeyreloaded",
+                  platform: "Discord"
+                },
+                {
+                  text: "I am truly impressed with both scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations. I would definitely buy them again! Keep up the great work!",
+                  author: "@gcp137",
+                  platform: "Discord"
+                }
+              ].map((review, i) => (
+                <div key={i} className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
+                  <div className="flex gap-1 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="w-5 h-5 fill-orange-500 text-orange-500" />
+                    ))}
                   </div>
-                ))}
-              </div>
+                  <p className="text-neutral-700 text-sm mb-4 line-clamp-6">
+                    {review.text}
+                  </p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-neutral-400">💬</span>
+                    <span className="text-neutral-600">{review.author}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Trusted By Section */}
-        <section className="py-16 bg-black border-t border-neutral-800">
+        <section className="py-16 bg-white border-t border-neutral-200">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-4xl font-bold text-white mb-4">Trusted by the best</h2>
-            <p className="text-neutral-500 mb-12">
-              {"We're partnered with some of the biggest names in the FiveM community."}
+            <h2 className="text-3xl font-bold text-black mb-4">Trusted by the best</h2>
+            <p className="text-neutral-500">
+              {"We've partnered with some of the biggest names in the FiveM community."}
             </p>
-            <div className="flex flex-wrap gap-8 lg:gap-16 items-center justify-center opacity-50">
-              <div className="text-neutral-400 text-xl font-bold">OCRP</div>
-              <div className="text-neutral-400 text-xl font-bold">QBCore</div>
-              <div className="text-neutral-400 text-xl font-bold">Wasabi</div>
-              <div className="text-neutral-400 text-xl font-bold">LB</div>
-            </div>
           </div>
         </section>
       </main>
 
-      <Footer />
+      <Footer storeName={storeName} />
     </div>
   );
 }

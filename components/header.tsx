@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Menu, X, ShoppingCart } from 'lucide-react';
-import Image from 'next/image';
 
 interface HeaderProps {
   basketCount?: number;
@@ -11,7 +10,7 @@ interface HeaderProps {
   logo?: string;
 }
 
-export function Header({ basketCount = 0 }: HeaderProps) {
+export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -20,13 +19,13 @@ export function Header({ basketCount = 0 }: HeaderProps) {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.jpg"
-              alt="Flake Development"
-              width={40}
-              height={40}
-              className="rounded-lg"
-            />
+            {logo ? (
+              <img src={logo} alt={storeName} className="h-8 w-auto" />
+            ) : (
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-500 text-white font-bold text-xl">
+                {storeName.charAt(0)}
+              </div>
+            )}
           </Link>
 
           {/* Desktop Navigation */}
@@ -42,6 +41,12 @@ export function Header({ basketCount = 0 }: HeaderProps) {
               className="text-sm font-medium text-neutral-300 hover:text-white transition"
             >
               Scripts
+            </Link>
+            <Link
+              href="/gift-cards"
+              className="text-sm font-medium text-neutral-300 hover:text-white transition"
+            >
+              Gift Cards
             </Link>
             <Link
               href="/docs"
@@ -66,7 +71,7 @@ export function Header({ basketCount = 0 }: HeaderProps) {
             >
               <ShoppingCart className="w-5 h-5" />
               {basketCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-blue-500 text-white rounded-full">
+                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-orange-500 text-white rounded-full">
                   {basketCount}
                 </span>
               )}
@@ -110,6 +115,13 @@ export function Header({ basketCount = 0 }: HeaderProps) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Scripts
+              </Link>
+              <Link
+                href="/gift-cards"
+                className="text-sm font-medium text-neutral-300 hover:text-white transition"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Gift Cards
               </Link>
               <Link
                 href="/docs"
