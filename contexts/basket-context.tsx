@@ -95,15 +95,17 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
     try {
       setAdding(true);
-      const updated = await addToBasket(basket.ident, packageId, quantity, basket.username_id ?? undefined);
-      if (updated) {
-        setBasket(updated);
-        return updated;
+      await addToBasket(basket.ident, packageId, quantity);
+      // Re-fetch via GET to preserve auth state — the packages endpoint returns username: null
+      const fresh = await getBasket(basket.ident);
+      if (fresh) {
+        setBasket(fresh);
+        return fresh;
       }
       return null;
     } catch (err) {
       console.error('[BasketProvider] Error adding item:', err);
-      throw err; // Pass through the actual error from Tebex
+      throw err;
     } finally {
       setAdding(false);
     }
@@ -114,11 +116,14 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true);
-      const updated = await removeFromBasket(basket.ident, packageId);
-      if (updated) {
-        setBasket(updated);
+      await removeFromBasket(basket.ident, packageId);
+      // Re-fetch via GET to preserve auth state
+      const fresh = await getBasket(basket.ident);
+      if (fresh) {
+        setBasket(fresh);
+        return fresh;
       }
-      return updated;
+      return null;
     } catch (err) {
       console.error('[BasketProvider] Error removing item:', err);
       setError(err instanceof Error ? err : new Error('Failed to remove item'));
