@@ -95,7 +95,7 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
     try {
       setAdding(true);
-      const updated = await addToBasket(basket.ident, packageId, quantity);
+      const updated = await addToBasket(basket.ident, packageId, quantity, basket.username_id ?? undefined);
       if (updated) {
         setBasket(updated);
         return updated;

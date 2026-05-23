@@ -258,17 +258,23 @@ export async function getBasket(ident: string): Promise<TebexBasket | null> {
 }
 
 // Add package to basket
-export async function addToBasket(ident: string, packageId: number, quantity: number = 1): Promise<TebexBasket | null> {
+export async function addToBasket(ident: string, packageId: number, quantity: number = 1, usernameId?: number): Promise<TebexBasket | null> {
   try {
+    const body: Record<string, unknown> = {
+      package_id: packageId,
+      quantity,
+    };
+
+    if (usernameId) {
+      body.variable_data = { username_id: String(usernameId) };
+    }
+
     const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        package_id: packageId,
-        quantity,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
