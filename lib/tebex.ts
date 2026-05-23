@@ -296,15 +296,14 @@ export async function addToBasket(ident: string, packageId: number, quantity: nu
       }
     }
 
-    const data = await response.json();
-    return data.data;
+    // /baskets/{ident}/packages returns the basket directly, not wrapped in { data: ... }
+    return await response.json();
   } catch (error) {
     console.error('[Tebex] Error adding to basket:', error);
     throw error; // Re-throw to preserve error message
   }
 }
 
-// Remove package from basket - Uses the accounts endpoint for authenticated stores
 export async function removeFromBasket(ident: string, packageId: number): Promise<TebexBasket | null> {
   try {
     const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages/remove`, {
@@ -322,8 +321,8 @@ export async function removeFromBasket(ident: string, packageId: number): Promis
       return null;
     }
 
-    const data = await response.json();
-    return data.data;
+    // /baskets/{ident}/packages/remove returns the basket directly, not wrapped in { data: ... }
+    return await response.json();
   } catch (error) {
     console.error('[Tebex] Error removing from basket:', error);
     return null;
