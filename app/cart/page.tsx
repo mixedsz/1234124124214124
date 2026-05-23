@@ -2,17 +2,72 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { useBasket } from '@/hooks/use-basket';
-import { formatPrice } from '@/lib/tebex';
+import { useBasket } from '@/contexts/basket-context';
+import { formatPrice, TEBEX_PROJECT_ID } from '@/lib/tebex';
 import Link from 'next/link';
-import { useState } from 'react';
-import { Trash2, ArrowLeft, AlertCircle, ShoppingBag, LogIn } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Trash2, ArrowLeft, AlertCircle, ShoppingBag, LogIn, X } from 'lucide-react';
+
+// Declare Tebex global
+declare global {
+  interface Window {
+    Tebex?: {
+      checkout: {
+        init: (config: { ident: string }) => void;
+        launch: () => void;
+        on: (event: string, callback: (data?: unknown) => void) => void;
+        close: () => void;
+      };
+    };
+  }
+}
 
 export default function CartPage() {
-  const { basket, loading, removeItem, itemCount } = useBasket();
+  const { basket, loading, removeItem, itemCount, isAuthenticated, refreshBasket } = useBasket();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [showCheckout, setShowCheckout] = useState(false);
+
+  // Initialize Tebex checkout when needed
+  const initTebexCheckout = useCallback(() => {
+    if (!basket?.ident || !window.Tebex) {
+      console.error('[Cart] Tebex.js not loaded or no basket ident');
+      return false;
+    }
+
+    try {
+      // Initialize Tebex checkout with basket ident
+      window.Tebex.checkout.init({
+        ident: basket.ident,
+      });
+
+      // Listen for checkout events
+      window.Tebex.checkout.on('payment:complete', () => {
+        console.log('[Cart] Payment complete');
+        setShowCheckout(false);
+        // Redirect to success page
+        window.location.href = '/checkout-complete?success=true';
+      });
+
+      window.Tebex.checkout.on('payment:error', (data) => {
+        console.error('[Cart] Payment error:', data);
+        setError('Payment failed. Please try again.');
+        setShowCheckout(false);
+      });
+
+      window.Tebex.checkout.on('close', () => {
+        console.log('[Cart] Checkout closed');
+        setShowCheckout(false);
+        setProcessing(false);
+      });
+
+      return true;
+    } catch (err) {
+      console.error('[Cart] Error initializing Tebex checkout:', err);
+      return false;
+    }
+  }, [basket?.ident]);
 
   const handleCheckout = async () => {
     if (!basket) return;
@@ -21,15 +76,32 @@ export default function CartPage() {
       setProcessing(true);
       setError(null);
 
-      if (basket.links?.checkout) {
-        window.location.href = basket.links.checkout;
+      // Check if Tebex.js is loaded
+      if (window.Tebex) {
+        // Use Tebex.js popup checkout
+        if (initTebexCheckout()) {
+          setShowCheckout(true);
+          window.Tebex.checkout.launch();
+        } else {
+          // Fallback to redirect checkout
+          if (basket.links?.checkout) {
+            window.location.href = basket.links.checkout;
+          } else {
+            // Direct checkout URL
+            window.location.href = `https://pay.tebex.io/${basket.ident}`;
+          }
+        }
       } else {
-        setError('Unable to access checkout. Please try again.');
+        // Fallback to redirect checkout if Tebex.js not loaded
+        if (basket.links?.checkout) {
+          window.location.href = basket.links.checkout;
+        } else {
+          window.location.href = `https://pay.tebex.io/${basket.ident}`;
+        }
       }
     } catch (err) {
       console.error('[CartPage] Checkout error:', err);
       setError('Failed to initiate checkout. Please try again.');
-    } finally {
       setProcessing(false);
     }
   };
@@ -49,7 +121,7 @@ export default function CartPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-900 flex flex-col">
-        <Header basketCount={0} />
+        <Header />
         <div className="flex items-center justify-center flex-1">
           <div className="text-neutral-400">Loading cart...</div>
         </div>
@@ -62,7 +134,7 @@ export default function CartPage() {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={itemCount} />
+      <Header />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <Link
@@ -140,19 +212,30 @@ export default function CartPage() {
           {/* Checkout Sidebar */}
           <div className="lg:col-span-1">
             <div className="bg-neutral-950 rounded-2xl border border-neutral-800 p-6 space-y-6 sticky top-24">
-              {/* Login CTA */}
-              <div className="bg-blue-600/10 border border-blue-600/20 rounded-xl p-4">
-                <p className="text-sm text-blue-300 font-medium mb-3">
-                  Sign in to link your purchase to your FiveM account
-                </p>
-                <Link
-                  href="/login"
-                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
-                >
-                  <LogIn className="w-4 h-4" />
-                  Login with FiveM
-                </Link>
-              </div>
+              {/* Login CTA - Only show if not authenticated */}
+              {!isAuthenticated && (
+                <div className="bg-blue-600/10 border border-blue-600/20 rounded-xl p-4">
+                  <p className="text-sm text-blue-300 font-medium mb-3">
+                    Sign in to link your purchase to your FiveM account
+                  </p>
+                  <Link
+                    href="/login"
+                    className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Login with FiveM
+                  </Link>
+                </div>
+              )}
+
+              {/* Authenticated user badge */}
+              {isAuthenticated && basket?.username && (
+                <div className="bg-green-600/10 border border-green-600/20 rounded-xl p-4">
+                  <p className="text-sm text-green-300 font-medium">
+                    Logged in as <span className="font-bold">{basket.username}</span>
+                  </p>
+                </div>
+              )}
 
               {/* Order Summary */}
               <div>

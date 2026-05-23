@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { Providers } from '@/components/providers'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
@@ -46,7 +47,9 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
