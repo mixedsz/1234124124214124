@@ -24,7 +24,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   const [basket, setBasket] = useState<TebexBasket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Helper to create basket with proper URLs
   const createNewBasket = async () => {
@@ -41,9 +40,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       const updated = await getBasket(storedIdent);
       if (updated) {
         setBasket(updated);
-        // Check if basket has username (authenticated)
-        const authenticated = !!(updated.username && updated.username_id);
-        setIsAuthenticated(authenticated);
         return updated;
       }
     } catch (err) {
@@ -65,9 +61,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
           
           if (existingBasket && !existingBasket.complete) {
             setBasket(existingBasket);
-            // Check if basket has username (authenticated)
-            const authenticated = !!(existingBasket.username && existingBasket.username_id);
-            setIsAuthenticated(authenticated);
           } else {
             // Basket completed, expired, or not found (404) - create new one
             localStorage.removeItem(BASKET_STORAGE_KEY);
@@ -75,7 +68,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
             if (newBasket) {
               setBasket(newBasket);
               localStorage.setItem(BASKET_STORAGE_KEY, newBasket.ident);
-              setIsAuthenticated(false);
             }
           }
         } else {
@@ -84,7 +76,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
           if (newBasket) {
             setBasket(newBasket);
             localStorage.setItem(BASKET_STORAGE_KEY, newBasket.ident);
-            setIsAuthenticated(false);
           }
         }
       } catch (err) {
@@ -145,6 +136,8 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
   const itemCount = basket?.packages?.length || 0;
   const username = basket?.username || null;
+  // Derive isAuthenticated from basket data - no separate state needed
+  const isAuthenticated = !!(basket?.username && basket?.username_id);
 
   return (
     <BasketContext.Provider value={{

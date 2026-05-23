@@ -52,7 +52,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem, itemCount, isAuthenticated } = useBasket();
+  const { addItem, itemCount, username } = useBasket();
 
   useEffect(() => {
     const loadPackage = async () => {
@@ -201,7 +201,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Login required notice */}
-            {!isAuthenticated && (
+            {!username && (
               <div className="mb-4 bg-blue-900/20 border border-blue-800 rounded-xl p-4 text-blue-300 text-sm">
                 <div className="flex items-center gap-2">
                   <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
