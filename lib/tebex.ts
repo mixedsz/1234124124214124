@@ -1,5 +1,6 @@
 const TEBEX_API_BASE = 'https://headless.tebex.io/api';
 const PUBLIC_TOKEN = process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN;
+const PRIVATE_KEY = process.env.TEBEX_PRIVATE_KEY;
 
 export interface TebexCategory {
   id: number;
@@ -308,11 +309,19 @@ export async function removeFromBasket(ident: string, packageId: number): Promis
   }
 }
 
-// Get auth URL for username
+// Get auth URL for username - using server-side endpoint with private key
 export async function getAuthUrl(ident: string, returnUrl: string): Promise<string | null> {
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/auth?returnUrl=${encodeURIComponent(returnUrl)}`, {
-      method: 'GET',
+    // Use server-side API route that has access to private key
+    const response = await fetch(`/api/tebex/auth`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        basketIdent: ident,
+        returnUrl,
+      }),
     });
 
     if (!response.ok) {
