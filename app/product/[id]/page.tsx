@@ -6,6 +6,7 @@ import { getPackage, formatPrice } from '@/lib/tebex';
 import { useEffect, useState } from 'react';
 import { TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
 import { marked } from 'marked';
@@ -52,7 +53,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem, itemCount, username } = useBasket();
+  const { addItem, isAuthenticated, username } = useBasket();
+  const router = useRouter();
 
   useEffect(() => {
     const loadPackage = async () => {
@@ -74,6 +76,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   const handleAddToCart = async () => {
     if (!pkg) return;
+
+    if (!isAuthenticated) {
+      router.push('/login');
+      return;
+    }
 
     try {
       setAdding(true);
@@ -255,7 +262,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2"
               >
                 <ShoppingCart className="w-5 h-5" />
-                {adding ? 'Adding to Cart...' : 'Add to Cart'}
+                {adding ? 'Adding to Cart...' : isAuthenticated ? 'Add to Cart' : 'Login to Purchase'}
               </button>
 
               <Link
