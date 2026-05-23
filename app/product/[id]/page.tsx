@@ -60,6 +60,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
+  const [errorDetail, setErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
+  const [showErrorDetail, setShowErrorDetail] = useState(false);
   const { addItem, isAuthenticated, username } = useBasket();
   const router = useRouter();
 
@@ -102,13 +104,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     try {
       setAdding(true);
       setError(null);
+      setErrorDetail(null);
+      setShowErrorDetail(false);
       const varData = Object.keys(variableValues).length > 0 ? variableValues : undefined;
       await addItem(pkg.id, quantity, varData);
       setAdded(true);
       setTimeout(() => setAdded(false), 3000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to add to cart';
+      const detail = (err as Error & { tebexDetail?: { status: number; body: unknown; raw: string } }).tebexDetail;
       setError(message);
+      if (detail) setErrorDetail(detail);
     } finally {
       setAdding(false);
     }
@@ -263,9 +269,24 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {/* Feedback */}
             {error && (
-              <div className="mb-4 bg-red-900/20 border border-red-900 rounded-xl p-4 text-red-300 text-sm flex gap-2">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                {error}
+              <div className="mb-4 bg-red-900/20 border border-red-900 rounded-xl p-4 text-red-300 text-sm">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                  <span className="flex-1">{error}</span>
+                  {errorDetail && (
+                    <button
+                      onClick={() => setShowErrorDetail((v) => !v)}
+                      className="text-red-400 hover:text-red-200 underline text-xs flex-shrink-0"
+                    >
+                      {showErrorDetail ? 'Hide' : 'Details'}
+                    </button>
+                  )}
+                </div>
+                {errorDetail && showErrorDetail && (
+                  <pre className="mt-3 bg-neutral-900/60 rounded-lg p-3 text-xs text-red-200 overflow-x-auto whitespace-pre-wrap break-all">
+                    {`HTTP ${errorDetail.status}\n\n${typeof errorDetail.body === 'object' ? JSON.stringify(errorDetail.body, null, 2) : errorDetail.raw}`}
+                  </pre>
+                )}
               </div>
             )}
             {added && (

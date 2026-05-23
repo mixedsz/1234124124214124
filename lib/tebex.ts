@@ -273,54 +273,58 @@ export async function addToBasket(
   quantity: number = 1,
   variableData?: Record<string, string>,
 ): Promise<TebexBasket | null> {
+  const body: Record<string, unknown> = { package_id: packageId, quantity };
+  if (variableData && Object.keys(variableData).length > 0) {
+    body.variable_data = variableData;
+  }
+
+  const url = `${TEBEX_API_BASE}/baskets/${ident}/packages`;
+  console.log('[Tebex:addToBasket] REQUEST', { url, body: JSON.stringify(body) });
+
   try {
-    const body: Record<string, unknown> = {
-      package_id: packageId,
-      quantity,
-    };
-
-    if (variableData && Object.keys(variableData).length > 0) {
-      body.variable_data = variableData;
-    }
-
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages`, {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
 
+    const responseText = await response.text();
+    console.log('[Tebex:addToBasket] RESPONSE', { status: response.status, body: responseText });
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Tebex] Failed to add to basket:', response.status, errorText);
-      
-      // Parse error and throw with meaningful message
-      try {
-        const errorJson = JSON.parse(errorText);
-        const message = errorJson.message || errorJson.error || errorJson.detail || 'Failed to add item';
-        throw new Error(message);
-      } catch (parseErr) {
-        if (parseErr instanceof SyntaxError) {
-          // JSON parse failed, use status-based message
-          if (response.status === 404) {
-            throw new Error('Basket expired. Please refresh the page.');
-          } else if (response.status === 422) {
-            throw new Error('This package cannot be added to your cart.');
-          } else if (response.status === 403) {
-            throw new Error('You must be logged in to add items to your cart.');
-          }
-          throw new Error(`Failed to add item (Error ${response.status})`);
-        }
-        throw parseErr;
-      }
+      let errorJson: Record<string, unknown> = {};
+      try { errorJson = JSON.parse(responseText); } catch { /* raw text */ }
+
+      // Log full error detail so it appears in Vercel Function Logs
+      console.error('[Tebex:addToBasket] ERROR DETAIL', {
+        status: response.status,
+        url,
+        requestBody: body,
+        responseBody: errorJson,
+        rawResponse: responseText,
+      });
+
+      const message =
+        (errorJson.message as string) ||
+        (errorJson.error as string) ||
+        (errorJson.detail as string) ||
+        (response.status === 404 ? 'Basket expired. Please refresh the page.' :
+         response.status === 422 ? 'This package cannot be added to your cart.' :
+         response.status === 403 ? 'You must be logged in to add items to your cart.' :
+         `Failed to add item (HTTP ${response.status})`);
+
+      const err = new Error(message);
+      // Attach raw details so the product page can surface them
+      (err as Error & { tebexDetail?: unknown }).tebexDetail = { status: response.status, body: errorJson, raw: responseText };
+      throw err;
     }
 
-    // /baskets/{ident}/packages returns the basket directly, not wrapped in { data: ... }
-    return await response.json();
+    return JSON.parse(responseText) as TebexBasket;
   } catch (error) {
-    console.error('[Tebex] Error adding to basket:', error);
-    throw error; // Re-throw to preserve error message
+    if (!(error instanceof Error && 'tebexDetail' in error)) {
+      console.error('[Tebex:addToBasket] UNEXPECTED ERROR', error);
+    }
+    throw error;
   }
 }
 
