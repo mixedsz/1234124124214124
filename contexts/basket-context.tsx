@@ -107,17 +107,6 @@ export function BasketProvider({ children }: { children: ReactNode }) {
       setAdding(true);
       return await attemptAdd(variableData);
     } catch (err) {
-      const message = err instanceof Error ? err.message : '';
-      // Game server command packages require username_id in variable_data.
-      // If that's the only missing piece, retry automatically rather than surfacing a confusing error.
-      if (
-        message === 'One of the options provided is invalid' &&
-        basket.username_id &&
-        !variableData?.username_id
-      ) {
-        const retryVars = { ...variableData, username_id: String(basket.username_id) };
-        return await attemptAdd(retryVars);
-      }
       console.error('[BasketProvider] Error adding item:', err);
       throw err;
     } finally {

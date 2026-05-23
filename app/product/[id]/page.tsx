@@ -20,20 +20,22 @@ marked.use({
 function parseDescription(description: string): string {
   if (!description) return '';
 
-  // If already HTML, return as-is but with link styling
+  // If already HTML, apply styling and also convert any inline markdown within it
   if (description.includes('<p>') || description.includes('<br') || description.includes('<ul>')) {
-    // Add styling to links
     return description
+      // Convert **bold** markdown that Tebex sometimes leaves in HTML descriptions
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
+      // Convert bare `- item` lines that aren't inside <ul> tags
+      .replace(/^- (.+)$/gm, '<span class="block ml-4 text-neutral-300 before:content-[\'•\'] before:mr-2">$1</span>')
       .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
-      .replace(/<strong>/g, '<strong class="font-bold text-white">')
+      .replace(/<strong(?! class)/g, '<strong class="font-bold text-white"')
       .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
       .replace(/<li>/g, '<li class="text-neutral-300">');
   }
 
-  // Pre-process: ensure list items have a blank line before them for proper markdown parsing
-  let processed = description
-    .replace(/(?<!\n)\n([-*] )/g, '\n\n$1')  // ensure blank line before lists
-    .replace(/\*\*(.*?)\*\*/g, '**$1**');     // keep bold as-is (marked handles it)
+  // Pre-process plain text / markdown: ensure blank line before list items
+  const processed = description
+    .replace(/(?<!\n)\n([-*] )/g, '\n\n$1');
 
   // Parse as markdown
   const html = marked.parse(processed, { async: false }) as string;
@@ -211,7 +213,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Trust badges */}
-            <div className="flex flex-wrap gap-4 mb-6 text-sm text-neutral-400">
+            <div className="flex flex-col gap-2 mb-6 text-sm text-neutral-400">
               <div className="flex items-center gap-1.5">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>

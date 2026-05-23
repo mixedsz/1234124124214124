@@ -421,20 +421,39 @@ export default function CartPage() {
                 </button>
 
                 {/* Payment method icons */}
-                <div className="flex flex-wrap justify-center gap-2 my-5">
-                  {['Apple Pay', 'Google Pay', 'Mastercard', 'Visa', 'Amex'].map((method) => (
-                    <span
-                      key={method}
-                      className="px-2 py-1 bg-neutral-800 border border-neutral-700 rounded text-xs text-neutral-400 font-medium"
-                    >
-                      {method}
-                    </span>
-                  ))}
+                <div className="flex flex-wrap justify-center items-center gap-3 my-5">
+                  {/* Visa */}
+                  <svg viewBox="0 0 48 16" width="44" height="15" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+                    <text x="0" y="13" fill="white" fontSize="13" fontWeight="800" fontFamily="Arial">VISA</text>
+                  </svg>
+                  {/* Mastercard */}
+                  <svg viewBox="0 0 38 24" width="38" height="24" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+                    <circle cx="13" cy="12" r="12" fill="#eb001b"/>
+                    <circle cx="25" cy="12" r="12" fill="#f79e1b"/>
+                    <path d="M19 5.4a12 12 0 0 1 0 13.2A12 12 0 0 1 19 5.4z" fill="#ff5f00"/>
+                  </svg>
+                  {/* Amex */}
+                  <svg viewBox="0 0 48 16" width="44" height="15" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+                    <text x="0" y="13" fill="#2E77BC" fontSize="10" fontWeight="700" fontFamily="Arial">AMEX</text>
+                  </svg>
+                  {/* Apple Pay */}
+                  <svg viewBox="0 0 50 20" width="50" height="20" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+                    <text x="0" y="15" fill="white" fontSize="11" fontWeight="600" fontFamily="-apple-system,Arial">Apple Pay</text>
+                  </svg>
+                  {/* Google Pay */}
+                  <svg viewBox="0 0 60 20" width="60" height="20" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
+                    <text x="0" y="15" fill="white" fontSize="11" fontWeight="600" fontFamily="Arial">Google Pay</text>
+                  </svg>
                 </div>
 
-                <p className="text-neutral-600 text-sm text-center mb-1">
-                  Powered by <span className="font-semibold">tebex</span>
-                </p>
+                {/* Powered by Tebex */}
+                <div className="flex justify-center items-center gap-2 mb-2">
+                  <span className="text-neutral-600 text-sm">Powered by</span>
+                  {/* Tebex wordmark SVG */}
+                  <svg width="52" height="16" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" className="opacity-40 mt-[-1px]" fill="white">
+                    <text x="0" y="28" fontSize="28" fontWeight="800" fontFamily="Arial" letterSpacing="-1">tebex</text>
+                  </svg>
+                </div>
                 <p className="text-xs text-neutral-600 text-center">
                   Our checkout process is owned &amp; operated by Tebex Limited, who handle product fulfilment, billing support and refunds.
                 </p>
