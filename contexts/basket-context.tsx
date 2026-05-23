@@ -12,7 +12,7 @@ interface BasketContextType {
   username: string | null;
   isAuthenticated: boolean;
   itemCount: number;
-  addItem: (packageId: number, quantity?: number) => Promise<TebexBasket | undefined>;
+  addItem: (packageId: number, quantity?: number, variableData?: Record<string, string>) => Promise<TebexBasket | undefined>;
   removeItem: (packageId: number) => Promise<TebexBasket | null | undefined>;
   refreshBasket: () => Promise<TebexBasket | null>;
   getBasketIdent: () => string | null;
@@ -90,12 +90,12 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     initBasket();
   }, []);
 
-  const addItem = async (packageId: number, quantity: number = 1) => {
+  const addItem = async (packageId: number, quantity: number = 1, variableData?: Record<string, string>) => {
     if (!basket) throw new Error('Basket not initialized');
 
     try {
       setAdding(true);
-      await addToBasket(basket.ident, packageId, quantity);
+      await addToBasket(basket.ident, packageId, quantity, variableData);
       // Re-fetch via GET to preserve auth state — the packages endpoint returns username: null
       const fresh = await getBasket(basket.ident);
       if (fresh) {
@@ -171,7 +171,7 @@ export function useBasket() {
       username: null,
       isAuthenticated: false,
       itemCount: 0,
-      addItem: async () => { throw new Error('Basket not initialized'); },
+      addItem: async (_id: number, _qty?: number, _vars?: Record<string, string>) => { throw new Error('Basket not initialized'); },
       removeItem: async () => { throw new Error('Basket not initialized'); },
       refreshBasket: async () => null,
       getBasketIdent: () => null,

@@ -14,6 +14,14 @@ export interface TebexCategory {
   packages?: TebexPackage[];
 }
 
+export interface TebexPackageVariable {
+  identifier: string;
+  description: string;
+  type: 'text' | 'dropdown';
+  required: boolean | number;
+  options?: Array<{ name: string; value: string }>;
+}
+
 export interface TebexPackage {
   id: number;
   name: string;
@@ -34,6 +42,7 @@ export interface TebexPackage {
   expiration_date?: string;
   created_at?: string;
   updated_at?: string;
+  variables?: TebexPackageVariable[];
 }
 
 export interface TebexBasketPackage {
@@ -258,12 +267,21 @@ export async function getBasket(ident: string): Promise<TebexBasket | null> {
 }
 
 // Add package to basket
-export async function addToBasket(ident: string, packageId: number, quantity: number = 1): Promise<TebexBasket | null> {
+export async function addToBasket(
+  ident: string,
+  packageId: number,
+  quantity: number = 1,
+  variableData?: Record<string, string>,
+): Promise<TebexBasket | null> {
   try {
     const body: Record<string, unknown> = {
       package_id: packageId,
       quantity,
     };
+
+    if (variableData && Object.keys(variableData).length > 0) {
+      body.variable_data = variableData;
+    }
 
     const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages`, {
       method: 'POST',

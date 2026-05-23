@@ -2,9 +2,8 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { getPackage, formatPrice } from '@/lib/tebex';
-import { useEffect, useState } from 'react';
-import { TebexPackage } from '@/lib/tebex';
+import { getPackage, formatPrice, TebexPackage, TebexPackageVariable } from '@/lib/tebex';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
@@ -53,6 +52,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
+  const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const { addItem, isAuthenticated, username } = useBasket();
   const router = useRouter();
 
@@ -74,6 +74,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     loadPackage();
   }, [params]);
 
+  const requiredVariables: TebexPackageVariable[] = (pkg?.variables ?? []).filter((v: TebexPackageVariable) => v.required || v.required === 1);
+
   const handleAddToCart = async () => {
     if (!pkg) return;
 
@@ -82,10 +84,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       return;
     }
 
+    // Validate required variables
+    for (const variable of requiredVariables) {
+      if (!variableValues[variable.identifier]?.trim()) {
+        setError(`Please fill in "${variable.description || variable.identifier}" before adding to cart.`);
+        return;
+      }
+    }
+
     try {
       setAdding(true);
       setError(null);
-      await addItem(pkg.id, quantity);
+      const varData = Object.keys(variableValues).length > 0 ? variableValues : undefined;
+      await addItem(pkg.id, quantity, varData);
       setAdded(true);
       setTimeout(() => setAdded(false), 3000);
     } catch (err) {
@@ -230,6 +241,40 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
                 Added to cart successfully!{' '}
                 <Link href="/cart" className="underline hover:text-green-200">View Cart →</Link>
+              </div>
+            )}
+
+            {/* Required package variables */}
+            {requiredVariables.length > 0 && (
+              <div className="mb-6 space-y-3">
+                <p className="text-neutral-300 text-sm font-medium">Required information:</p>
+                {requiredVariables.map((variable) => (
+                  <div key={variable.identifier}>
+                    <label className="block text-neutral-400 text-xs mb-1">
+                      {variable.description || variable.identifier}
+                    </label>
+                    {variable.type === 'dropdown' && variable.options && variable.options.length > 0 ? (
+                      <select
+                        value={variableValues[variable.identifier] || ''}
+                        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setVariableValues((prev: Record<string, string>) => ({ ...prev, [variable.identifier]: e.target.value }))}
+                        className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                      >
+                        <option value="">Select an option...</option>
+                        {variable.options.map((opt) => (
+                          <option key={opt.value} value={opt.value}>{opt.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={variableValues[variable.identifier] || ''}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setVariableValues((prev: Record<string, string>) => ({ ...prev, [variable.identifier]: e.target.value }))}
+                        placeholder={variable.description || variable.identifier}
+                        className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-3 py-2 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-blue-500"
+                      />
+                    )}
+                  </div>
+                ))}
               </div>
             )}
 
