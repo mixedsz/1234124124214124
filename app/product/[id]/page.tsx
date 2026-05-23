@@ -54,7 +54,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col">
+      <div className="min-h-screen bg-neutral-900 flex flex-col">
         <Header basketCount={itemCount} />
         <div className="flex items-center justify-center flex-1">
           <div className="text-neutral-400">Loading product...</div>
@@ -65,7 +65,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   if (error || !pkg) {
     return (
-      <div className="min-h-screen bg-black flex flex-col">
+      <div className="min-h-screen bg-neutral-900 flex flex-col">
         <Header basketCount={itemCount} />
         <div className="mx-auto max-w-7xl px-4 py-12 w-full">
           <Link href="/store" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition">
@@ -89,7 +89,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const hasDiscount = pkg.discount > 0;
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={itemCount} />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
@@ -117,6 +117,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-blue-400 text-sm font-medium mb-2">{pkg.category?.name}</p>
+                
+                {/* Framework Badges */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {pkg.description?.toLowerCase().includes('qbcore') && (
+                    <span className="px-3 py-1 bg-red-900/30 border border-red-700 text-red-300 text-xs font-semibold rounded-lg">QBCore</span>
+                  )}
+                  {pkg.description?.toLowerCase().includes('qbox') && (
+                    <span className="px-3 py-1 bg-yellow-900/30 border border-yellow-700 text-yellow-300 text-xs font-semibold rounded-lg">Qbox</span>
+                  )}
+                  {pkg.description?.toLowerCase().includes('esx') && (
+                    <span className="px-3 py-1 bg-orange-900/30 border border-orange-700 text-orange-300 text-xs font-semibold rounded-lg">ESX</span>
+                  )}
+                </div>
+
                 <h1 className="text-3xl font-bold text-white">{pkg.name}</h1>
               </div>
               {hasDiscount && (

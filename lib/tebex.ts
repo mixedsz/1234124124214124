@@ -238,7 +238,7 @@ export async function getBasket(ident: string): Promise<TebexBasket | null> {
   }
 
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}`, {
+    const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/baskets/${ident}`, {
       cache: 'no-store',
     });
 
@@ -258,7 +258,7 @@ export async function getBasket(ident: string): Promise<TebexBasket | null> {
 // Add package to basket
 export async function addToBasket(ident: string, packageId: number, quantity: number = 1): Promise<TebexBasket | null> {
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages`, {
+    const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/baskets/${ident}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -286,7 +286,7 @@ export async function addToBasket(ident: string, packageId: number, quantity: nu
 // Remove package from basket
 export async function removeFromBasket(ident: string, packageId: number): Promise<TebexBasket | null> {
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages/remove`, {
+    const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/baskets/${ident}/packages/remove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

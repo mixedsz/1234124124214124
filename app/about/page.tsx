@@ -9,7 +9,7 @@ export default async function AboutPage() {
   const storeName = webstore?.name || 'Our Store';
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} storeName={storeName} />
 
       <main className="flex-1">
@@ -50,22 +50,22 @@ export default async function AboutPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-4 gap-8 text-center">
               <div>
-                <Users className="w-10 h-10 text-orange-500 mx-auto mb-4" />
+                <Users className="w-10 h-10 text-blue-500 mx-auto mb-4" />
                 <div className="text-4xl font-bold text-white mb-2">10k+</div>
                 <div className="text-neutral-400">Happy Customers</div>
               </div>
               <div>
-                <Code className="w-10 h-10 text-orange-500 mx-auto mb-4" />
+                <Code className="w-10 h-10 text-blue-500 mx-auto mb-4" />
                 <div className="text-4xl font-bold text-white mb-2">50+</div>
                 <div className="text-neutral-400">Scripts Created</div>
               </div>
               <div>
-                <Award className="w-10 h-10 text-orange-500 mx-auto mb-4" />
+                <Award className="w-10 h-10 text-blue-500 mx-auto mb-4" />
                 <div className="text-4xl font-bold text-white mb-2">3+</div>
                 <div className="text-neutral-400">Years Experience</div>
               </div>
               <div>
-                <Heart className="w-10 h-10 text-orange-500 mx-auto mb-4" />
+                <Heart className="w-10 h-10 text-blue-500 mx-auto mb-4" />
                 <div className="text-4xl font-bold text-white mb-2">500+</div>
                 <div className="text-neutral-400">5-Star Reviews</div>
               </div>
@@ -110,7 +110,7 @@ export default async function AboutPage() {
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
                 href="/store"
-                className="px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+                className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
               >
                 Browse Scripts
               </Link>

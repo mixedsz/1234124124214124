@@ -48,7 +48,7 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
               </p>
               <div className="flex items-center gap-2 text-sm text-neutral-400">
                 <span>Currency:</span>
-                <span className="px-2 py-1 bg-neutral-800 rounded text-white text-xs">GBP</span>
+                <span className="px-2 py-1 bg-neutral-800 rounded text-white text-xs">USD</span>
               </div>
             </div>
 

@@ -45,7 +45,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header />
 
       <main className="flex-1 flex items-center justify-center px-4 py-24">

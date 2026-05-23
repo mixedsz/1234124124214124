@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 export default function StorePage() {
   const [categories, setCategories] = useState<TebexCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +18,12 @@ export default function StorePage() {
     async function load() {
       try {
         const cats = await fetch('/api/categories').then(r => r.json());
-        setCategories(cats);
+        // Filter out subscription categories - they should only be on subscription page
+        const filteredCats = cats.filter((cat: TebexCategory) => 
+          !cat.name.toLowerCase().includes('subscription') && 
+          !cat.name.toLowerCase().includes('recurring')
+        );
+        setCategories(filteredCats);
       } catch {
         setError('Failed to load products. Please try again later.');
       } finally {
@@ -27,12 +33,20 @@ export default function StorePage() {
     load();
   }, []);
 
-  const visiblePackages: TebexPackage[] = activeCategory === null
-    ? categories.flatMap(cat => cat.packages || [])
-    : (categories.find(cat => cat.id === activeCategory)?.packages || []);
+  const visiblePackages: TebexPackage[] = (() => {
+    const categoryPackages = activeCategory === null
+      ? categories.flatMap(cat => cat.packages || [])
+      : (categories.find(cat => cat.id === activeCategory)?.packages || []);
+    
+    // Filter by search query
+    return categoryPackages.filter(pkg =>
+      pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pkg.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  })();
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} />
 
       {/* Page Header */}
@@ -43,12 +57,26 @@ export default function StorePage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 flex-1">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
         {error && (
           <div className="mb-8 bg-red-900/20 border border-red-900 rounded-lg p-4 text-red-200">
             {error}
           </div>
         )}
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" />
+            <input
+              type="text"
+              placeholder="Search scripts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition"
+            />
+          </div>
+        </div>
 
         {/* Category Tabs */}
         {categories.length > 0 && (
@@ -100,7 +128,7 @@ export default function StorePage() {
         ) : (
           <div className="text-center py-24">
             <Search className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-            <p className="text-neutral-400 text-lg">No products available in this category.</p>
+            <p className="text-neutral-400 text-lg">No products available{searchQuery ? ' matching your search' : ' in this category'}.</p>
             <p className="text-neutral-500 text-sm mt-2">Try another category or check back later.</p>
           </div>
         )}

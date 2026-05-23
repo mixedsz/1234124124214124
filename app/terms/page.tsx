@@ -3,7 +3,7 @@ import { Footer } from '@/components/footer';
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} />
 
       <main className="flex-1 py-16">

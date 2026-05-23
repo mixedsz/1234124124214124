@@ -85,12 +85,12 @@ export default async function HomePage() {
   const doubledReviews = [...REVIEWS, ...REVIEWS];
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} storeName={storeName} />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 lg:py-32 overflow-hidden bg-black">
+        <section className="relative py-20 lg:py-32 overflow-hidden bg-neutral-900">
           {/* Subtle blue glow background */}
           <div className="absolute inset-0 pointer-events-none">
             <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[120px]" />
@@ -112,7 +112,7 @@ export default async function HomePage() {
                   href="/subscription"
                   className="text-blue-400 hover:text-blue-300 transition text-sm font-medium"
                 >
-                  Get our full collection for £35/month.{' '}
+                  Get our full collection for $35/month.{' '}
                   <span className="underline">Learn more →</span>
                 </Link>
               </div>
@@ -173,7 +173,7 @@ export default async function HomePage() {
         </section>
 
         {/* Newsletter Section */}
-        <section className="py-16 bg-black border-t border-neutral-800">
+        <section className="py-16 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -245,7 +245,7 @@ export default async function HomePage() {
         </section>
 
         {/* Reviews Section - Infinite Scroll */}
-        <section className="py-20 bg-black border-t border-neutral-800">
+        <section className="py-20 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-white text-center mb-3">Reviews</h2>
             <p className="text-neutral-500 text-center mb-0">

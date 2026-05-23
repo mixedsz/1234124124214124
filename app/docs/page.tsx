@@ -32,7 +32,7 @@ export default function DocsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} />
 
       <main className="flex-1">
@@ -40,8 +40,8 @@ export default function DocsPage() {
         <section className="py-16 border-b border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                <Book className="w-6 h-6 text-orange-500" />
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                <Book className="w-6 h-6 text-blue-500" />
               </div>
               <h1 className="text-4xl font-bold text-white">Documentation</h1>
             </div>
@@ -56,7 +56,7 @@ export default function DocsPage() {
                 <input
                   type="text"
                   placeholder="Search documentation..."
-                  className="w-full pl-12 pr-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition"
+                  className="w-full pl-12 pr-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition"
                 />
               </div>
             </div>
@@ -75,7 +75,7 @@ export default function DocsPage() {
                       <li key={item.title}>
                         <Link
                           href={item.href}
-                          className="flex items-center justify-between text-neutral-400 hover:text-orange-400 transition"
+                          className="flex items-center justify-between text-neutral-400 hover:text-blue-400 transition"
                         >
                           {item.title}
                           <ExternalLink className="w-4 h-4" />
@@ -107,7 +107,7 @@ export default function DocsPage() {
                 <p className="text-neutral-400 mb-4">
                   Extract the contents to your server&apos;s resources folder:
                 </p>
-                <pre className="bg-black rounded-lg p-4 overflow-x-auto">
+                <pre className="bg-neutral-900 rounded-lg p-4 overflow-x-auto">
                   <code className="text-green-400">
                     /resources/[scripts]/your-script-name/
                   </code>
@@ -119,7 +119,7 @@ export default function DocsPage() {
                 <p className="text-neutral-400 mb-4">
                   Add the resource to your server.cfg:
                 </p>
-                <pre className="bg-black rounded-lg p-4 overflow-x-auto">
+                <pre className="bg-neutral-900 rounded-lg p-4 overflow-x-auto">
                   <code className="text-green-400">
                     ensure your-script-name
                   </code>
@@ -145,7 +145,7 @@ export default function DocsPage() {
             </p>
             <Link
               href="/support"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
             >
               Contact Support
             </Link>

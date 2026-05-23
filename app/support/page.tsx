@@ -5,15 +5,15 @@ import { HelpCircle, MessageCircle, FileText, ExternalLink } from 'lucide-react'
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} />
 
       <main className="flex-1">
         {/* Hero */}
         <section className="py-16 lg:py-24 border-b border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-6">
-              <HelpCircle className="w-10 h-10 text-orange-500" />
+            <div className="w-20 h-20 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-6">
+              <HelpCircle className="w-10 h-10 text-blue-500" />
             </div>
             <h1 className="text-4xl sm:text-5xl font-bold text-white mb-6">
               Support Center
@@ -33,16 +33,16 @@ export default function SupportPage() {
                 href="https://discord.gg/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8 hover:border-orange-500/50 transition group"
+                className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8 hover:border-blue-500/50 transition group"
               >
-                <MessageCircle className="w-12 h-12 text-orange-500 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition">
+                <MessageCircle className="w-12 h-12 text-blue-500 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition">
                   Discord Community
                 </h3>
                 <p className="text-neutral-400 mb-4">
                   Join our Discord server for real-time support from our team and community members.
                 </p>
-                <span className="inline-flex items-center gap-2 text-orange-400 text-sm font-medium">
+                <span className="inline-flex items-center gap-2 text-blue-400 text-sm font-medium">
                   Join Discord
                   <ExternalLink className="w-4 h-4" />
                 </span>
@@ -51,16 +51,16 @@ export default function SupportPage() {
               {/* Documentation */}
               <Link
                 href="/docs"
-                className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8 hover:border-orange-500/50 transition group"
+                className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8 hover:border-blue-500/50 transition group"
               >
-                <FileText className="w-12 h-12 text-orange-500 mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-orange-400 transition">
+                <FileText className="w-12 h-12 text-blue-500 mb-4" />
+                <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition">
                   Documentation
                 </h3>
                 <p className="text-neutral-400 mb-4">
                   Browse our comprehensive documentation for installation guides and configuration help.
                 </p>
-                <span className="inline-flex items-center gap-2 text-orange-400 text-sm font-medium">
+                <span className="inline-flex items-center gap-2 text-blue-400 text-sm font-medium">
                   View Docs
                   <ExternalLink className="w-4 h-4" />
                 </span>
@@ -68,7 +68,7 @@ export default function SupportPage() {
 
               {/* FAQ */}
               <div className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8">
-                <HelpCircle className="w-12 h-12 text-orange-500 mb-4" />
+                <HelpCircle className="w-12 h-12 text-blue-500 mb-4" />
                 <h3 className="text-xl font-semibold text-white mb-2">
                   FAQ
                 </h3>
@@ -139,7 +139,7 @@ export default function SupportPage() {
                   </label>
                   <input
                     type="email"
-                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition"
+                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition"
                     placeholder="your@email.com"
                   />
                 </div>
@@ -149,7 +149,7 @@ export default function SupportPage() {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition"
+                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition"
                     placeholder="What can we help with?"
                   />
                 </div>
@@ -159,13 +159,13 @@ export default function SupportPage() {
                   </label>
                   <textarea
                     rows={5}
-                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-orange-500 transition resize-none"
+                    className="w-full px-4 py-3 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition resize-none"
                     placeholder="Describe your issue..."
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+                  className="w-full px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
                 >
                   Send Message
                 </button>

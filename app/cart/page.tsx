@@ -48,7 +48,7 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex flex-col">
+      <div className="min-h-screen bg-neutral-900 flex flex-col">
         <Header basketCount={0} />
         <div className="flex items-center justify-center flex-1">
           <div className="text-neutral-400">Loading cart...</div>
@@ -61,7 +61,7 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={itemCount} />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">

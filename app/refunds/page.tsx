@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function RefundsPage() {
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header basketCount={0} />
 
       <main className="flex-1 py-16">
@@ -85,7 +85,7 @@ export default function RefundsPage() {
                 </p>
                 <Link
                   href="/support"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
                 >
                   Contact Support
                 </Link>
