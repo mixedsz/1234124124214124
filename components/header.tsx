@@ -11,7 +11,7 @@ export function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   
-  const { itemCount, isAuthenticated, username, refreshBasket, getBasketIdent } = useBasket();
+  const { itemCount, isAuthenticated, username, loading } = useBasket();
 
   // Close profile dropdown when clicking outside
   useEffect(() => {
@@ -30,6 +30,9 @@ export function Header() {
     // Refresh the page to clear state
     window.location.href = '/store';
   };
+
+  // Determine if user should see profile (authenticated with username)
+  const showProfile = !loading && isAuthenticated && username;
 
   return (
     <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
@@ -90,7 +93,7 @@ export function Header() {
             </Link>
 
             {/* Profile or Login Button */}
-            {isAuthenticated && username ? (
+            {showProfile ? (
               <div className="relative hidden lg:block" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
@@ -196,7 +199,7 @@ export function Header() {
               </Link>
               
               {/* Mobile Profile/Login */}
-              {isAuthenticated && username ? (
+              {showProfile ? (
                 <>
                   <div className="pt-2 border-t border-neutral-800">
                     <div className="flex items-center gap-2 px-2 py-2 text-white">
