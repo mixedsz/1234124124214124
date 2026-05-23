@@ -28,15 +28,16 @@ export default function LoginPage() {
         ident = basket.ident;
         localStorage.setItem(BASKET_KEY, ident);
       }
-
-      const returnUrl = `${window.location.origin}/store`;
+      
+      const returnUrl = `${window.location.origin}/store?success=true`;
       const authUrl = await getAuthUrl(ident, returnUrl);
 
       if (!authUrl) {
         throw new Error('Could not get authentication URL. Check that your Tebex token is configured correctly.');
       }
 
-      window.location.href = authUrl;
+      // Redirect the user to Tebex's FiveM authentication page
+      window.location.replace(authUrl);
     } catch (err) {
       console.error('[Login] Auth error:', err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.');

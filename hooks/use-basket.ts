@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { TebexBasket, createBasket, getBasket, addToBasket, removeFromBasket } from '@/lib/tebex';
 
 const BASKET_STORAGE_KEY = 'tebex_basket_ident';
@@ -7,7 +7,7 @@ export function useBasket() {
   const [basket, setBasket] = useState<TebexBasket | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [username, setUsername] = useState<string | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // Helper to create basket with proper URLs
   const createNewBasket = async () => {
@@ -16,28 +16,48 @@ export function useBasket() {
     return await createBasket(returnUrl, completeUrl);
   };
 
+  const refreshBasket = useCallback(async () => {
+    const storedIdent = localStorage.getItem(BASKET_STORAGE_KEY);
+    if (!storedIdent) return null;
+    
+    try {
+      const updated = await getBasket(storedIdent);
+      if (updated) {
+        setBasket(updated);
+        // Check if basket has username (authenticated)
+        const authenticated = !!(updated.username && updated.username_id);
+        setIsAuthenticated(authenticated);
+        return updated;
+      }
+    } catch (err) {
+      console.error('[useBasket] Error refreshing basket:', err);
+    }
+    return null;
+  }, []);
+
   // Initialize basket
   useEffect(() => {
     const initBasket = async () => {
       try {
         setLoading(true);
         const storedIdent = localStorage.getItem(BASKET_STORAGE_KEY);
-        const storedUsername = localStorage.getItem('tebex_username');
 
         if (storedIdent) {
           // Try to fetch existing basket
           const existingBasket = await getBasket(storedIdent);
+          
           if (existingBasket && !existingBasket.complete) {
             setBasket(existingBasket);
-            if (storedUsername) {
-              setUsername(storedUsername);
-            }
+            // Check if basket has username (authenticated)
+            const authenticated = !!(existingBasket.username && existingBasket.username_id);
+            setIsAuthenticated(authenticated);
           } else {
             // Basket completed or expired, create new one
             const newBasket = await createNewBasket();
             if (newBasket) {
               setBasket(newBasket);
               localStorage.setItem(BASKET_STORAGE_KEY, newBasket.ident);
+              setIsAuthenticated(false);
             }
           }
         } else {
@@ -46,6 +66,7 @@ export function useBasket() {
           if (newBasket) {
             setBasket(newBasket);
             localStorage.setItem(BASKET_STORAGE_KEY, newBasket.ident);
+            setIsAuthenticated(false);
           }
         }
       } catch (err) {
@@ -59,20 +80,6 @@ export function useBasket() {
     initBasket();
   }, []);
 
-  const updateUsername = async (newUsername: string) => {
-    try {
-      setLoading(true);
-      setUsername(newUsername);
-      localStorage.setItem('tebex_username', newUsername);
-    } catch (err) {
-      console.error('[useBasket] Error updating username:', err);
-      setError(err instanceof Error ? err : new Error('Failed to update username'));
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const addItem = async (packageId: number, quantity: number = 1) => {
     if (!basket) throw new Error('Basket not initialized');
 
@@ -81,8 +88,11 @@ export function useBasket() {
       const updated = await addToBasket(basket.ident, packageId, quantity);
       if (updated) {
         setBasket(updated);
+        return updated;
+      } else {
+        // If add failed, it might be because user needs to login
+        throw new Error('Failed to add item. You may need to login first.');
       }
-      return updated;
     } catch (err) {
       console.error('[useBasket] Error adding item:', err);
       setError(err instanceof Error ? err : new Error('Failed to add item'));
@@ -111,31 +121,20 @@ export function useBasket() {
     }
   };
 
-  const refreshBasket = async () => {
-    if (!basket) return;
-    try {
-      const updated = await getBasket(basket.ident);
-      if (updated) {
-        setBasket(updated);
-      }
-    } catch (err) {
-      console.error('[useBasket] Error refreshing basket:', err);
-    }
-  };
-
   const getBasketIdent = () => {
     return basket?.ident || localStorage.getItem(BASKET_STORAGE_KEY) || null;
   };
 
   const itemCount = basket?.packages?.length || 0;
+  const username = basket?.username || null;
 
   return {
     basket,
     loading,
     error,
     username,
+    isAuthenticated,
     itemCount,
-    updateUsername,
     addItem,
     removeItem,
     refreshBasket,

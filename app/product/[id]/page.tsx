@@ -52,7 +52,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
-  const { addItem, itemCount } = useBasket();
+  const { addItem, itemCount, isAuthenticated } = useBasket();
 
   useEffect(() => {
     const loadPackage = async () => {
@@ -81,8 +81,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       await addItem(pkg.id, quantity);
       setAdded(true);
       setTimeout(() => setAdded(false), 3000);
-    } catch {
-      setError('Failed to add to cart. Please try again.');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to add to cart';
+      // Check if the error is about needing to login
+      if (message.toLowerCase().includes('login') || message.toLowerCase().includes('must login')) {
+        setError('You must login before adding items to your cart. Click "Login with FiveM" in the header.');
+      } else {
+        setError(message);
+      }
     } finally {
       setAdding(false);
     }
@@ -193,6 +199,22 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 dangerouslySetInnerHTML={{ __html: parsedDescription }}
               />
             </div>
+
+            {/* Login required notice */}
+            {!isAuthenticated && (
+              <div className="mb-4 bg-blue-900/20 border border-blue-800 rounded-xl p-4 text-blue-300 text-sm">
+                <div className="flex items-center gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                  </svg>
+                  <span>
+                    You need to{' '}
+                    <Link href="/login" className="underline hover:text-blue-200 font-medium">login with FiveM</Link>
+                    {' '}before adding items to your cart.
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Feedback */}
             {error && (
