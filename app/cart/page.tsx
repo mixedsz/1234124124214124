@@ -1,54 +1,26 @@
 'use client';
 
 import { Header } from '@/components/header';
+import { Footer } from '@/components/footer';
 import { useBasket } from '@/hooks/use-basket';
 import { formatPrice } from '@/lib/tebex';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import { Trash2, ArrowLeft, AlertCircle, ShoppingBag } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, ArrowLeft, AlertCircle, ShoppingBag, LogIn } from 'lucide-react';
 
 export default function CartPage() {
-  const { basket, loading, removeItem, updateUsername, itemCount } = useBasket();
-  const [username, setUsername] = useState('');
-  const [usernameInput, setUsernameInput] = useState('');
+  const { basket, loading, removeItem, itemCount } = useBasket();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('tebex_username');
-    if (stored) {
-      setUsername(stored);
-      setUsernameInput(stored);
-    }
-  }, []);
-
-  const handleUpdateUsername = async () => {
-    if (!usernameInput.trim()) {
-      setError('Please enter a username');
-      return;
-    }
-
-    try {
-      setError(null);
-      await updateUsername(usernameInput);
-      setUsername(usernameInput);
-    } catch {
-      setError('Failed to update username');
-    }
-  };
-
   const handleCheckout = async () => {
-    if (!basket || !username) {
-      setError('Please set a username before checkout');
-      return;
-    }
+    if (!basket) return;
 
     try {
       setProcessing(true);
       setError(null);
 
-      // Use the checkout URL from the basket
       if (basket.links?.checkout) {
         window.location.href = basket.links.checkout;
       } else {
@@ -76,9 +48,9 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black">
-        <Header basketCount={itemCount} />
-        <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="min-h-screen bg-black flex flex-col">
+        <Header basketCount={0} />
+        <div className="flex items-center justify-center flex-1">
           <div className="text-neutral-400">Loading cart...</div>
         </div>
       </div>
@@ -89,13 +61,13 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-black flex flex-col">
       <Header basketCount={itemCount} />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12">
+      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <Link
           href="/store"
-          className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 mb-8"
+          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition"
         >
           <ArrowLeft className="w-4 h-4" />
           Continue Shopping
@@ -104,8 +76,8 @@ export default function CartPage() {
         <h1 className="text-4xl font-bold text-white mb-8">Shopping Cart</h1>
 
         {error && (
-          <div className="mb-6 bg-red-900/20 border border-red-900 rounded-lg p-4 text-red-200 flex gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" />
+          <div className="mb-6 bg-red-900/20 border border-red-900 rounded-xl p-4 text-red-300 flex gap-3">
+            <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
             {error}
           </div>
         )}
@@ -114,14 +86,15 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2">
             {isCartEmpty ? (
-              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-12 text-center">
-                <ShoppingBag className="w-16 h-16 text-neutral-600 mx-auto mb-4" />
-                <p className="text-neutral-400 mb-4">Your cart is empty</p>
+              <div className="bg-neutral-950 rounded-2xl border border-neutral-800 p-16 text-center">
+                <ShoppingBag className="w-16 h-16 text-neutral-700 mx-auto mb-4" />
+                <p className="text-neutral-400 text-lg mb-2">Your cart is empty</p>
+                <p className="text-neutral-600 text-sm mb-6">Add some scripts to get started</p>
                 <Link
                   href="/store"
-                  className="inline-block px-6 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg transition font-medium"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition font-semibold"
                 >
-                  Browse Products
+                  Browse Scripts
                 </Link>
               </div>
             ) : (
@@ -129,41 +102,33 @@ export default function CartPage() {
                 {packages.map((item) => (
                   <div
                     key={item.id}
-                    className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 flex items-center gap-4"
+                    className="bg-neutral-950 rounded-xl border border-neutral-800 p-5 flex items-center gap-4"
                   >
-                    {/* Image */}
                     <div className="w-20 h-20 rounded-lg overflow-hidden bg-neutral-800 flex-shrink-0">
                       {item.image ? (
                         <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500/20 to-orange-600/10">
-                          <span className="text-xl font-bold text-orange-500/50">{item.name.charAt(0)}</span>
+                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+                          <span className="text-xl font-bold text-blue-500/50">{item.name.charAt(0)}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Details */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-white truncate">{item.name}</h3>
-                      <p className="text-neutral-400 text-sm">
-                        Qty: <span className="font-medium">{item.in_basket.quantity}</span>
-                      </p>
+                      <h3 className="text-base font-semibold text-white truncate">{item.name}</h3>
+                      <p className="text-neutral-500 text-sm mt-0.5">Qty: {item.in_basket.quantity}</p>
                     </div>
 
-                    {/* Price & Remove */}
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        <p className="text-xl font-bold text-orange-500">
-                          {formatPrice(item.in_basket.price, basket?.currency || 'USD')}
-                        </p>
-                      </div>
-
+                    <div className="flex items-center gap-4">
+                      <p className="text-xl font-bold text-blue-400">
+                        {formatPrice(item.in_basket.price, basket?.currency || 'USD')}
+                      </p>
                       <button
                         onClick={() => handleRemoveItem(item.id)}
                         disabled={removingId === item.id}
-                        className="p-2 hover:bg-red-900/20 rounded-lg transition text-red-400 hover:text-red-300 disabled:opacity-50"
+                        className="p-2 hover:bg-red-900/20 rounded-lg transition text-neutral-500 hover:text-red-400 disabled:opacity-50"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -174,92 +139,61 @@ export default function CartPage() {
 
           {/* Checkout Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 space-y-6 sticky top-24">
-              {/* Username Section */}
-              <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Your Username</h3>
-                <div className="space-y-3">
-                  {!username ? (
-                    <>
-                      <input
-                        type="text"
-                        value={usernameInput}
-                        onChange={(e) => setUsernameInput(e.target.value)}
-                        placeholder="Enter your username"
-                        className="w-full bg-neutral-800 text-white px-4 py-3 rounded-lg border border-neutral-700 placeholder-neutral-500 focus:border-orange-500 focus:outline-none transition"
-                      />
-                      <button
-                        onClick={handleUpdateUsername}
-                        className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 rounded-lg transition"
-                      >
-                        Set Username
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <div className="bg-neutral-800 px-4 py-3 rounded-lg border border-neutral-700 text-white font-medium">
-                        {username}
-                      </div>
-                      <button
-                        onClick={() => {
-                          setUsername('');
-                          setUsernameInput('');
-                          localStorage.removeItem('tebex_username');
-                        }}
-                        className="w-full text-orange-400 hover:text-orange-300 text-sm font-medium"
-                      >
-                        Change Username
-                      </button>
-                    </>
-                  )}
-                </div>
+            <div className="bg-neutral-950 rounded-2xl border border-neutral-800 p-6 space-y-6 sticky top-24">
+              {/* Login CTA */}
+              <div className="bg-blue-600/10 border border-blue-600/20 rounded-xl p-4">
+                <p className="text-sm text-blue-300 font-medium mb-3">
+                  Sign in to link your purchase to your FiveM account
+                </p>
+                <Link
+                  href="/login"
+                  className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
+                >
+                  <LogIn className="w-4 h-4" />
+                  Login with FiveM
+                </Link>
               </div>
 
               {/* Order Summary */}
-              <div className="border-t border-neutral-700 pt-6">
+              <div>
                 <h3 className="text-lg font-semibold text-white mb-4">Order Summary</h3>
 
                 <div className="space-y-3 mb-4">
-                  <div className="flex justify-between text-neutral-400">
+                  <div className="flex justify-between text-neutral-400 text-sm">
                     <span>Subtotal</span>
                     <span>{formatPrice(basket?.base_price || 0, basket?.currency || 'USD')}</span>
                   </div>
-                  <div className="flex justify-between text-neutral-400">
+                  <div className="flex justify-between text-neutral-400 text-sm">
                     <span>Tax</span>
                     <span>{formatPrice(basket?.sales_tax || 0, basket?.currency || 'USD')}</span>
                   </div>
                 </div>
 
-                <div className="border-t border-neutral-700 pt-4 flex justify-between mb-6">
-                  <span className="text-lg font-semibold text-white">Total</span>
-                  <span className="text-2xl font-bold text-orange-500">
+                <div className="border-t border-neutral-800 pt-4 flex justify-between mb-6">
+                  <span className="font-semibold text-white">Total</span>
+                  <span className="text-2xl font-bold text-blue-400">
                     {formatPrice(basket?.total_price || 0, basket?.currency || 'USD')}
                   </span>
                 </div>
 
                 <button
                   onClick={handleCheckout}
-                  disabled={isCartEmpty || !username || processing}
-                  className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-neutral-700 disabled:text-neutral-500 text-white font-semibold py-3 rounded-lg transition"
+                  disabled={isCartEmpty || processing}
+                  className="w-full bg-white hover:bg-neutral-100 disabled:bg-neutral-800 disabled:text-neutral-600 text-black font-bold py-3 rounded-xl transition"
                 >
                   {processing ? 'Processing...' : 'Proceed to Checkout'}
                 </button>
 
-                <p className="text-xs text-neutral-500 text-center mt-4">
+                <p className="text-xs text-neutral-600 text-center mt-4">
                   Secure checkout powered by Tebex
                 </p>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-800 bg-black py-12 px-4 sm:px-6 lg:px-8 mt-16">
-        <div className="mx-auto max-w-7xl text-center text-neutral-400">
-          <p>Powered by Tebex</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

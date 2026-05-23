@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import { Menu, X, ShoppingCart } from 'lucide-react';
 
@@ -10,7 +11,7 @@ interface HeaderProps {
   logo?: string;
 }
 
-export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderProps) {
+export function Header({ basketCount = 0, storeName = 'Flake Development', logo }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -19,13 +20,13 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            {logo ? (
-              <img src={logo} alt={storeName} className="h-8 w-auto" />
-            ) : (
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-500 text-white font-bold text-xl">
-                {storeName.charAt(0)}
-              </div>
-            )}
+            <Image
+              src="/fd-logo.jpg"
+              alt="Flake Development"
+              width={40}
+              height={40}
+              className="rounded-lg"
+            />
           </Link>
 
           {/* Desktop Navigation */}
@@ -41,12 +42,6 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
               className="text-sm font-medium text-neutral-300 hover:text-white transition"
             >
               Scripts
-            </Link>
-            <Link
-              href="/gift-cards"
-              className="text-sm font-medium text-neutral-300 hover:text-white transition"
-            >
-              Gift Cards
             </Link>
             <Link
               href="/docs"
@@ -71,7 +66,7 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
             >
               <ShoppingCart className="w-5 h-5" />
               {basketCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-orange-500 text-white rounded-full">
+                <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-blue-500 text-white rounded-full">
                   {basketCount}
                 </span>
               )}
@@ -80,7 +75,7 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
             {/* Login Button */}
             <Link
               href="/login"
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium transition"
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
@@ -117,13 +112,6 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
                 Scripts
               </Link>
               <Link
-                href="/gift-cards"
-                className="text-sm font-medium text-neutral-300 hover:text-white transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Gift Cards
-              </Link>
-              <Link
                 href="/docs"
                 className="text-sm font-medium text-neutral-300 hover:text-white transition"
                 onClick={() => setMobileMenuOpen(false)}
@@ -139,7 +127,7 @@ export function Header({ basketCount = 0, storeName = 'Store', logo }: HeaderPro
               </Link>
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium transition w-fit"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition w-fit"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">

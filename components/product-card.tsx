@@ -14,7 +14,7 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
   return (
     <Link
       href={`/product/${package_.id}`}
-      className="group block bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-orange-500/50 transition-all duration-300"
+      className="group block bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-blue-500/50 transition-all duration-300"
     >
       {/* Image */}
       <div className="relative aspect-[4/3] bg-neutral-800 overflow-hidden">
@@ -25,14 +25,14 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-500/20 to-orange-600/10">
-            <span className="text-4xl font-bold text-orange-500/50">{package_.name.charAt(0)}</span>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+            <span className="text-4xl font-bold text-blue-500/50">{package_.name.charAt(0)}</span>
           </div>
         )}
 
         {/* Sale Badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded">
+          <div className="absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded">
             SALE
           </div>
         )}
@@ -59,14 +59,14 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
 
       {/* Content */}
       <div className="p-4">
-        <h3 className="font-semibold text-white group-hover:text-orange-400 transition-colors line-clamp-1">
+        <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
           {package_.name}
         </h3>
 
         <div className="mt-2 flex items-center gap-2">
           {hasDiscount ? (
             <>
-              <span className="text-lg font-bold text-orange-500">
+              <span className="text-lg font-bold text-blue-400">
                 {formatPrice(discountedPrice, package_.currency)}
               </span>
               <span className="text-sm text-neutral-500 line-through">
