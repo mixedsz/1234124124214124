@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ category.name }} - {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{{ store.url }}">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            {% if category.parent %}
+                <a href="{{ category.parent.url }}">{{ category.parent.name }}</a>
+                <span class="breadcrumb-separator">/</span>
+            {% endif %}
+            <span class="breadcrumb-current">{{ category.name }}</span>
+        </nav>
+        <h1 class="page-title">{{ category.name }}</h1>
+        {% if category.description %}
+            <p class="page-description">{{ category.description }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        {% if category.subcategories|length > 0 %}
+        <div class="subcategories">
+            {% for subcategory in category.subcategories %}
+                <a href="{{ subcategory.url }}" class="subcategory-card">
+                    {% if subcategory.image %}
+                        <img src="{{ subcategory.image }}" alt="{{ subcategory.name }}">
+                    {% endif %}
+                    <span>{{ subcategory.name }}</span>
+                </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if category.packages|length > 0 %}
+        <div class="packages-grid packages-grid-{{ settings.products.products_per_row }}">
+            {% for package in category.packages %}
+                {% include 'partials/package-card.html' with {'package': package} %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            </svg>
+            <h3>No packages found</h3>
+            <p>There are no packages in this category yet.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

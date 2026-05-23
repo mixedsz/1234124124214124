@@ -1,0 +1,12 @@
+<div class="module module-featured">
+    <h4 class="module-title">Featured Package</h4>
+    <a href="{{ module.package.url }}" class="featured-package">
+        {% if module.package.image %}
+        <img src="{{ module.package.image }}" alt="{{ module.package.name }}" class="featured-image">
+        {% endif %}
+        <div class="featured-info">
+            <span class="featured-name">{{ module.package.name }}</span>
+            <span class="featured-price">{{ module.package.price | price }}</span>
+        </div>
+    </a>
+</div>

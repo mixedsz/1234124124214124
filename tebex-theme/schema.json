@@ -1,0 +1,143 @@
+{
+  "name": "FiveM Dark Pro",
+  "version": "1.0.0",
+  "author": "Custom Theme",
+  "description": "A modern dark theme inspired by professional FiveM script stores",
+  "settings": {
+    "colors": {
+      "label": "Colors",
+      "settings": {
+        "primary_color": {
+          "type": "color",
+          "label": "Primary Color",
+          "default": "#3B82F6"
+        },
+        "secondary_color": {
+          "type": "color",
+          "label": "Secondary Color",
+          "default": "#F97316"
+        },
+        "background_color": {
+          "type": "color",
+          "label": "Background Color",
+          "default": "#0a0a0a"
+        },
+        "card_background": {
+          "type": "color",
+          "label": "Card Background",
+          "default": "#171717"
+        },
+        "text_color": {
+          "type": "color",
+          "label": "Text Color",
+          "default": "#ffffff"
+        },
+        "text_muted": {
+          "type": "color",
+          "label": "Muted Text Color",
+          "default": "#a3a3a3"
+        }
+      }
+    },
+    "header": {
+      "label": "Header",
+      "settings": {
+        "show_announcement": {
+          "type": "checkbox",
+          "label": "Show Announcement Bar",
+          "default": true
+        },
+        "announcement_text": {
+          "type": "text",
+          "label": "Announcement Text",
+          "default": "Flash Sale - Limited Time Only!"
+        },
+        "announcement_bg": {
+          "type": "color",
+          "label": "Announcement Background",
+          "default": "#F97316"
+        }
+      }
+    },
+    "homepage": {
+      "label": "Homepage",
+      "settings": {
+        "hero_title": {
+          "type": "text",
+          "label": "Hero Title",
+          "default": "Premium Scripts for Your FiveM Server"
+        },
+        "hero_subtitle": {
+          "type": "text",
+          "label": "Hero Subtitle",
+          "default": "High quality, optimized scripts to enhance your server experience."
+        },
+        "show_featured": {
+          "type": "checkbox",
+          "label": "Show Featured Packages",
+          "default": true
+        },
+        "show_reviews": {
+          "type": "checkbox",
+          "label": "Show Reviews Section",
+          "default": true
+        },
+        "show_stats": {
+          "type": "checkbox",
+          "label": "Show Statistics",
+          "default": true
+        }
+      }
+    },
+    "products": {
+      "label": "Products",
+      "settings": {
+        "products_per_row": {
+          "type": "select",
+          "label": "Products Per Row",
+          "default": "3",
+          "options": {
+            "2": "2 Products",
+            "3": "3 Products",
+            "4": "4 Products"
+          }
+        },
+        "show_sale_badge": {
+          "type": "checkbox",
+          "label": "Show Sale Badges",
+          "default": true
+        }
+      }
+    },
+    "footer": {
+      "label": "Footer",
+      "settings": {
+        "footer_text": {
+          "type": "text",
+          "label": "Footer Text",
+          "default": "Premium scripts for your server."
+        },
+        "show_social_links": {
+          "type": "checkbox",
+          "label": "Show Social Links",
+          "default": true
+        },
+        "discord_url": {
+          "type": "text",
+          "label": "Discord URL",
+          "default": ""
+        },
+        "youtube_url": {
+          "type": "text",
+          "label": "YouTube URL",
+          "default": ""
+        },
+        "github_url": {
+          "type": "text",
+          "label": "GitHub URL",
+          "default": ""
+        }
+      }
+    }
+  }
+}

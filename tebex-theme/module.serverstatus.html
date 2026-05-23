@@ -1,0 +1,13 @@
+<div class="module module-serverstatus">
+    <h4 class="module-title">Server Status</h4>
+    <div class="server-status {{ module.online ? 'online' : 'offline' }}">
+        <div class="status-indicator"></div>
+        <span class="status-text">{{ module.online ? 'Online' : 'Offline' }}</span>
+    </div>
+    {% if module.online %}
+    <div class="server-players">
+        <span class="players-count">{{ module.players }}</span>
+        <span class="players-label">players online</span>
+    </div>
+    {% endif %}
+</div>

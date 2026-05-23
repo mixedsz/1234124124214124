@@ -1,0 +1,175 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ store.name }} - Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <span class="hero-badge">Premium FiveM Scripts</span>
+            <h1 class="hero-title">{{ settings.homepage.hero_title }}</h1>
+            <p class="hero-subtitle">{{ settings.homepage.hero_subtitle }}</p>
+            <div class="hero-actions">
+                <a href="#packages" class="btn btn-primary btn-lg">
+                    Browse Scripts
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="hero-glow"></div>
+</section>
+
+{% if settings.homepage.show_featured and store.featured_packages|length > 0 %}
+<section class="section" id="packages">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                </svg>
+                Best Sellers
+            </span>
+        </div>
+        <div class="packages-grid">
+            {% for package in store.featured_packages %}
+                {% include 'partials/package-card.html' with {'package': package} %}
+            {% endfor %}
+        </div>
+        <div class="section-footer">
+            <a href="{{ store.categories|first.url }}" class="btn btn-secondary">
+                View All
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section newsletter-section">
+    <div class="container">
+        <div class="newsletter-card">
+            <div class="newsletter-content">
+                <h2>10% off your first purchase</h2>
+                <p>Subscribe to our newsletter to get product announcements, news, exclusive discounts, 10% off your first purchase and more right to your inbox!</p>
+                <form class="newsletter-form" action="{{ urls.newsletter }}" method="POST">
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-secondary">Subscribe</button>
+                </form>
+            </div>
+            <div class="newsletter-image">
+                <div class="floating-card">
+                    <span class="floating-card-count">500+</span>
+                    <span class="floating-card-label">Happy Customers</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if settings.homepage.show_stats %}
+<section class="section stats-section">
+    <div class="container">
+        <div class="section-header centered">
+            <h2>Achievements</h2>
+            <p>We've been around for over 3 years and are one of the fastest growing creators on the platform.</p>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-number">0K<span class="stat-plus">+</span></span>
+                <span class="stat-label">Sales</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">0K<span class="stat-plus">+</span></span>
+                <span class="stat-label">Servers using our scripts</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number">0K<span class="stat-plus">+</span></span>
+                <span class="stat-label">Players enjoying our scripts</span>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if settings.homepage.show_reviews %}
+<section class="section reviews-section">
+    <div class="container">
+        <div class="section-header centered">
+            <h2>Reviews</h2>
+            <p>We've received many five star reviews from our customers.</p>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-stars">
+                    {% for i in 1..5 %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#F97316" stroke="#F97316" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    {% endfor %}
+                </div>
+                <p class="review-text">"Amazing scripts! The support team is incredibly helpful and responsive. Highly recommended for any FiveM server."</p>
+                <div class="review-author">
+                    <span class="review-name">Happy Customer</span>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    {% for i in 1..5 %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#F97316" stroke="#F97316" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    {% endfor %}
+                </div>
+                <p class="review-text">"The best scripts I've ever used. Clean code, great documentation, and fantastic support. Worth every penny!"</p>
+                <div class="review-author">
+                    <span class="review-name">Server Owner</span>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    {% for i in 1..5 %}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="#F97316" stroke="#F97316" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                    {% endfor %}
+                </div>
+                <p class="review-text">"I am truly impressed with both scripts! They are incredibly easy to use and install. The design and versatile functionality really stand out."</p>
+                <div class="review-author">
+                    <span class="review-name">Verified Buyer</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="section cta-section">
+    <div class="container">
+        <div class="cta-card">
+            <div class="cta-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                </svg>
+            </div>
+            <h2>Got a Question?</h2>
+            <p>Our support center offers FAQs, links to helpful guides, and direct contact options if you need further assistance.</p>
+            <a href="{{ urls.contact }}" class="btn btn-white">
+                Get Support
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

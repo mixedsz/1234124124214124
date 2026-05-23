@@ -1,0 +1,12 @@
+<div class="module module-goal">
+    <h4 class="module-title">{{ module.title }}</h4>
+    <div class="goal-progress">
+        <div class="goal-bar">
+            <div class="goal-bar-fill" style="width: {{ module.percentage }}%"></div>
+        </div>
+        <div class="goal-info">
+            <span class="goal-current">{{ module.current | price }}</span>
+            <span class="goal-target">{{ module.target | price }}</span>
+        </div>
+    </div>
+</div>

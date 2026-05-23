@@ -1,0 +1,30 @@
+<article class="package-card">
+    <a href="{{ package.url }}" class="package-card-link">
+        <div class="package-card-image">
+            {% if package.image %}
+                <img src="{{ package.image }}" alt="{{ package.name }}" loading="lazy">
+            {% else %}
+                <div class="package-card-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    </svg>
+                </div>
+            {% endif %}
+            {% if package.sale.active and settings.products.show_sale_badge %}
+                <span class="sale-badge">SALE</span>
+            {% endif %}
+        </div>
+        <div class="package-card-content">
+            <h3 class="package-card-title">{{ package.name }}</h3>
+            <div class="package-card-price">
+                {% if package.sale.active %}
+                    <span class="price-original">{{ package.original_price | price }}</span>
+                    <span class="price-current sale">{{ package.price | price }}</span>
+                    <span class="price-discount">-{{ package.sale.discount }}%</span>
+                {% else %}
+                    <span class="price-current">{{ package.price | price }}</span>
+                {% endif %}
+            </div>
+        </div>
+    </a>
+</article>

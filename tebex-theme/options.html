@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ package.name }} Options - {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb">
+            <a href="{{ store.url }}">Home</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ package.category.url }}">{{ package.category.name }}</a>
+            <span class="breadcrumb-separator">/</span>
+            <a href="{{ package.url }}">{{ package.name }}</a>
+            <span class="breadcrumb-separator">/</span>
+            <span class="breadcrumb-current">Options</span>
+        </nav>
+        <h1 class="page-title">{{ package.name }}</h1>
+        <p class="page-description">Select your options below</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="options-card">
+            {% if package.image %}
+            <div class="options-image">
+                <img src="{{ package.image }}" alt="{{ package.name }}">
+            </div>
+            {% endif %}
+            <div class="options-content">
+                {{ options | raw }}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

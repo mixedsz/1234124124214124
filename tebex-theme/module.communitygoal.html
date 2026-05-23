@@ -1,0 +1,13 @@
+<div class="module module-community-goal">
+    <h4 class="module-title">{{ module.title }}</h4>
+    <p class="goal-description">{{ module.description }}</p>
+    <div class="goal-progress">
+        <div class="goal-bar">
+            <div class="goal-bar-fill" style="width: {{ module.percentage }}%"></div>
+        </div>
+        <div class="goal-stats">
+            <span>{{ module.percentage }}% complete</span>
+            <span>{{ module.current }} / {{ module.target }}</span>
+        </div>
+    </div>
+</div>

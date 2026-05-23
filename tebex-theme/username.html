@@ -1,0 +1,26 @@
+{% extends 'layout.html' %}
+
+{% block title %}Enter Username - {{ store.name }}{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <div class="container">
+        <h1 class="page-title">Enter Your Username</h1>
+        <p class="page-description">Please enter your in-game username to continue with your purchase.</p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        <div class="username-card">
+            <div class="username-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            {{ username | raw }}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+<div class="module module-topdonator">
+    <h4 class="module-title">Top Supporters</h4>
+    <ul class="donators-list">
+        {% for donator in module.donators %}
+        <li class="donator-item">
+            <span class="donator-rank">#{{ loop.index }}</span>
+            <span class="donator-name">{{ donator.username }}</span>
+            <span class="donator-amount">{{ donator.amount | price }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>

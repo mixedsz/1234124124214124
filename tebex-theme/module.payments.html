@@ -1,0 +1,11 @@
+<div class="module module-payments">
+    <h4 class="module-title">Recent Purchases</h4>
+    <ul class="payments-list">
+        {% for payment in module.payments %}
+        <li class="payment-item">
+            <span class="payment-user">{{ payment.username }}</span>
+            <span class="payment-package">{{ payment.package }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
