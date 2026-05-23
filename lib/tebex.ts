@@ -275,14 +275,33 @@ export async function addToBasket(ident: string, packageId: number, quantity: nu
     if (!response.ok) {
       const errorText = await response.text();
       console.error('[Tebex] Failed to add to basket:', response.status, errorText);
-      return null;
+      
+      // Parse error and throw with meaningful message
+      try {
+        const errorJson = JSON.parse(errorText);
+        const message = errorJson.message || errorJson.error || errorJson.detail || 'Failed to add item';
+        throw new Error(message);
+      } catch (parseErr) {
+        if (parseErr instanceof SyntaxError) {
+          // JSON parse failed, use status-based message
+          if (response.status === 404) {
+            throw new Error('Basket expired. Please refresh the page.');
+          } else if (response.status === 422) {
+            throw new Error('This package cannot be added to your cart.');
+          } else if (response.status === 403) {
+            throw new Error('You must be logged in to add items to your cart.');
+          }
+          throw new Error(`Failed to add item (Error ${response.status})`);
+        }
+        throw parseErr;
+      }
     }
 
     const data = await response.json();
     return data.data;
   } catch (error) {
     console.error('[Tebex] Error adding to basket:', error);
-    return null;
+    throw error; // Re-throw to preserve error message
   }
 }
 

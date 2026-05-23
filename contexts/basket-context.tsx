@@ -23,6 +23,7 @@ const BasketContext = createContext<BasketContextType | null>(null);
 export function BasketProvider({ children }: { children: ReactNode }) {
   const [basket, setBasket] = useState<TebexBasket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false); // Separate state for add operations
   const [error, setError] = useState<Error | null>(null);
 
   // Helper to create basket with proper URLs
@@ -93,21 +94,18 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     if (!basket) throw new Error('Basket not initialized');
 
     try {
-      setLoading(true);
+      setAdding(true);
       const updated = await addToBasket(basket.ident, packageId, quantity);
       if (updated) {
         setBasket(updated);
         return updated;
-      } else {
-        // If add failed, it might be because user needs to login
-        throw new Error('Failed to add item. You may need to login first.');
       }
+      return null;
     } catch (err) {
       console.error('[BasketProvider] Error adding item:', err);
-      setError(err instanceof Error ? err : new Error('Failed to add item'));
-      throw err;
+      throw err; // Pass through the actual error from Tebex
     } finally {
-      setLoading(false);
+      setAdding(false);
     }
   };
 

@@ -83,12 +83,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       setTimeout(() => setAdded(false), 3000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to add to cart';
-      // Check if the error is about needing to login
-      if (message.toLowerCase().includes('login') || message.toLowerCase().includes('must login')) {
-        setError('You must login before adding items to your cart. Click "Login with FiveM" in the header.');
-      } else {
-        setError(message);
-      }
+      setError(message);
     } finally {
       setAdding(false);
     }
