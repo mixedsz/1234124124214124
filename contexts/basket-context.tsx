@@ -69,7 +69,8 @@ export function BasketProvider({ children }: { children: ReactNode }) {
             const authenticated = !!(existingBasket.username && existingBasket.username_id);
             setIsAuthenticated(authenticated);
           } else {
-            // Basket completed or expired, create new one
+            // Basket completed, expired, or not found (404) - create new one
+            localStorage.removeItem(BASKET_STORAGE_KEY);
             const newBasket = await createNewBasket();
             if (newBasket) {
               setBasket(newBasket);
