@@ -255,10 +255,11 @@ export async function getBasket(ident: string): Promise<TebexBasket | null> {
   }
 }
 
-// Add package to basket - NOTE: This endpoint does NOT use the account token
+// Add package to basket - Uses the accounts endpoint for authenticated stores
 export async function addToBasket(ident: string, packageId: number, quantity: number = 1): Promise<TebexBasket | null> {
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages`, {
+    // Use the accounts endpoint which works for stores requiring authentication
+    const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/baskets/${ident}/packages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -283,10 +284,10 @@ export async function addToBasket(ident: string, packageId: number, quantity: nu
   }
 }
 
-// Remove package from basket - NOTE: This endpoint does NOT use the account token
+// Remove package from basket - Uses the accounts endpoint for authenticated stores
 export async function removeFromBasket(ident: string, packageId: number): Promise<TebexBasket | null> {
   try {
-    const response = await fetch(`${TEBEX_API_BASE}/baskets/${ident}/packages/remove`, {
+    const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/baskets/${ident}/packages/remove`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

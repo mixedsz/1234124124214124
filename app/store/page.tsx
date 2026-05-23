@@ -4,9 +4,10 @@ import { Header } from '@/components/header';
 import { getCategories, TebexCategory, TebexPackage } from '@/lib/tebex';
 import { ProductCard } from '@/components/product-card';
 import { Footer } from '@/components/footer';
-import { Search } from 'lucide-react';
+import { Search, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useBasket } from '@/hooks/use-basket';
+import { useSearchParams } from 'next/navigation';
 
 export default function StorePage() {
   const [categories, setCategories] = useState<TebexCategory[]>([]);
@@ -14,7 +15,20 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { itemCount } = useBasket();
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const { itemCount, refreshBasket } = useBasket();
+  const searchParams = useSearchParams();
+
+  // Check for login success
+  useEffect(() => {
+    if (searchParams.get('success') === 'true') {
+      setLoginSuccess(true);
+      // Refresh basket to get authenticated state
+      refreshBasket();
+      // Auto-hide message after 5 seconds
+      setTimeout(() => setLoginSuccess(false), 5000);
+    }
+  }, [searchParams, refreshBasket]);
 
   useEffect(() => {
     async function load() {
@@ -60,6 +74,14 @@ export default function StorePage() {
       </section>
 
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 flex-1 w-full">
+        {/* Login Success Message */}
+        {loginSuccess && (
+          <div className="mb-6 bg-green-900/20 border border-green-800 rounded-xl p-4 flex items-center gap-3 text-green-300">
+            <CheckCircle className="w-5 h-5 flex-shrink-0" />
+            <span className="text-sm">Successfully logged in with FiveM! You can now add items to your cart.</span>
+          </div>
+        )}
+
         {error && (
           <div className="mb-8 bg-red-900/20 border border-red-900 rounded-lg p-4 text-red-200">
             {error}

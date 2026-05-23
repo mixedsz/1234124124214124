@@ -244,11 +244,11 @@ export default function SubscriptionPage() {
                       </div>
                     )}
                   </div>
-                  {/* Framework badges */}
+                  {/* Framework badges - light variant style */}
                   <div className="flex gap-1.5 px-4 pt-4">
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-red-500/90 text-white">QBCORE</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-500/90 text-black">QBOX</span>
-                    <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-orange-500/90 text-white">ESX</span>
+                    <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-500/15 text-red-400">QBCore</span>
+                    <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-yellow-500/15 text-yellow-400">Qbox</span>
+                    <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-orange-500/15 text-orange-400">ESX</span>
                   </div>
                   <div className="p-4 pt-2">
                     <h3 className="font-semibold text-white group-hover:text-blue-400 transition">{script.name}</h3>

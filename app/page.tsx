@@ -9,34 +9,28 @@ export const revalidate = 60;
 
 const REVIEWS = [
   {
-    text: "I want to express my deep appreciation for the staff. They are always respectful and kind to us members, and truly admire the hard work they put into these scripts. They're simply amazing – the best I've ever come across. Much love to all the staff, especially the creator!",
+    text: "I want to express my deep appreciation for Flake Development. They are always respectful and responsive, and I truly admire the hard work they put into these scripts. They're simply amazing – the best I've ever come across. Much love to Trey and the team!",
     author: "@f_xzz",
-    platform: "Discord",
   },
   {
-    text: "I had far more issues than just implementing the script. The support team went way beyond and helped me not only add the script but made sure ALL aspects of my server were working correctly! Amazing support and amazing scripts, what more could you ask for?",
+    text: "I had far more issues than just implementing the script. Flake went way beyond and helped me not only add the script but made sure ALL aspects of my server were working correctly! Amazing support and amazing scripts, what more could you ask for?",
     author: "@whodeyreloaded",
-    platform: "Discord",
   },
   {
-    text: "I am truly impressed with both scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations. Would definitely buy again!",
+    text: "I am truly impressed with Flake's scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations. Would definitely buy again!",
     author: "@gcp137",
-    platform: "Discord",
   },
   {
-    text: "Hands down the best FiveM scripts I've used. The attention to detail is incredible and the support response time is unmatched. Every update brings something new and they listen to the community. 10/10 would recommend to any server owner.",
+    text: "Hands down the best FiveM scripts I've used. Trey's attention to detail is incredible and the support response time is unmatched. Every update brings something new and they listen to the community. 10/10 would recommend to any server owner.",
     author: "@serverdev99",
-    platform: "Discord",
   },
   {
     text: "Been using Flake Development scripts for over a year now. The quality is consistently high and the free updates policy is something no other creator does. My players absolutely love the immersion these scripts bring.",
     author: "@roleplayer42",
-    platform: "Discord",
   },
   {
-    text: "The documentation is thorough and the scripts work out of the box. Had a small config question and support answered within minutes. This is how every FiveM resource should be sold and supported.",
+    text: "The documentation is thorough and the scripts work out of the box. Had a small config question and Trey answered within minutes. This is how every FiveM resource should be sold and supported.",
     author: "@adminlife",
-    platform: "Discord",
   },
 ];
 
@@ -226,8 +220,8 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-2">
               {[
                 { value: '40', suffix: 'K', label: 'Sales' },
-                { value: '42', suffix: 'K', label: 'Servers using FD scripts*' },
-                { value: '158', suffix: 'K', label: 'Players enjoying FD scripts*' },
+                { value: '42', suffix: 'K', label: 'Servers using Flake Scripts*' },
+                { value: '158', suffix: 'K', label: 'Players enjoying Flake Scripts*' },
               ].map((stat) => (
                 <div key={stat.label} className="w-full text-center leading-none">
                   <div
@@ -271,9 +265,11 @@ export default async function HomePage() {
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-5 text-sm text-neutral-500">
-                    <span className="text-blue-400">💬</span>
+                    {/* Discord Icon */}
+                    <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                    </svg>
                     <span>{review.author}</span>
-                    <span className="ml-auto text-xs">{review.platform}</span>
                   </div>
                 </div>
               ))}

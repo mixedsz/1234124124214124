@@ -155,11 +155,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div>
                 <p className="text-blue-400 text-sm font-medium mb-2">{pkg.category?.name}</p>
                 
-                {/* Framework Badges - Colored like reference */}
+                {/* Framework Badges - Light variant style like Mantine */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded">QBCORE</span>
-                  <span className="px-3 py-1 bg-yellow-500/90 text-black text-xs font-bold rounded">QBOX</span>
-                  <span className="px-3 py-1 bg-orange-500/90 text-white text-xs font-bold rounded">ESX</span>
+                  <span className="px-2.5 py-1 bg-red-500/15 text-red-400 text-xs font-semibold rounded">QBCore</span>
+                  <span className="px-2.5 py-1 bg-yellow-500/15 text-yellow-400 text-xs font-semibold rounded">Qbox</span>
+                  <span className="px-2.5 py-1 bg-orange-500/15 text-orange-400 text-xs font-semibold rounded">ESX</span>
                 </div>
 
                 <h1 className="text-3xl font-bold text-white">{pkg.name}</h1>

@@ -42,23 +42,23 @@ export function ProductCard({ package_ }: ProductCardProps) {
             NEW
           </div>
         )}
+      </div>
 
-        {/* Framework Tags overlay at bottom of image */}
-        <div className="absolute bottom-3 left-3 flex gap-1.5">
-          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-red-500/90 text-white">
-            QBCORE
+      {/* Content - badges above title */}
+      <div className="p-4">
+        {/* Framework Tags - light variant style like Mantine */}
+        <div className="flex gap-1.5 mb-2">
+          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-500/15 text-red-400">
+            QBCore
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-500/90 text-black">
-            QBOX
+          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-yellow-500/15 text-yellow-400">
+            Qbox
           </span>
-          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-orange-500/90 text-white">
+          <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-orange-500/15 text-orange-400">
             ESX
           </span>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="p-4">
         <h3 className="font-semibold text-white group-hover:text-blue-400 transition-colors line-clamp-1">
           {package_.name}
         </h3>
