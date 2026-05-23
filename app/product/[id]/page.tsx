@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 import { TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
-import { useBasket } from '@/hooks/use-basket';
+import { useBasket } from '@/contexts/basket-context';
 import { marked } from 'marked';
 
 // Configure marked for safe rendering
@@ -97,7 +97,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   if (loading) {
     return (
       <div className="min-h-screen bg-neutral-900 flex flex-col">
-        <Header basketCount={itemCount} />
+        <Header />
         <div className="flex items-center justify-center flex-1">
           <div className="text-neutral-400">Loading product...</div>
         </div>
@@ -105,10 +105,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     );
   }
 
-  if (error || !pkg) {
+  if (!pkg && !loading) {
     return (
       <div className="min-h-screen bg-neutral-900 flex flex-col">
-        <Header basketCount={itemCount} />
+        <Header />
         <div className="mx-auto max-w-7xl px-4 py-12 w-full">
           <Link href="/store" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition">
             <ArrowLeft className="w-4 h-4" /> Back to Store
@@ -118,7 +118,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <AlertCircle className="w-6 h-6 flex-shrink-0" />
               <div>
                 <h3 className="font-semibold mb-2">Product Not Found</h3>
-                <p>{error || 'The product you are looking for does not exist.'}</p>
+                <p>The product you are looking for does not exist or has been removed.</p>
               </div>
             </div>
           </div>
@@ -133,7 +133,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={itemCount} />
+      <Header />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <Link href="/store" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-10 transition">

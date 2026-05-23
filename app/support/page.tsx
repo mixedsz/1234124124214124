@@ -6,7 +6,7 @@ import { HelpCircle, MessageCircle, FileText, ExternalLink } from 'lucide-react'
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={0} />
+      <Header />
 
       <main className="flex-1">
         {/* Hero */}

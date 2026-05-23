@@ -6,7 +6,7 @@ import { Footer } from '@/components/footer';
 import { Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { useBasket } from '@/hooks/use-basket';
+import { useBasket } from '@/contexts/basket-context';
 
 // Helper to strip HTML tags and convert to plain text
 function stripHtml(html: string): string {
@@ -87,7 +87,7 @@ export default function SubscriptionPage() {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={itemCount} />
+      <Header />
 
       {/* Page Header */}
       <section className="border-b border-neutral-800 bg-neutral-900 py-12 px-4 sm:px-6 lg:px-8">

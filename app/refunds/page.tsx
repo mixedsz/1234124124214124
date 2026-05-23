@@ -5,7 +5,7 @@ import Link from 'next/link';
 export default function RefundsPage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={0} />
+      <Header />
 
       <main className="flex-1 py-16">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">

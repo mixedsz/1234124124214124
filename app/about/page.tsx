@@ -10,7 +10,7 @@ export default async function AboutPage() {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={0} storeName={storeName} />
+      <Header />
 
       <main className="flex-1">
         {/* Hero */}
