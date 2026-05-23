@@ -46,34 +46,57 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    console.log('[Tebex Auth] Response data:', JSON.stringify(data));
+    console.log('[Tebex Auth] Full response:', JSON.stringify(data, null, 2));
     
     // The auth endpoint returns an array of auth providers like:
     // [{ "name": "FiveM", "url": "https://..." }]
-    // Or data.data if wrapped
-    let authProviders = data;
-    if (data.data && Array.isArray(data.data)) {
+    // Could be data directly as array, or wrapped in data.data
+    let authProviders: Array<{ name: string; url: string }> = [];
+    
+    if (Array.isArray(data)) {
+      authProviders = data;
+    } else if (data && Array.isArray(data.data)) {
       authProviders = data.data;
+    } else if (data && typeof data === 'object') {
+      // Maybe it's a single object with url
+      if (data.url) {
+        console.log('[Tebex Auth] Direct URL found:', data.url);
+        return NextResponse.json({ url: data.url });
+      }
     }
     
-    // Find the FiveM provider or use the first one
+    console.log('[Tebex Auth] Auth providers found:', authProviders.length);
+    
+    // Find the FiveM/CFX provider or use the first one
     let selectedUrl: string | null = null;
     
-    if (Array.isArray(authProviders)) {
-      const fivemProvider = authProviders.find((p: { name: string; url: string }) => 
-        p.name?.toLowerCase().includes('fivem') || p.name?.toLowerCase().includes('cfx')
+    if (authProviders.length > 0) {
+      // Look for FiveM specifically
+      const fivemProvider = authProviders.find((p) => 
+        p.name?.toLowerCase().includes('fivem') || 
+        p.name?.toLowerCase().includes('cfx') ||
+        p.name?.toLowerCase().includes('citizenfx')
       );
       
       if (fivemProvider && fivemProvider.url) {
         selectedUrl = fivemProvider.url;
-      } else if (authProviders.length > 0 && authProviders[0].url) {
+        console.log('[Tebex Auth] Found FiveM provider:', fivemProvider.name);
+      } else if (authProviders[0]?.url) {
+        // Use first available provider
         selectedUrl = authProviders[0].url;
+        console.log('[Tebex Auth] Using first provider:', authProviders[0].name);
       }
-    } else if (typeof authProviders === 'object' && authProviders.url) {
-      selectedUrl = authProviders.url;
     }
     
-    console.log('[Tebex Auth] Selected URL:', selectedUrl);
+    console.log('[Tebex Auth] Selected URL:', selectedUrl ? 'Found' : 'Not found');
+    
+    if (!selectedUrl) {
+      console.error('[Tebex Auth] No auth URL found in response');
+      return NextResponse.json(
+        { error: 'No authentication provider found', providers: authProviders },
+        { status: 404 }
+      );
+    }
     
     return NextResponse.json({ url: selectedUrl });
   } catch (error) {

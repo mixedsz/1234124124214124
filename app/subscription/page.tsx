@@ -1,10 +1,10 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { getCategories, TebexCategory, TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexCategory, TebexPackage, formatPrice } from '@/lib/tebex';
 import { Footer } from '@/components/footer';
 import { Check } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useBasket } from '@/hooks/use-basket';
 
@@ -19,7 +19,9 @@ export default function SubscriptionPage() {
   const [scripts, setScripts] = useState<TebexPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
   const { itemCount } = useBasket();
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -40,9 +42,9 @@ export default function SubscriptionPage() {
         const allSubs = subCats.flatMap((cat: TebexCategory) => cat.packages || []);
         setSubscriptions(allSubs);
         
-        // Get first 5 scripts for "What's Included"
+        // Get ALL scripts for rotating display
         const allScripts = scriptCats.flatMap((cat: TebexCategory) => cat.packages || []);
-        setScripts(allScripts.slice(0, 5));
+        setScripts(allScripts);
       } catch (err) {
         console.error('Error loading subscriptions:', err);
         setError('Failed to load subscriptions. Please try again later.');
@@ -52,6 +54,36 @@ export default function SubscriptionPage() {
     }
     load();
   }, []);
+
+  // Rotate through scripts every 3 seconds
+  useEffect(() => {
+    if (scripts.length <= 5) return;
+    
+    intervalRef.current = setInterval(() => {
+      setCurrentScriptIndex((prev) => {
+        const nextIndex = prev + 1;
+        // Reset when we've shown all scripts
+        if (nextIndex >= scripts.length - 4) {
+          return 0;
+        }
+        return nextIndex;
+      });
+    }, 3000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [scripts.length]);
+
+  // Get 5 scripts starting from current index
+  const displayedScripts = scripts.slice(currentScriptIndex, currentScriptIndex + 5);
+  // If we don't have enough scripts from current index, wrap around
+  if (displayedScripts.length < 5 && scripts.length >= 5) {
+    const remaining = 5 - displayedScripts.length;
+    displayedScripts.push(...scripts.slice(0, remaining));
+  }
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -101,11 +133,11 @@ export default function SubscriptionPage() {
                   }`}
                 >
                   {/* Badge for recommended */}
-                  {isRecommended && hasDiscount && (
+                  {isRecommended && hasDiscount ? (
                     <div className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full mb-4">
                       BEST VALUE
                     </div>
-                  )}
+                  ) : null}
 
                   <h3 className="text-2xl font-bold text-white mb-2">{sub.name}</h3>
                   
@@ -188,11 +220,16 @@ export default function SubscriptionPage() {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {scripts.map((script) => (
+              {displayedScripts.map((script, idx) => (
                 <Link 
-                  key={script.id} 
+                  key={`${script.id}-${idx}`} 
                   href={`/product/${script.id}`}
-                  className="block bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 hover:border-blue-500/50 transition group"
+                  className="block bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 hover:border-blue-500/50 transition-all duration-500 group animate-fade-in"
+                  style={{ 
+                    animationDelay: `${idx * 100}ms`,
+                    opacity: 0,
+                    animation: 'fadeIn 0.5s ease forwards'
+                  }}
                 >
                   <div className="aspect-video bg-neutral-700 overflow-hidden">
                     {script.image ? (
@@ -219,13 +256,17 @@ export default function SubscriptionPage() {
                 </Link>
               ))}
 
-              {/* "+ all future releases!" card */}
+              {/* "+ all current & future releases!" card */}
               <div className="bg-gradient-to-b from-neutral-700/50 to-transparent h-full rounded-2xl p-[1px] hidden lg:block">
-                <div className="w-full h-full bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-2xl flex items-center justify-center min-h-[280px]">
-                  <div className="text-2xl font-bold text-white/75 items-center flex gap-2">
-                    <span className="text-blue-400 font-bold text-5xl leading-none" style={{ textShadow: '0 0 20px rgba(59,130,246,0.5)' }}>+</span>
-                    all future releases!
+                <div className="w-full h-full bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-2xl flex flex-col items-center justify-center min-h-[280px] gap-4">
+                  <div className="text-blue-400 font-bold text-6xl leading-none" style={{ textShadow: '0 0 30px rgba(59,130,246,0.6)' }}>+</div>
+                  <div className="text-center">
+                    <p className="text-xl font-bold text-white/90">all current &</p>
+                    <p className="text-xl font-bold text-white/90">future releases!</p>
                   </div>
+                  <p className="text-neutral-500 text-sm text-center px-4">
+                    {scripts.length} scripts and counting
+                  </p>
                 </div>
               </div>
             </div>
@@ -234,6 +275,19 @@ export default function SubscriptionPage() {
       </div>
 
       <Footer />
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

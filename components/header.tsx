@@ -15,7 +15,7 @@ export function Header({ basketCount = 0, storeName = 'Flake Development', logo 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 bg-black border-b border-neutral-800">
+    <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
