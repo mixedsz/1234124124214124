@@ -30,7 +30,7 @@ export default function SupportPage() {
             <div className="grid md:grid-cols-3 gap-6">
               {/* Discord */}
               <a
-                href="https://discord.gg/"
+                href="https://discord.gg/flakedev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-neutral-900 rounded-2xl border border-neutral-800 p-8 hover:border-blue-500/50 transition group"

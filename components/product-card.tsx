@@ -3,10 +3,9 @@ import { TebexPackage, formatPrice } from '@/lib/tebex';
 
 interface ProductCardProps {
   package_: TebexPackage;
-  tags?: string[];
 }
 
-export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: ProductCardProps) {
+export function ProductCard({ package_ }: ProductCardProps) {
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
   const discountedPrice = package_.total_price;
@@ -16,13 +15,13 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
       href={`/product/${package_.id}`}
       className="group block bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-blue-500/50 transition-all duration-300"
     >
-      {/* Image */}
-      <div className="relative aspect-[4/3] bg-neutral-800 overflow-hidden">
+      {/* Image - use object-contain to show full image */}
+      <div className="relative aspect-video bg-neutral-800 overflow-hidden">
         {package_.image ? (
           <img
             src={package_.image}
             alt={package_.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
@@ -32,7 +31,7 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
 
         {/* Sale Badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded">
+          <div className="absolute top-3 right-3 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded">
             SALE
           </div>
         )}
@@ -44,16 +43,17 @@ export function ProductCard({ package_, tags = ['QBCORE', 'QBOX', 'ESX'] }: Prod
           </div>
         )}
 
-        {/* Tags overlay at bottom of image */}
+        {/* Framework Tags overlay at bottom of image */}
         <div className="absolute bottom-3 left-3 flex gap-1.5">
-          {tags.map((tag) => (
-            <span
-              key={tag}
-              className="px-2 py-0.5 text-[10px] font-semibold rounded bg-black/70 text-white backdrop-blur-sm"
-            >
-              {tag}
-            </span>
-          ))}
+          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-red-500/90 text-white">
+            QBCORE
+          </span>
+          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-yellow-500/90 text-black">
+            QBOX
+          </span>
+          <span className="px-2 py-0.5 text-[10px] font-bold rounded bg-orange-500/90 text-white">
+            ESX
+          </span>
         </div>
       </div>
 

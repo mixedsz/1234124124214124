@@ -6,6 +6,7 @@ import { ProductCard } from '@/components/product-card';
 import { Footer } from '@/components/footer';
 import { Search } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useBasket } from '@/hooks/use-basket';
 
 export default function StorePage() {
   const [categories, setCategories] = useState<TebexCategory[]>([]);
@@ -13,6 +14,7 @@ export default function StorePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { itemCount } = useBasket();
 
   useEffect(() => {
     async function load() {
@@ -47,7 +49,7 @@ export default function StorePage() {
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header basketCount={0} />
+      <Header basketCount={itemCount} />
 
       {/* Page Header */}
       <section className="border-b border-neutral-800 bg-neutral-900/50 py-12 px-4 sm:px-6 lg:px-8">

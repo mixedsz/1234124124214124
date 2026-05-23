@@ -136,7 +136,7 @@ export default async function HomePage() {
         </section>
 
         {/* Best Sellers Section */}
-        <section className="py-16 bg-neutral-950 border-t border-neutral-800">
+        <section className="py-16 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-8">
               <span className="text-xl">🔥</span>
@@ -217,7 +217,7 @@ export default async function HomePage() {
         </section>
 
         {/* Achievements Section */}
-        <section className="py-20 bg-neutral-950 border-t border-neutral-800">
+        <section className="py-20 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-4xl font-bold text-white mb-4">Achievements</h2>
             <p className="text-neutral-500 mb-16">
@@ -282,7 +282,7 @@ export default async function HomePage() {
         </section>
 
         {/* Trusted By Section */}
-        <section className="py-16 bg-neutral-950 border-t border-neutral-800">
+        <section className="py-16 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl font-bold text-white mb-3">Trusted by the best</h2>
             <p className="text-neutral-500 mb-12">

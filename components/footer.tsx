@@ -7,11 +7,11 @@ interface FooterProps {
 
 export function Footer({ storeName = 'Flake Development' }: FooterProps) {
   return (
-    <footer className="bg-black border-t border-neutral-800">
+    <footer className="bg-neutral-900 border-t border-neutral-800">
       {/* Support CTA Section */}
-      <div className="bg-neutral-950 py-16">
+      <div className="bg-neutral-900 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-center py-12 px-10 rounded-3xl bg-gradient-to-br from-blue-950/60 to-neutral-950 border border-blue-900/20 text-center">
+          <div className="flex flex-col items-center justify-center py-12 px-10 rounded-3xl bg-gradient-to-br from-blue-950/60 to-neutral-900 border border-blue-900/20 text-center">
             <div className="bg-white/5 rounded-full relative w-[70px] h-[70px] p-[5px] mb-4 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="42" height="42" viewBox="0 0 24 24" fill="currentColor" className="text-blue-500">
                 <path d="M12 2c5.523 0 10 4.477 10 10a10 10 0 0 1 -19.995 .324l-.005 -.324l.004 -.28c.148 -5.393 4.566 -9.72 9.996 -9.72zm0 13a1 1 0 0 0 -.993 .883l-.007 .117l.007 .127a1 1 0 0 0 1.986 0l.007 -.117l-.007 -.127a1 1 0 0 0 -.993 -.883zm1.368 -6.673a2.98 2.98 0 0 0 -3.631 .728a1 1 0 0 0 1.44 1.383l.171 -.18a.98 .98 0 0 1 1.11 -.15a1 1 0 0 1 -.34 1.886l-.232 .012a1 1 0 0 0 .111 1.994a3 3 0 0 0 1.371 -5.673z" />

@@ -150,3 +150,44 @@
   -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
   mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
 }
+
+/* Custom scrollbar for product descriptions */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Prose styling for description markdown */
+.prose a {
+  color: rgb(96, 165, 250);
+  text-decoration: underline;
+}
+.prose a:hover {
+  color: rgb(147, 197, 253);
+}
+.prose strong {
+  color: white;
+  font-weight: 700;
+}
+.prose ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+.prose li {
+  color: rgb(163, 163, 163);
+  margin: 0.25rem 0;
+}
+.prose p {
+  margin-bottom: 0.5rem;
+}

@@ -8,6 +8,42 @@ import { TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
 import { useBasket } from '@/hooks/use-basket';
+import { marked } from 'marked';
+
+// Configure marked for safe rendering
+marked.use({
+  breaks: true,
+  gfm: true,
+});
+
+// Helper to parse description - handles both HTML and markdown
+function parseDescription(description: string): string {
+  if (!description) return '';
+  
+  // If already HTML, return as-is but with link styling
+  if (description.includes('<p>') || description.includes('<br') || description.includes('<ul>')) {
+    // Add styling to links
+    return description
+      .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
+      .replace(/<strong>/g, '<strong class="font-bold text-white">')
+      .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
+      .replace(/<li>/g, '<li class="text-neutral-300">');
+  }
+  
+  // Parse as markdown
+  const html = marked.parse(description, { async: false }) as string;
+  
+  // Add styling classes
+  return html
+    .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
+    .replace(/<strong>/g, '<strong class="font-bold text-white">')
+    .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
+    .replace(/<li>/g, '<li class="text-neutral-300">')
+    .replace(/<h1>/g, '<h1 class="text-xl font-bold text-white mt-4 mb-2">')
+    .replace(/<h2>/g, '<h2 class="text-lg font-bold text-white mt-3 mb-2">')
+    .replace(/<h3>/g, '<h3 class="text-base font-bold text-white mt-2 mb-1">')
+    .replace(/<p>/g, '<p class="mb-2">');
+}
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(null);
@@ -87,6 +123,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   }
 
   const hasDiscount = pkg.discount > 0;
+  const parsedDescription = parseDescription(pkg.description);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -101,9 +138,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
           {/* Image */}
           <div>
-            <div className="bg-neutral-950 rounded-2xl overflow-hidden border border-neutral-800 aspect-video">
+            <div className="bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 aspect-video">
               {pkg.image ? (
-                <img src={pkg.image} alt={pkg.name} className="w-full h-full object-cover" />
+                <img src={pkg.image} alt={pkg.name} className="w-full h-full object-contain" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
                   <span className="text-6xl font-bold text-blue-500/50">{pkg.name.charAt(0)}</span>
@@ -118,23 +155,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div>
                 <p className="text-blue-400 text-sm font-medium mb-2">{pkg.category?.name}</p>
                 
-                {/* Framework Badges */}
+                {/* Framework Badges - Colored like reference */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {pkg.description?.toLowerCase().includes('qbcore') && (
-                    <span className="px-3 py-1 bg-red-900/30 border border-red-700 text-red-300 text-xs font-semibold rounded-lg">QBCore</span>
-                  )}
-                  {pkg.description?.toLowerCase().includes('qbox') && (
-                    <span className="px-3 py-1 bg-yellow-900/30 border border-yellow-700 text-yellow-300 text-xs font-semibold rounded-lg">Qbox</span>
-                  )}
-                  {pkg.description?.toLowerCase().includes('esx') && (
-                    <span className="px-3 py-1 bg-orange-900/30 border border-orange-700 text-orange-300 text-xs font-semibold rounded-lg">ESX</span>
-                  )}
+                  <span className="px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded">QBCORE</span>
+                  <span className="px-3 py-1 bg-yellow-500/90 text-black text-xs font-bold rounded">QBOX</span>
+                  <span className="px-3 py-1 bg-orange-500/90 text-white text-xs font-bold rounded">ESX</span>
                 </div>
 
                 <h1 className="text-3xl font-bold text-white">{pkg.name}</h1>
               </div>
               {hasDiscount && (
-                <span className="bg-blue-500 text-white px-3 py-1 rounded-lg text-sm font-bold flex-shrink-0 ml-4">
+                <span className="bg-green-500 text-white px-3 py-1 rounded text-sm font-bold flex-shrink-0 ml-4">
                   SALE
                 </span>
               )}
@@ -143,7 +174,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {/* Price */}
             <div className="mb-8 pb-8 border-b border-neutral-800">
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-black text-blue-400">
+                <span className="text-4xl font-black text-white">
                   {pkg.total_price === 0 ? 'Free' : formatPrice(pkg.total_price, pkg.currency)}
                 </span>
                 {hasDiscount && (
@@ -152,14 +183,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </span>
                 )}
               </div>
-              <p className="text-neutral-600 text-sm mt-1">Tax included</p>
+              <p className="text-neutral-500 text-sm mt-1">Tax included</p>
             </div>
 
-            {/* Description */}
-            <div className="mb-8 max-h-48 overflow-y-auto pr-2">
+            {/* Description with proper markdown rendering */}
+            <div className="mb-8 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
               <div
-                className="text-neutral-400 leading-relaxed text-sm"
-                dangerouslySetInnerHTML={{ __html: pkg.description }}
+                className="text-neutral-400 leading-relaxed text-sm prose prose-invert prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: parsedDescription }}
               />
             </div>
 
