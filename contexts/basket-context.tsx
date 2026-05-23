@@ -93,17 +93,31 @@ export function BasketProvider({ children }: { children: ReactNode }) {
   const addItem = async (packageId: number, quantity: number = 1, variableData?: Record<string, string>) => {
     if (!basket) throw new Error('Basket not initialized');
 
-    try {
-      setAdding(true);
-      await addToBasket(basket.ident, packageId, quantity, variableData);
-      // Re-fetch via GET to preserve auth state — the packages endpoint returns username: null
+    const attemptAdd = async (vars?: Record<string, string>) => {
+      await addToBasket(basket.ident, packageId, quantity, vars);
       const fresh = await getBasket(basket.ident);
       if (fresh) {
         setBasket(fresh);
         return fresh;
       }
       return null;
+    };
+
+    try {
+      setAdding(true);
+      return await attemptAdd(variableData);
     } catch (err) {
+      const message = err instanceof Error ? err.message : '';
+      // Game server command packages require username_id in variable_data.
+      // If that's the only missing piece, retry automatically rather than surfacing a confusing error.
+      if (
+        message === 'One of the options provided is invalid' &&
+        basket.username_id &&
+        !variableData?.username_id
+      ) {
+        const retryVars = { ...variableData, username_id: String(basket.username_id) };
+        return await attemptAdd(retryVars);
+      }
       console.error('[BasketProvider] Error adding item:', err);
       throw err;
     } finally {
