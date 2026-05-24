@@ -2,6 +2,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { ProductCard } from '@/components/product-card';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
+import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -81,8 +82,17 @@ export default async function HomePage() {
 
   const bestSellers = allPackages.slice(0, 6);
 
+  // Fetch real reviews from Vercel Blob; fall back to static if none yet
+  const apiReviews = await readReviews().catch(() => []);
+  const displayReviews = apiReviews.length > 0
+    ? apiReviews
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 20)
+        .map(r => ({ text: r.content, author: `@${r.username}` }))
+    : REVIEWS;
+
   // Double the reviews for seamless infinite scroll
-  const doubledReviews = [...REVIEWS, ...REVIEWS];
+  const doubledReviews = [...displayReviews, ...displayReviews];
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
