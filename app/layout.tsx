@@ -30,8 +30,8 @@ export default function RootLayout({
     <html lang="en" className="dark bg-black">
       <head>
         <script
-          src="https://checkout.tebex.io/v1/tebex.js"
-          async
+          src="https://js.tebex.io/v/1.js"
+          defer
         ></script>
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}>
