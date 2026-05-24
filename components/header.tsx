@@ -40,12 +40,12 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <Image
+            <img
               src="/fd-logo.jpg"
               alt="Flake Development"
               width={40}
               height={40}
-              className="rounded-lg"
+              className="rounded-lg object-contain"
             />
           </Link>
 

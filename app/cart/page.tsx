@@ -292,7 +292,9 @@ export default function CartPage() {
                             <span className="text-indigo-300 text-xs font-semibold">Connected</span>
                           ) : (
                             <a
-                              href={basket ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/cart?discord_linked=1`)}` : '#'}
+                              href={basket && typeof window !== 'undefined'
+                                ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${window.location.origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=/cart`)}`
+                                : '#'}
                               className="text-blue-400 text-xs font-semibold hover:text-blue-300 transition"
                             >
                               Connect

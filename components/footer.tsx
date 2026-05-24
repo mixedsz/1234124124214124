@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '@/contexts/currency-context';
 import { useBasket } from '@/contexts/basket-context';
@@ -69,13 +68,13 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Image src="/fd-logo.jpg" alt="Flake Development" width={36} height={36} className="rounded-lg" />
+              <div className="mb-3">
+                <img
+                  src="/fd-wordmark.png"
+                  alt="Flake Development"
+                  className="h-12 w-auto object-contain"
+                />
               </div>
-              <p className="font-bold text-white text-sm mb-1">{storeName}</p>
-              <p className="text-neutral-600 text-xs mb-3">
-                Powered by <span className="font-semibold text-neutral-500">tebex</span>
-              </p>
               <p className="text-sm text-neutral-400 mb-4">
                 The most popular scripts for your FiveM server.
               </p>
