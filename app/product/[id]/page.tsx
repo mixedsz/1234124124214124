@@ -78,9 +78,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [giftErrorDetail, setGiftErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
   const [showGiftErrorDetail, setShowGiftErrorDetail] = useState(false);
   const [giftAdded, setGiftAdded] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!username) { setAvatarUrl(null); return; }
+    fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`)
+      .then((r) => r.json())
+      .then((d) => setAvatarUrl(d.url || null))
+      .catch(() => setAvatarUrl(null));
+  }, [username]);
 
   // Handle return from Tebex Discord ident via our ident-callback
   const discordLinkedParam = searchParams.get('discord_linked') === '1';
@@ -622,7 +631,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div className="rounded-xl border border-neutral-800 bg-neutral-950/50 divide-y divide-neutral-800 mb-3">
                 {username && (
                   <div className="flex items-center gap-2 px-4 py-2.5">
-                    <span className="inline-flex items-center justify-center w-4 h-4 bg-red-600 rounded text-white font-bold text-[9px] leading-none flex-shrink-0">M</span>
+                    <div className="w-4 h-4 rounded bg-red-600 overflow-hidden flex items-center justify-center flex-shrink-0">
+                      {avatarUrl ? (
+                        <img src={avatarUrl} alt={username} className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
+                      ) : (
+                        <span className="text-white font-bold text-[9px] leading-none">M</span>
+                      )}
+                    </div>
                     <span className="text-neutral-500 text-xs">FiveM:</span>
                     <span className="text-white text-xs">{username}</span>
                   </div>

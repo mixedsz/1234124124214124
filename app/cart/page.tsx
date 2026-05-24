@@ -33,6 +33,15 @@ export default function CartPage() {
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
   const [discordLinked, setDiscordLinked] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!basket?.username) { setAvatarUrl(null); return; }
+    fetch(`/api/fivem-avatar?username=${encodeURIComponent(basket.username)}`)
+      .then((r) => r.json())
+      .then((d) => setAvatarUrl(d.url || null))
+      .catch(() => setAvatarUrl(null));
+  }, [basket?.username]);
 
   // Coupon state
   const [couponType, setCouponType] = useState<'coupon' | 'creator_code'>('coupon');
@@ -273,9 +282,13 @@ export default function CartPage() {
 
                         {/* FiveM row */}
                         <div className="flex items-center gap-1.5 mt-2">
-                          <span className="inline-flex items-center justify-center w-4 h-4 bg-red-600 rounded text-white font-bold text-[9px] leading-none flex-shrink-0">
-                            M
-                          </span>
+                          <div className="w-4 h-4 rounded bg-red-600 overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {avatarUrl ? (
+                              <img src={avatarUrl} alt={basket?.username ?? ''} className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
+                            ) : (
+                              <span className="text-white font-bold text-[9px] leading-none">M</span>
+                            )}
+                          </div>
                           <span className="text-neutral-500 text-xs">FiveM:</span>
                           <span className="text-white text-xs">{basket?.username || 'Not linked'}</span>
                         </div>
