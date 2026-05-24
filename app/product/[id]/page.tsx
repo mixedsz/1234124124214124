@@ -75,6 +75,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [giftUsername, setGiftUsername] = useState('');
   const [giftLoading, setGiftLoading] = useState(false);
   const [giftError, setGiftError] = useState<string | null>(null);
+  const [giftErrorDetail, setGiftErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
+  const [showGiftErrorDetail, setShowGiftErrorDetail] = useState(false);
   const [giftAdded, setGiftAdded] = useState(false);
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
@@ -176,6 +178,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (!pkg || !basket || !giftUsername.trim()) return;
     setGiftLoading(true);
     setGiftError(null);
+    setGiftErrorDetail(null);
+    setShowGiftErrorDetail(false);
     try {
       await addToBasket(basket.ident, pkg.id, 1, undefined, giftUsername.trim());
       await refreshBasket();
@@ -184,7 +188,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       setGiftUsername('');
       setTimeout(() => setGiftAdded(false), 3000);
     } catch (err) {
-      setGiftError(err instanceof Error ? err.message : 'Failed to gift item');
+      const message = err instanceof Error ? err.message : 'Failed to gift item';
+      const detail = (err as Error & { tebexDetail?: { status: number; body: unknown; raw: string } }).tebexDetail;
+      setGiftError(message);
+      if (detail) setGiftErrorDetail(detail);
     } finally {
       setGiftLoading(false);
     }
@@ -610,12 +617,28 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 autoFocus
               />
               {giftError && (
-                <p className="text-red-400 text-sm mb-3 flex gap-1.5 items-start">
-                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />{giftError}
-                </p>
+                <div className="mb-3 bg-red-900/20 border border-red-900 rounded-xl p-3 text-red-300 text-sm">
+                  <div className="flex gap-2 items-start">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                    <span className="flex-1">{giftError}</span>
+                    {giftErrorDetail && (
+                      <button
+                        onClick={() => setShowGiftErrorDetail((v) => !v)}
+                        className="text-red-400 hover:text-red-200 underline text-xs flex-shrink-0"
+                      >
+                        {showGiftErrorDetail ? 'Hide' : 'Details'}
+                      </button>
+                    )}
+                  </div>
+                  {giftErrorDetail && showGiftErrorDetail && (
+                    <pre className="mt-3 bg-neutral-900/60 rounded-lg p-3 text-xs text-red-200 overflow-x-auto whitespace-pre-wrap break-all">
+                      {`HTTP ${giftErrorDetail.status}\n\n${typeof giftErrorDetail.body === 'object' ? JSON.stringify(giftErrorDetail.body, null, 2) : giftErrorDetail.raw}`}
+                    </pre>
+                  )}
+                </div>
               )}
               <p className="text-neutral-600 text-xs mb-4">
-                {pkg?.name} will be delivered to this player&apos;s Cfx.re account after checkout.
+                {pkg?.name}{' '}will be delivered to this player&apos;s Cfx.re account after checkout.
               </p>
               <button
                 onClick={handleGift}

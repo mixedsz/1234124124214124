@@ -48,8 +48,11 @@ export default function SubscriptionPage() {
         const allSubs = subCats.flatMap((cat: TebexCategory) => cat.packages || []);
         setSubscriptions(allSubs);
         
-        // Get ALL scripts for rotating display
-        const allScripts = scriptCats.flatMap((cat: TebexCategory) => cat.packages || []);
+        // Get ALL scripts for rotating display, deduplicated by id
+        const seen = new Set<number>();
+        const allScripts = scriptCats
+          .flatMap((cat: TebexCategory) => cat.packages || [])
+          .filter(pkg => { if (seen.has(pkg.id)) return false; seen.add(pkg.id); return true; });
         setScripts(allScripts);
       } catch (err) {
         console.error('Error loading subscriptions:', err);
@@ -61,35 +64,26 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // Rotate through scripts every 3 seconds
+  // Rotate through scripts every 3 seconds, advancing by 5 each time (no overlap)
   useEffect(() => {
     if (scripts.length <= 5) return;
-    
+
     intervalRef.current = setInterval(() => {
       setCurrentScriptIndex((prev) => {
-        const nextIndex = prev + 1;
-        // Reset when we've shown all scripts
-        if (nextIndex >= scripts.length - 4) {
-          return 0;
-        }
-        return nextIndex;
+        const next = prev + 5;
+        return next >= scripts.length ? 0 : next;
       });
     }, 3000);
 
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, [scripts.length]);
 
-  // Get 5 scripts starting from current index
-  const displayedScripts = scripts.slice(currentScriptIndex, currentScriptIndex + 5);
-  // If we don't have enough scripts from current index, wrap around
-  if (displayedScripts.length < 5 && scripts.length >= 5) {
-    const remaining = 5 - displayedScripts.length;
-    displayedScripts.push(...scripts.slice(0, remaining));
-  }
+  // Get 5 scripts starting from current index, wrapping with modulo so no repeats within a batch
+  const displayedScripts = Array.from({ length: Math.min(5, scripts.length) }, (_, i) =>
+    scripts[(currentScriptIndex + i) % scripts.length]
+  );
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
