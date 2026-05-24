@@ -161,10 +161,10 @@ export default async function HomePage() {
                 <div className="mt-10 flex justify-center">
                   <Link
                     href="/scripts"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-semibold border border-blue-600/30 transition"
+                    className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 hover:text-blue-300 font-bold text-base transition"
                   >
                     View All
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-5 h-5" />
                   </Link>
                 </div>
               </>

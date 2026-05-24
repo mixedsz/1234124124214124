@@ -272,10 +272,14 @@ export async function addToBasket(
   packageId: number,
   quantity: number = 1,
   variableData?: Record<string, string>,
+  targetUsername?: string,
 ): Promise<TebexBasket | null> {
   const body: Record<string, unknown> = { package_id: packageId, quantity };
   if (variableData && Object.keys(variableData).length > 0) {
     body.variable_data = variableData;
+  }
+  if (targetUsername) {
+    body.target_username = targetUsername;
   }
 
   const url = `${TEBEX_API_BASE}/baskets/${ident}/packages`;
