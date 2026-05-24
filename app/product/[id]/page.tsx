@@ -176,12 +176,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
   const handleGift = async () => {
     if (!pkg || !basket || !giftUsername.trim()) return;
+    if (needsDiscord && !discordLinked) return;
     setGiftLoading(true);
     setGiftError(null);
     setGiftErrorDetail(null);
     setShowGiftErrorDetail(false);
     try {
-      await addToBasket(basket.ident, pkg.id, 1, undefined, giftUsername.trim());
+      const varData: Record<string, string> = {};
+      if (discordLinked && discordId && discordVarIdentifier) {
+        varData[discordVarIdentifier] = discordId;
+      } else if (discordLinked && discordId) {
+        varData.discord_id = discordId;
+      }
+      await addToBasket(basket.ident, pkg.id, 1, Object.keys(varData).length > 0 ? varData : undefined, giftUsername.trim());
       await refreshBasket();
       setGiftAdded(true);
       setShowGiftModal(false);
