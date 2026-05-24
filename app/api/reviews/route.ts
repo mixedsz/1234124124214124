@@ -3,7 +3,6 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json');
-const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 export interface Review {
   id: string;
@@ -57,20 +56,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ reviews: sorted, total: sorted.length, avg_rating: avgRating });
 }
 
-// POST /api/reviews — Discord bot authenticated, creates a review
+// POST /api/reviews — creates a review
 export async function POST(request: NextRequest) {
-  // Authenticate the Discord bot
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-
-  if (!BOT_TOKEN) {
-    return NextResponse.json({ error: 'Reviews API not configured (missing REVIEWS_BOT_TOKEN env var)' }, { status: 503 });
-  }
-
-  if (token !== BOT_TOKEN) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   let body: Partial<Review & { action?: string; review_id?: string }>;
   try {
     body = await request.json();
@@ -126,15 +113,8 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, review }, { status: 201 });
 }
 
-// DELETE /api/reviews?id=... — bot authenticated
+// DELETE /api/reviews?id=...
 export async function DELETE(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  const token = authHeader?.replace('Bearer ', '');
-
-  if (!BOT_TOKEN || token !== BOT_TOKEN) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   const id = new URL(request.url).searchParams.get('id');
   if (!id) {
     return NextResponse.json({ error: 'Review id required' }, { status: 400 });
