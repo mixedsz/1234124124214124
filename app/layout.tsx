@@ -9,10 +9,7 @@ export const metadata: Metadata = {
   title: 'Flake Development - Premium FiveM Scripts',
   description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
   icons: {
-    icon: [
-      { url: '/fd-logo.svg', type: 'image/svg+xml' },
-      { url: '/fd-favicon.png', type: 'image/png' },
-    ],
+    icon: '/fd-favicon.png',
     apple: '/fd-favicon.png',
   },
 }
