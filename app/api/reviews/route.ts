@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
 const BLOB_PATHNAME = 'reviews.json';
 
 export interface Review {
@@ -19,23 +19,43 @@ export interface Review {
 }
 
 async function readReviews(): Promise<Review[]> {
+  if (!BLOB_TOKEN) return [];
   try {
-    const { blobs } = await list({ prefix: BLOB_PATHNAME });
-    if (!blobs.length) return [];
-    const res = await fetch(blobs[0].url, { cache: 'no-store' });
-    if (!res.ok) return [];
-    return await res.json();
+    const listRes = await fetch(
+      `https://blob.vercel-storage.com?prefix=${BLOB_PATHNAME}&limit=1`,
+      { headers: { Authorization: `Bearer ${BLOB_TOKEN}` } }
+    );
+    if (!listRes.ok) return [];
+    const { blobs } = await listRes.json();
+    if (!blobs?.length) return [];
+    const dataRes = await fetch(blobs[0].url, { cache: 'no-store' });
+    if (!dataRes.ok) return [];
+    return await dataRes.json();
   } catch {
     return [];
   }
 }
 
 async function writeReviews(reviews: Review[]): Promise<void> {
-  await put(BLOB_PATHNAME, JSON.stringify(reviews), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'application/json',
-  });
+  if (!BLOB_TOKEN) throw new Error('BLOB_READ_WRITE_TOKEN is not set');
+  const res = await fetch(
+    `https://blob.vercel-storage.com/${BLOB_PATHNAME}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${BLOB_TOKEN}`,
+        'x-api-version': '7',
+        'content-type': 'application/json',
+        'x-add-random-suffix': '0',
+        'x-cache-control-max-age': '0',
+      },
+      body: JSON.stringify(reviews),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Blob write failed (${res.status}): ${text}`);
+  }
 }
 
 // GET /api/reviews — public, returns all reviews sorted newest first
