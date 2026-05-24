@@ -28,11 +28,9 @@ export function Header() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [discordLinked, setDiscordLinked] = useState(false);
-  const [discordId, setDiscordId] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const { itemCount, isAuthenticated, username, loading, basket } = useBasket();
+  const { itemCount, isAuthenticated, username, loading } = useBasket();
 
   // Avatar with localStorage caching — no flicker on navigation
   useEffect(() => {
@@ -48,17 +46,6 @@ export function Header() {
       })
       .catch(() => setAvatarUrl(null));
   }, [username]);
-
-  // Restore Discord linked state from localStorage
-  useEffect(() => {
-    if (!basket?.ident) return;
-    const storedBasket = localStorage.getItem('discord_linked_basket');
-    const storedId = localStorage.getItem('discord_ident_id');
-    if (storedBasket === basket.ident) {
-      setDiscordLinked(true);
-      if (storedId) setDiscordId(storedId);
-    }
-  }, [basket?.ident]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -88,15 +75,6 @@ export function Header() {
     } catch {
       setLoginLoading(false);
     }
-  };
-
-  const handleDiscordConnect = () => {
-    if (!basket?.ident) return;
-    setProfileOpen(false);
-    const origin = window.location.origin;
-    const returnTo = encodeURIComponent(window.location.pathname);
-    const callbackUrl = `${origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${returnTo}`;
-    window.location.href = `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(callbackUrl)}`;
   };
 
   const handleOpenPortal = () => {
@@ -181,26 +159,16 @@ export function Header() {
                         Manage Orders &amp; Subscriptions
                       </button>
 
-                      {/* Discord row */}
-                      {discordLinked ? (
-                        <div className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                          <DiscordIcon className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-indigo-300 font-semibold leading-tight">Discord Connected</span>
-                            {discordId && (
-                              <span className="text-neutral-500 text-xs truncate">{discordId}</span>
-                            )}
-                          </div>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={handleDiscordConnect}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition w-full text-left"
-                        >
-                          <DiscordIcon className="w-4 h-4" />
-                          Connect with Discord
-                        </button>
-                      )}
+                      <a
+                        href="https://discord.gg/flakedev"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => setProfileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition"
+                      >
+                        <DiscordIcon className="w-4 h-4" />
+                        Connect with Discord
+                      </a>
 
                       <div className="my-2 border-t border-neutral-700" />
                       <button
@@ -273,23 +241,16 @@ export function Header() {
                     <Package className="w-4 h-4" />
                     Manage Orders
                   </button>
-                  {discordLinked ? (
-                    <div className="flex items-center gap-2 text-sm font-medium">
-                      <DiscordIcon className="w-4 h-4 text-indigo-400" />
-                      <div className="flex flex-col">
-                        <span className="text-indigo-300 leading-tight">Discord Connected</span>
-                        {discordId && <span className="text-neutral-500 text-xs">{discordId}</span>}
-                      </div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); handleDiscordConnect(); }}
-                      className="flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition text-left"
-                    >
-                      <DiscordIcon className="w-4 h-4" />
-                      Connect with Discord
-                    </button>
-                  )}
+                  <a
+                    href="https://discord.gg/flakedev"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition"
+                  >
+                    <DiscordIcon className="w-4 h-4" />
+                    Connect with Discord
+                  </a>
                   <button
                     onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
                     className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition text-left"
