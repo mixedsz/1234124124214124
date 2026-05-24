@@ -82,16 +82,11 @@ function buildResultEmbed(user, rating, title, reviewText, reviewId) {
   return new EmbedBuilder()
     .setColor(EMBED_COLOR)
     .setAuthor({
-      name: user.username,
+      name: `Review from ${user.username}`,
       iconURL: user.displayAvatarURL({ extension: 'png', size: 64 }),
     })
-    .setTitle(`Review from ${user.username}`)
-    .addFields(
-      { name: 'Rating',        value: stars,      inline: true },
-      { name: 'Product/Title', value: title,      inline: true },
-      { name: 'Review',        value: reviewText, inline: false },
-    )
-    .setFooter({ text: `ID: ${reviewId ?? 'unknown'} | Submitted by ${user.tag ?? user.username}` })
+    .setDescription(`${stars}\n**${title}**\n${reviewText}`)
+    .setFooter({ text: `ID: ${reviewId ?? 'unknown'}` })
     .setTimestamp();
 }
 
