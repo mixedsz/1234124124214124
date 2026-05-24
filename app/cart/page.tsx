@@ -7,7 +7,7 @@ import { TEBEX_PROJECT_ID } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, ArrowLeft, AlertCircle, ShoppingBag, LogIn, X, Lock } from 'lucide-react';
+import { Trash2, ArrowLeft, AlertCircle, LogIn, X, Lock } from 'lucide-react';
 
 // Declare Tebex global
 declare global {
@@ -211,19 +211,14 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
+    <div className="min-h-screen bg-[#111] flex flex-col">
       <Header />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <Link
-          href="/scripts"
-          className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Continue Shopping
-        </Link>
-
-        <h1 className="text-4xl font-bold text-white mb-8">Shopping Cart</h1>
+        <div className="flex justify-between items-end mb-8">
+          <h1 className="text-[40px] font-bold text-white leading-none">Cart</h1>
+          <p className="text-neutral-600 font-medium text-sm">{(basket?.packages || []).length} package{(basket?.packages || []).length !== 1 ? 's' : ''}</p>
+        </div>
 
         {error && (
           <div className="mb-6 bg-red-900/20 border border-red-900 rounded-xl p-4 text-red-300 flex gap-3">
@@ -236,15 +231,14 @@ export default function CartPage() {
           {/* Left column: Cart Items + Subscribe & Save */}
           <div className="lg:col-span-2">
             {isCartEmpty ? (
-              <div className="bg-neutral-950 rounded-2xl border border-neutral-800 p-16 text-center">
-                <ShoppingBag className="w-16 h-16 text-neutral-700 mx-auto mb-4" />
-                <p className="text-neutral-400 text-lg mb-2">Your cart is empty</p>
-                <p className="text-neutral-600 text-sm mb-6">Add some scripts to get started</p>
+              <div>
+                <p className="text-neutral-500">Your basket is empty. Your players are missing out on the ultimate FiveM experience.</p>
                 <Link
                   href="/scripts"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition font-semibold"
+                  className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-xl bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 font-semibold transition"
                 >
                   Browse Scripts
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6l-6 6"/></svg>
                 </Link>
               </div>
             ) : (
@@ -320,29 +314,31 @@ export default function CartPage() {
             )}
 
             {/* Subscribe & Save section */}
-            <div className="mt-8 flex items-center gap-5 py-5 border-t border-neutral-800">
-              {/* FD+ badge */}
-              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
-                <span className="text-blue-400 font-black text-lg tracking-tight">FD+</span>
+            <div className="mt-10 lg:mt-16 flex items-start lg:items-center gap-6">
+              {/* FD+ badge graphic */}
+              <div className="flex-shrink-0 w-[90px] lg:w-[120px] h-[60px] lg:h-[80px] rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-blue-400 font-black text-2xl lg:text-3xl tracking-tight leading-none">FD</div>
+                  <div className="text-blue-300 font-black text-lg lg:text-xl leading-none">+</div>
+                </div>
               </div>
-              {/* Text */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white mb-0.5">Subscribe &amp; Save with Flake+</p>
-                <p className="text-xs text-neutral-400 leading-snug">
-                  Get every script for one monthly price.{' '}
-                  <strong className="text-white">Save up to 85%</strong> vs. buying individually.
+              {/* Text + CTA */}
+              <div>
+                <h2 className="text-xl font-extrabold text-white mb-2">Subscribe &amp; Save with Flake+</h2>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Get our entire collection, including new scripts on release day, for one low monthly price.{' '}
+                  <strong className="text-white">Save up to 85%</strong> when compared to the usual upfront cost; with no price increases while you remain subscribed.
                 </p>
+                <Link
+                  href="/subscription"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 text-sm font-semibold transition"
+                >
+                  Learn More
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12l14 0"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/>
+                  </svg>
+                </Link>
               </div>
-              {/* CTA */}
-              <Link
-                href="/subscription"
-                className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 text-sm font-semibold transition whitespace-nowrap"
-              >
-                Learn More
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/>
-                </svg>
-              </Link>
             </div>
           </div>
 

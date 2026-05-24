@@ -3,7 +3,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getAuthUrl, createBasket } from '@/lib/tebex';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, LogIn } from 'lucide-react';
 
 const BASKET_KEY = 'tebex_basket_ident';
