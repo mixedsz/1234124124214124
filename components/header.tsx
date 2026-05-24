@@ -17,22 +17,48 @@ declare global {
   }
 }
 
+const DiscordIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
+  </svg>
+);
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [discordLinked, setDiscordLinked] = useState(false);
+  const [discordId, setDiscordId] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const { itemCount, isAuthenticated, username, loading } = useBasket();
+  const { itemCount, isAuthenticated, username, loading, basket } = useBasket();
 
+  // Avatar with localStorage caching — no flicker on navigation
   useEffect(() => {
     if (!username) { setAvatarUrl(null); return; }
+    const cacheKey = `fivem_avatar_${username}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) { setAvatarUrl(cached); return; }
     fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`)
       .then((r) => r.json())
-      .then((d) => setAvatarUrl(d.url || null))
+      .then((d) => {
+        if (d.url) { setAvatarUrl(d.url); localStorage.setItem(cacheKey, d.url); }
+        else setAvatarUrl(null);
+      })
       .catch(() => setAvatarUrl(null));
   }, [username]);
+
+  // Restore Discord linked state from localStorage
+  useEffect(() => {
+    if (!basket?.ident) return;
+    const storedBasket = localStorage.getItem('discord_linked_basket');
+    const storedId = localStorage.getItem('discord_ident_id');
+    if (storedBasket === basket.ident) {
+      setDiscordLinked(true);
+      if (storedId) setDiscordId(storedId);
+    }
+  }, [basket?.ident]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -50,9 +76,9 @@ export function Header() {
       let ident = localStorage.getItem(BASKET_KEY);
       if (!ident) {
         const origin = window.location.origin;
-        const basket = await createBasket(`${origin}/cart`, `${origin}/checkout-complete`);
-        if (!basket) throw new Error('Could not create session');
-        ident = basket.ident;
+        const b = await createBasket(`${origin}/cart`, `${origin}/checkout-complete`);
+        if (!b) throw new Error('Could not create session');
+        ident = b.ident;
         localStorage.setItem(BASKET_KEY, ident);
       }
       const returnUrl = `${window.location.origin}/scripts?success=true`;
@@ -62,6 +88,15 @@ export function Header() {
     } catch {
       setLoginLoading(false);
     }
+  };
+
+  const handleDiscordConnect = () => {
+    if (!basket?.ident) return;
+    setProfileOpen(false);
+    const origin = window.location.origin;
+    const returnTo = encodeURIComponent(window.location.pathname);
+    const callbackUrl = `${origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${returnTo}`;
+    window.location.href = `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(callbackUrl)}`;
   };
 
   const handleOpenPortal = () => {
@@ -91,49 +126,21 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <img
-              src="/fd-logo-clean.svg"
-              alt="Flake Development"
-              width={44}
-              height={44}
-            />
+            <img src="/fd-logo-clean.svg" alt="Flake Development" width={44} height={44} />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-8">
-            <Link
-              href="/subscription"
-              className="text-sm font-medium text-neutral-300 hover:text-white transition"
-            >
-              Subscription
-            </Link>
-            <Link
-              href="/scripts"
-              className="text-sm font-medium text-neutral-300 hover:text-white transition"
-            >
-              Scripts
-            </Link>
-            <Link
-              href="/docs"
-              className="text-sm font-medium text-neutral-300 hover:text-white transition"
-            >
-              Docs
-            </Link>
-            <Link
-              href="/support"
-              className="text-sm font-medium text-neutral-300 hover:text-white transition"
-            >
-              Support
-            </Link>
+            <Link href="/subscription" className="text-sm font-medium text-neutral-300 hover:text-white transition">Subscription</Link>
+            <Link href="/scripts" className="text-sm font-medium text-neutral-300 hover:text-white transition">Scripts</Link>
+            <Link href="/docs" className="text-sm font-medium text-neutral-300 hover:text-white transition">Docs</Link>
+            <Link href="/support" className="text-sm font-medium text-neutral-300 hover:text-white transition">Support</Link>
           </nav>
 
           {/* Right side */}
           <div className="flex items-center gap-4">
             {/* Cart */}
-            <Link
-              href="/cart"
-              className="relative p-2 text-neutral-300 hover:text-white transition"
-            >
+            <Link href="/cart" className="relative p-2 text-neutral-300 hover:text-white transition">
               <ShoppingCart className="w-5 h-5" />
               {itemCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center text-xs font-bold bg-blue-600 text-white rounded-full">
@@ -153,12 +160,7 @@ export function Header() {
                 >
                   <div className="w-7 h-7 rounded-full bg-neutral-600 flex items-center justify-center overflow-hidden flex-shrink-0">
                     {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={username ?? ''}
-                        className="w-full h-full object-cover"
-                        onError={() => setAvatarUrl(null)}
-                      />
+                      <img src={avatarUrl} alt={username ?? ''} className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
                     ) : (
                       <User className="w-4 h-4" />
                     )}
@@ -169,7 +171,7 @@ export function Header() {
 
                 {/* Dropdown Menu */}
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-xl bg-neutral-800 border border-neutral-700 shadow-xl overflow-hidden">
+                  <div className="absolute right-0 mt-2 w-64 rounded-xl bg-neutral-800 border border-neutral-700 shadow-xl overflow-hidden">
                     <div className="py-2">
                       <button
                         onClick={handleOpenPortal}
@@ -178,18 +180,28 @@ export function Header() {
                         <Package className="w-4 h-4" />
                         Manage Orders &amp; Subscriptions
                       </button>
-                      <a
-                        href="https://discord.gg/flakedev"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition"
-                      >
-                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                          <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z" />
-                        </svg>
-                        Connect with Discord
-                      </a>
+
+                      {/* Discord row */}
+                      {discordLinked ? (
+                        <div className="flex items-center gap-3 px-4 py-2.5 text-sm">
+                          <DiscordIcon className="w-4 h-4 text-indigo-400 flex-shrink-0" />
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-indigo-300 font-semibold leading-tight">Discord Connected</span>
+                            {discordId && (
+                              <span className="text-neutral-500 text-xs truncate">{discordId}</span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleDiscordConnect}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition w-full text-left"
+                        >
+                          <DiscordIcon className="w-4 h-4" />
+                          Connect with Discord
+                        </button>
+                      )}
+
                       <div className="my-2 border-t border-neutral-700" />
                       <button
                         onClick={handleLogout}
@@ -217,7 +229,7 @@ export function Header() {
                 )}
                 {loginLoading ? 'Connecting...' : 'Login with FiveM'}
               </button>
-            ) }
+            )}
 
             {/* Mobile menu button */}
             <button
@@ -234,34 +246,10 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden py-4 border-t border-neutral-800">
             <nav className="flex flex-col gap-4">
-              <Link
-                href="/subscription"
-                className="text-sm font-medium text-neutral-300 hover:text-white transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Subscription
-              </Link>
-              <Link
-                href="/scripts"
-                className="text-sm font-medium text-neutral-300 hover:text-white transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Scripts
-              </Link>
-              <Link
-                href="/docs"
-                className="text-sm font-medium text-neutral-300 hover:text-white transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Docs
-              </Link>
-              <Link
-                href="/support"
-                className="text-sm font-medium text-neutral-300 hover:text-white transition"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Support
-              </Link>
+              <Link href="/subscription" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Subscription</Link>
+              <Link href="/scripts" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Scripts</Link>
+              <Link href="/docs" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
+              <Link href="/support" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Support</Link>
 
               {/* Mobile Profile/Login */}
               {showProfile ? (
@@ -270,12 +258,7 @@ export function Header() {
                     <div className="flex items-center gap-2 px-2 py-2 text-white">
                       <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
                         {avatarUrl ? (
-                          <img
-                            src={avatarUrl}
-                            alt={username ?? ''}
-                            className="w-full h-full object-cover"
-                            onError={() => setAvatarUrl(null)}
-                          />
+                          <img src={avatarUrl} alt={username ?? ''} className="w-full h-full object-cover" onError={() => setAvatarUrl(null)} />
                         ) : (
                           <User className="w-5 h-5" />
                         )}
@@ -290,6 +273,23 @@ export function Header() {
                     <Package className="w-4 h-4" />
                     Manage Orders
                   </button>
+                  {discordLinked ? (
+                    <div className="flex items-center gap-2 text-sm font-medium">
+                      <DiscordIcon className="w-4 h-4 text-indigo-400" />
+                      <div className="flex flex-col">
+                        <span className="text-indigo-300 leading-tight">Discord Connected</span>
+                        {discordId && <span className="text-neutral-500 text-xs">{discordId}</span>}
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleDiscordConnect(); }}
+                      className="flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition text-left"
+                    >
+                      <DiscordIcon className="w-4 h-4" />
+                      Connect with Discord
+                    </button>
+                  )}
                   <button
                     onClick={() => { setMobileMenuOpen(false); handleLogout(); }}
                     className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition text-left"

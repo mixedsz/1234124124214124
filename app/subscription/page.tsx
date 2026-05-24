@@ -214,6 +214,38 @@ export default function SubscriptionPage() {
         {/* What's Included Section */}
         {scripts.length > 0 && (
           <section className="mt-20">
+            {/* Stats bar */}
+            {(() => {
+              const totalValue = scripts.reduce((sum, s) => sum + s.total_price, 0);
+              const monthlySub = subscriptions.find(s => s.name.toLowerCase().includes('month'));
+              const monthsWorth = monthlySub && monthlySub.total_price > 0 ? Math.floor(totalValue / monthlySub.total_price) : 0;
+              const years = Math.floor(monthsWorth / 12);
+              const months = monthsWorth % 12;
+              const worthLabel = years > 0 && months > 0
+                ? `${years} Year${years !== 1 ? 's' : ''} ${months} Month${months !== 1 ? 's' : ''}`
+                : years > 0
+                ? `${years} Year${years !== 1 ? 's' : ''}`
+                : `${months} Month${months !== 1 ? 's' : ''}`;
+              return (
+                <div className="flex flex-wrap justify-center gap-4 mb-14">
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{scripts.length}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Products Included</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{formatPrice(totalValue)}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Total Value</span>
+                  </div>
+                  {monthsWorth > 0 && (
+                    <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                      <span className="text-3xl font-black text-white mb-1">{worthLabel}</span>
+                      <span className="text-neutral-500 text-sm font-medium">Worth of Subscriptions</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <h2 className="text-4xl font-bold text-white text-center mb-3">{"What's Included"}</h2>
             <p className="text-neutral-500 text-center mb-12">
               Get all of our current scripts, plus new scripts on release day, automatically.
