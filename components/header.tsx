@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Menu, X, ShoppingCart, ChevronDown, LogOut, User, Loader2 } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
-import { createBasket, getAuthUrl, TEBEX_PROJECT_ID } from '@/lib/tebex';
+import { createBasket, getAuthUrl } from '@/lib/tebex';
 
 const BASKET_KEY = 'tebex_basket_ident';
 
@@ -57,13 +57,16 @@ export function Header() {
 
   const handleOpenPortal = () => {
     setProfileOpen(false);
-    if (!window.Tebex?.portal) return;
-    window.Tebex.portal.init({
-      token: TEBEX_PROJECT_ID,
-      theme: 'dark',
-      colors: [{ name: 'primary', color: '#3B82F6' }],
-    });
-    window.Tebex.portal.launch();
+    try {
+      window.Tebex!.portal!.init({
+        token: process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN || '',
+        theme: 'dark',
+        colors: [{ name: 'primary', color: '#3B82F6' }],
+      });
+      window.Tebex!.portal!.launch();
+    } catch (e) {
+      console.error('[Portal] Failed to open portal:', e);
+    }
   };
 
   const handleLogout = () => {
