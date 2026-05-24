@@ -40,13 +40,12 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <div className="overflow-hidden flex-shrink-0 rounded-lg" style={{width: 44, height: 44}}>
-              <img
-                src="/fd-logo.jpg"
-                alt="Flake Development"
-                style={{width: '165px', height: '110px', maxWidth: 'none', marginLeft: '-60px', marginTop: '-33px'}}
-              />
-            </div>
+            <img
+              src="/fd-logo.svg"
+              alt="Flake Development"
+              width={44}
+              height={44}
+            />
           </Link>
 
           {/* Desktop Navigation */}
