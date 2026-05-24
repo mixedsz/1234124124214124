@@ -7,14 +7,14 @@ import { TEBEX_PROJECT_ID } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, ArrowLeft, AlertCircle, LogIn, X, Lock } from 'lucide-react';
+import { Trash2, ArrowLeft, AlertCircle, LogIn, X, Lock, Gift } from 'lucide-react';
 
 // Declare Tebex global
 declare global {
   interface Window {
     Tebex?: {
       checkout: {
-        init: (config: { ident: string }) => void;
+        init: (config: { ident: string; theme?: string; colors?: { name: string; color: string }[] }) => void;
         launch: () => void;
         on: (event: string, callback: (data?: unknown) => void) => void;
         close: () => void;
@@ -72,6 +72,8 @@ export default function CartPage() {
       // Initialize Tebex checkout with basket ident
       window.Tebex.checkout.init({
         ident: basket.ident,
+        theme: 'dark',
+        colors: [{ name: 'primary', color: '#3B82F6' }],
       });
 
       // Listen for checkout events
@@ -297,6 +299,17 @@ export default function CartPage() {
                             </a>
                           )}
                         </div>
+
+                        {/* Gifting to row — shown only for gift purchases */}
+                        {(item.in_basket.gift_username || item.in_basket.gift_username_id) && (
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <Gift className="w-[15px] h-[15px] text-blue-400 flex-shrink-0" />
+                            <span className="text-neutral-500 text-xs">Gifting to:</span>
+                            <span className="text-white text-xs font-semibold">
+                              {item.in_basket.gift_username || `#${item.in_basket.gift_username_id}`}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Delete button */}

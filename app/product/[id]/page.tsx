@@ -415,20 +415,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <div className="flex gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                   <span className="flex-1">{error}</span>
-                  {errorDetail && (
-                    <button
-                      onClick={() => setShowErrorDetail((v) => !v)}
-                      className="text-red-400 hover:text-red-200 underline text-xs flex-shrink-0"
-                    >
-                      {showErrorDetail ? 'Hide' : 'Details'}
-                    </button>
-                  )}
                 </div>
-                {errorDetail && showErrorDetail && (
-                  <pre className="mt-3 bg-neutral-900/60 rounded-lg p-3 text-xs text-red-200 overflow-x-auto whitespace-pre-wrap break-all">
-                    {`HTTP ${errorDetail.status}\n\n${typeof errorDetail.body === 'object' ? JSON.stringify(errorDetail.body, null, 2) : errorDetail.raw}`}
-                  </pre>
-                )}
               </div>
             )}
             {added && (
@@ -671,20 +658,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <div className="flex gap-2 items-start">
                     <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <span className="flex-1">{giftError}</span>
-                    {giftErrorDetail && (
-                      <button
-                        onClick={() => setShowGiftErrorDetail((v) => !v)}
-                        className="text-red-400 hover:text-red-200 underline text-xs flex-shrink-0"
-                      >
-                        {showGiftErrorDetail ? 'Hide' : 'Details'}
-                      </button>
-                    )}
                   </div>
-                  {giftErrorDetail && showGiftErrorDetail && (
-                    <pre className="mt-3 bg-neutral-900/60 rounded-lg p-3 text-xs text-red-200 overflow-x-auto whitespace-pre-wrap break-all">
-                      {`HTTP ${giftErrorDetail.status}\n\n${typeof giftErrorDetail.body === 'object' ? JSON.stringify(giftErrorDetail.body, null, 2) : giftErrorDetail.raw}`}
-                    </pre>
-                  )}
                 </div>
               )}
               <p className="text-neutral-600 text-xs mb-4">

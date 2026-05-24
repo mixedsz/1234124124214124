@@ -54,6 +54,7 @@ export interface TebexBasketPackage {
     quantity: number;
     price: number;
     gift_username_id?: number;
+    gift_username?: string;
   };
 }
 
