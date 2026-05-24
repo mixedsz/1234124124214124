@@ -48,6 +48,7 @@ async function writeReviews(reviews: Review[]): Promise<void> {
         'content-type': 'application/json',
         'x-add-random-suffix': '0',
         'x-cache-control-max-age': '0',
+        'x-access': 'private',
       },
       body: JSON.stringify(reviews),
     }
