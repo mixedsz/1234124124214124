@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
 
-const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json');
+export const dynamic = 'force-dynamic';
+
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN;
+const BLOB_PATHNAME = 'reviews.json';
 
 export interface Review {
   id: string;
@@ -18,17 +19,44 @@ export interface Review {
 }
 
 async function readReviews(): Promise<Review[]> {
+  if (!BLOB_TOKEN) return [];
   try {
-    const raw = await fs.readFile(REVIEWS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const listRes = await fetch(
+      `https://blob.vercel-storage.com?prefix=${BLOB_PATHNAME}&limit=1`,
+      { headers: { Authorization: `Bearer ${BLOB_TOKEN}` } }
+    );
+    if (!listRes.ok) return [];
+    const { blobs } = await listRes.json();
+    if (!blobs?.length) return [];
+    const dataRes = await fetch(blobs[0].url, { cache: 'no-store' });
+    if (!dataRes.ok) return [];
+    return await dataRes.json();
   } catch {
     return [];
   }
 }
 
 async function writeReviews(reviews: Review[]): Promise<void> {
-  await fs.mkdir(path.dirname(REVIEWS_FILE), { recursive: true });
-  await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2), 'utf-8');
+  if (!BLOB_TOKEN) throw new Error('BLOB_READ_WRITE_TOKEN is not set');
+  const res = await fetch(
+    `https://blob.vercel-storage.com/${BLOB_PATHNAME}`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${BLOB_TOKEN}`,
+        'x-api-version': '7',
+        'content-type': 'application/json',
+        'x-add-random-suffix': '0',
+        'x-cache-control-max-age': '0',
+        'x-access': 'private',
+      },
+      body: JSON.stringify(reviews),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Blob write failed (${res.status}): ${text}`);
+  }
 }
 
 // GET /api/reviews — public, returns all reviews sorted newest first
@@ -44,7 +72,6 @@ export async function GET(request: NextRequest) {
     filtered = reviews.filter(r => String(r.product_id) === productId);
   }
 
-  // Sort newest first, cap at limit
   const sorted = filtered
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, limit);
@@ -65,7 +92,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  // Handle delete action
   if (body.action === 'delete' && body.review_id) {
     const reviews = await readReviews();
     const updated = reviews.filter(r => r.id !== body.review_id);
@@ -76,7 +102,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // Validate required fields
   const { discord_id, username, rating, content } = body;
   if (!discord_id || !username || !rating || !content) {
     return NextResponse.json(
