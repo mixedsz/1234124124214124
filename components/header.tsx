@@ -21,9 +21,14 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const { itemCount, isAuthenticated, username, loading } = useBasket();
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [username]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -142,8 +147,17 @@ export function Header() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium transition"
                 >
-                  <div className="w-7 h-7 rounded-full bg-neutral-600 flex items-center justify-center">
-                    <User className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-full bg-neutral-600 flex items-center justify-center overflow-hidden flex-shrink-0">
+                    {!avatarError && username ? (
+                      <img
+                        src={`https://forum.cfx.re/user_avatar/forum.cfx.re/${encodeURIComponent(username.toLowerCase())}/40/2.png`}
+                        alt={username}
+                        className="w-full h-full object-cover"
+                        onError={() => setAvatarError(true)}
+                      />
+                    ) : (
+                      <User className="w-4 h-4" />
+                    )}
                   </div>
                   <span>{username}</span>
                   <ChevronDown className={`w-4 h-4 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
@@ -250,8 +264,17 @@ export function Header() {
                 <>
                   <div className="pt-2 border-t border-neutral-800">
                     <div className="flex items-center gap-2 px-2 py-2 text-white">
-                      <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center">
-                        <User className="w-5 h-5" />
+                      <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        {!avatarError && username ? (
+                          <img
+                            src={`https://forum.cfx.re/user_avatar/forum.cfx.re/${encodeURIComponent(username.toLowerCase())}/40/2.png`}
+                            alt={username}
+                            className="w-full h-full object-cover"
+                            onError={() => setAvatarError(true)}
+                          />
+                        ) : (
+                          <User className="w-5 h-5" />
+                        )}
                       </div>
                       <span className="font-medium">{username}</span>
                     </div>

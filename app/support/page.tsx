@@ -3,17 +3,37 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, ChevronDown, HelpCircle, FileText, ExternalLink, Mail, Copy, Check } from 'lucide-react';
 
-const faqs = [
+const faqs: Array<{ q: string; a: React.ReactNode }> = [
   {
     q: 'Where do I access my script after purchase?',
-    a: 'Immediately after purchase, your asset(s) will be available in the Cfx.re Portal of the account you logged into the store with. You can access Portal by going to portal.cfx.re.',
+    a: (
+      <span className="flex flex-col gap-2">
+        <span>
+          Immediately after purchase, your asset(s) will be available in the Cfx.re Portal of the account you logged into the store with. You can access Portal by going to{' '}
+          <a href="https://portal.cfx.re" target="_blank" rel="noopener noreferrer" className="underline text-blue-400 hover:text-blue-300">portal.cfx.re</a>.
+        </span>
+        <span>
+          You can also see a picture-guided overview on how to get started with any of our scripts in our{' '}
+          <Link href="/docs" className="underline text-blue-400 hover:text-blue-300">documentation</Link>.
+        </span>
+      </span>
+    ),
   },
   {
     q: 'Can I get a refund?',
-    a: 'Absolutely, we offer a 7 day money-back guarantee in case you change your mind, or something goes wrong with your purchase. In some select cases, we can also offer a refund after 7 days in case there is something we cannot fix, or you are unable to get the script working despite our best efforts. Please note, subscriptions are not eligible for refunds. This is subject to our refund terms and conditions.',
+    a: (
+      <span className="flex flex-col gap-2">
+        <span>Absolutely, we offer a 7 day money-back guarantee in case you change your mind, or something goes wrong with your purchase. In some select cases, we can also offer a refund after 7 days in case there is something we cannot fix, or you are unable to get the script working despite our best efforts.</span>
+        <span>Please note, subscriptions are not eligible for refunds.</span>
+        <span>
+          This is subject to our refund terms and conditions;{' '}
+          <Link href="/refunds" className="underline text-blue-400 hover:text-blue-300">found here</Link>.
+        </span>
+      </span>
+    ),
   },
   {
     q: 'Can I transfer my purchase to another account?',
@@ -29,11 +49,24 @@ const faqs = [
   },
   {
     q: 'How do I cancel my subscription?',
-    a: "To cancel your subscription, navigate to checkout.tebex.io/payment-history. After logging in, simply navigate to the 'Subscriptions' tab to cancel.",
+    a: (
+      <span>
+        To cancel your subscription, navigate to{' '}
+        <a href="https://checkout.tebex.io/payment-history/login" target="_blank" rel="noopener noreferrer" className="underline text-blue-400 hover:text-blue-300">checkout.tebex.io/payment-history</a>.
+        {' '}After logging in, simply navigate to the &quot;Subscriptions&quot; tab to cancel.
+      </span>
+    ),
   },
   {
     q: 'How do I contact support?',
-    a: 'We have a support team active 7 days a week. We offer support primarily through our Discord (discord.gg/flakedev), but we can also provide support via email: support@flakedev.com',
+    a: (
+      <span>
+        We have a support team active 7 days a week. We offer support primarily through our Discord (
+        <a href="https://discord.gg/flakedev" target="_blank" rel="noopener noreferrer" className="underline text-blue-400 hover:text-blue-300">discord.gg/flakedev</a>
+        ), but we can also provide support via email:{' '}
+        <a href="mailto:support@flakedev.com" className="underline text-blue-400 hover:text-blue-300">support@flakedev.com</a>.
+      </span>
+    ),
   },
 ];
 
@@ -49,7 +82,7 @@ export default function SupportPage() {
   const filtered = faqs.filter(
     (f) =>
       f.q.toLowerCase().includes(search.toLowerCase()) ||
-      f.a.toLowerCase().includes(search.toLowerCase()),
+      (typeof f.a === 'string' && f.a.toLowerCase().includes(search.toLowerCase())),
   );
 
   const handleCopyEmail = () => {
@@ -110,7 +143,7 @@ export default function SupportPage() {
                     </button>
                     {openIndex === i && (
                       <div className="px-5 pb-5">
-                        <p className="pl-8 text-neutral-400 text-sm leading-relaxed">{faq.a}</p>
+                        <div className="pl-8 text-neutral-400 text-sm leading-relaxed">{faq.a}</div>
                       </div>
                     )}
                   </div>

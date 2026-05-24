@@ -642,6 +642,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </a>
                 </div>
               )}
+              {giftUsername.trim() && (
+                <div className="flex items-center gap-2 mb-3 px-1">
+                  <span className="text-neutral-500 text-xs">Gifting to:</span>
+                  <span className="text-white text-xs font-semibold">{giftUsername.trim()}</span>
+                </div>
+              )}
               {giftError && !(needsDiscord && !discordLinked) && (
                 <div className="mb-3 bg-red-900/20 border border-red-900 rounded-xl p-3 text-red-300 text-sm">
                   <div className="flex gap-2 items-start">
