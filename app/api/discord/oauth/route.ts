@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   const clientId = process.env.DISCORD_CLIENT_ID;
+  console.log('[Discord OAuth] DISCORD_CLIENT_ID present:', !!clientId);
+  console.log('[Discord OAuth] Available DISCORD_ vars:', Object.keys(process.env).filter(k => k.startsWith('DISCORD')));
   if (!clientId) {
-    return NextResponse.json({ error: 'Discord not configured. Set DISCORD_CLIENT_ID env var.' }, { status: 500 });
+    return NextResponse.json({
+      error: 'Discord not configured. Set DISCORD_CLIENT_ID env var.',
+      hint: 'Env var DISCORD_CLIENT_ID is undefined at runtime. Check Vercel dashboard → Settings → Environment Variables and ensure it is saved for the correct environment, then redeploy.',
+    }, { status: 500 });
   }
 
   const returnTo = request.nextUrl.searchParams.get('returnTo') || '/store';
