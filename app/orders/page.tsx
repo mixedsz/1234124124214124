@@ -7,6 +7,7 @@ import { Footer } from '@/components/footer';
 import { useBasket } from '@/contexts/basket-context';
 import { ExternalLink, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function OrdersPage() {
   useEffect(() => { document.title = 'Orders | Flake Development | QBCore, Qbox & ESX FiveM Scripts'; }, []);
