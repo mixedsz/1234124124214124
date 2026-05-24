@@ -134,7 +134,9 @@ export function Header() {
             </Link>
 
             {/* Profile or Login Button */}
-            {showProfile ? (
+            {loading ? (
+              <div className="hidden lg:block w-32 h-9 bg-neutral-800 rounded-lg animate-pulse" />
+            ) : showProfile ? (
               <div className="relative hidden lg:block" ref={profileRef}>
                 <button
                   onClick={() => setProfileOpen(!profileOpen)}
@@ -197,7 +199,7 @@ export function Header() {
                 )}
                 {loginLoading ? 'Connecting...' : 'Login with FiveM'}
               </button>
-            )}
+            ) }
 
             {/* Mobile menu button */}
             <button
