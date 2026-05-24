@@ -260,7 +260,11 @@ async function handleSetup(interaction) {
 // ── Button: "Leave a Review" ──────────────────────────────────────────────────
 
 async function handleLeaveReviewButton(interaction) {
-  await interaction.showModal(buildReviewModal());
+  try {
+    await interaction.showModal(buildReviewModal());
+  } catch (err) {
+    console.error('showModal failed (interaction likely expired):', err);
+  }
 }
 
 // ── Modal submit ──────────────────────────────────────────────────────────────
@@ -404,6 +408,8 @@ async function handleDeleteReview(interaction) {
 }
 
 // ── Start ─────────────────────────────────────────────────────────────────────
+
+client.on('error', err => console.error('Discord client error:', err));
 
 // Minimal HTTP server so Render web service detects an open port
 const http = require('http');
