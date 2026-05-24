@@ -63,43 +63,32 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const [errorDetail, setErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
   const [showErrorDetail, setShowErrorDetail] = useState(false);
-  const [discordId, setDiscordId] = useState<string | null>(null);
-  const [discordUsername, setDiscordUsername] = useState<string | null>(null);
+  const [discordLinked, setDiscordLinked] = useState(false);
   const [needsDiscord, setNeedsDiscord] = useState(false);
-  const { addItem, isAuthenticated, username } = useBasket();
+  const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Persist discord_id from OAuth callback into localStorage and state
+  // Handle return from Tebex Discord ident — basket now has Discord linked server-side
+  const discordLinkedParam = searchParams.get('discord_linked') === '1';
   useEffect(() => {
-    const paramId = searchParams.get('discord_id');
-    const paramUser = searchParams.get('discord_username');
-    const discordError = searchParams.get('discord_error');
-
-    if (discordError) {
-      setError('Discord connection failed. Please try again.');
+    if (!basket?.ident) return;
+    // Restore from localStorage if same basket
+    const stored = localStorage.getItem('discord_linked_basket');
+    if (stored === basket.ident) {
+      setDiscordLinked(true);
+      return;
     }
-
-    if (paramId) {
-      localStorage.setItem('discord_user_id', paramId);
-      if (paramUser) localStorage.setItem('discord_username', paramUser);
-      setDiscordId(paramId);
-      setDiscordUsername(paramUser);
-      // Clean URL params without reload
+    if (discordLinkedParam) {
+      setDiscordLinked(true);
+      localStorage.setItem('discord_linked_basket', basket.ident);
+      refreshBasket();
       const url = new URL(window.location.href);
-      url.searchParams.delete('discord_id');
-      url.searchParams.delete('discord_username');
-      url.searchParams.delete('discord_error');
+      url.searchParams.delete('discord_linked');
       window.history.replaceState({}, '', url.toString());
-    } else {
-      const stored = localStorage.getItem('discord_user_id');
-      if (stored) {
-        setDiscordId(stored);
-        setDiscordUsername(localStorage.getItem('discord_username'));
-      }
     }
-  }, [searchParams]);
+  }, [basket?.ident, discordLinkedParam, refreshBasket]);
 
   useEffect(() => {
     const loadPackage = async () => {
@@ -150,8 +139,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       }
     }
 
-    // If Discord is needed but not connected yet, block and prompt
-    if (needsDiscord && !discordId) {
+    // If Discord is needed but not linked via Tebex yet, block and prompt
+    if (needsDiscord && !discordLinked) {
       setError('This package requires your Discord account. Connect Discord below to continue.');
       return;
     }
@@ -163,7 +152,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       setShowErrorDetail(false);
 
       const varData: Record<string, string> = { ...variableValues };
-      if (discordId) varData.discord_id = discordId;
 
       await addItem(pkg.id, quantity, Object.keys(varData).length > 0 ? varData : undefined);
       setAdded(true);
@@ -183,7 +171,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     } finally {
       setAdding(false);
     }
-  }, [pkg, isAuthenticated, router, requiredVariables, variableValues, needsDiscord, discordId, addItem, quantity]);
+  }, [pkg, isAuthenticated, router, requiredVariables, variableValues, needsDiscord, discordLinked, addItem, quantity]);
 
   if (loading) {
     return (
@@ -362,10 +350,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             )}
 
-            {/* Discord connect — shown when package needs Discord ID */}
+            {/* Discord connect — shown when package needs Discord (uses Tebex ident bot) */}
             {needsDiscord && (
               <div className="mb-5">
-                {discordId ? (
+                {discordLinked ? (
                   <div className="flex items-center justify-between bg-[#5865F2]/10 border border-[#5865F2]/30 rounded-xl px-4 py-3">
                     <div className="flex items-center gap-2">
                       <svg className="w-5 h-5 text-[#5865F2] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -373,15 +361,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       </svg>
                       <div>
                         <p className="text-sm text-white font-medium">Discord connected</p>
-                        <p className="text-xs text-neutral-400">{discordUsername || discordId}</p>
+                        <p className="text-xs text-neutral-400">Authorized via Tebex</p>
                       </div>
                     </div>
                     <button
                       onClick={() => {
-                        localStorage.removeItem('discord_user_id');
-                        localStorage.removeItem('discord_username');
-                        setDiscordId(null);
-                        setDiscordUsername(null);
+                        localStorage.removeItem('discord_linked_basket');
+                        setDiscordLinked(false);
                       }}
                       className="text-xs text-neutral-500 hover:text-white transition"
                     >
@@ -390,7 +376,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </div>
                 ) : (
                   <a
-                    href={`/api/discord/oauth?returnTo=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : '/')}`}
+                    href={basket ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(typeof window !== 'undefined' ? (() => { const u = new URL(window.location.href); u.searchParams.set('discord_linked', '1'); return u.toString(); })() : '/')}` : '#'}
                     className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold transition"
                   >
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
