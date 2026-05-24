@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 
   const review: Review = {
-    id: `${Date.now()}-${discord_id}`,
+    id: Date.now().toString(36),
     discord_id,
     username,
     avatar_url: body.avatar_url,
