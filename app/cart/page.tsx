@@ -30,6 +30,8 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [discordId, setDiscordId] = useState<string | null>(null);
+  const [discordUsername, setDiscordUsername] = useState<string | null>(null);
 
   // Coupon state
   const [couponType, setCouponType] = useState<'coupon' | 'creator_code'>('coupon');
@@ -41,6 +43,30 @@ export default function CartPage() {
   const [giftCardCode, setGiftCardCode] = useState('');
   const [giftCardError, setGiftCardError] = useState<string | null>(null);
   const [giftCardSuccess, setGiftCardSuccess] = useState<string | null>(null);
+
+  // Load Discord connection state from localStorage (and URL params if returning from OAuth)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paramId = params.get('discord_id');
+    const paramUser = params.get('discord_username');
+    if (paramId) {
+      localStorage.setItem('discord_user_id', paramId);
+      if (paramUser) localStorage.setItem('discord_username', paramUser);
+      setDiscordId(paramId);
+      setDiscordUsername(paramUser);
+      // Clean URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('discord_id');
+      url.searchParams.delete('discord_username');
+      window.history.replaceState({}, '', url.toString());
+    } else {
+      const stored = localStorage.getItem('discord_user_id');
+      if (stored) {
+        setDiscordId(stored);
+        setDiscordUsername(localStorage.getItem('discord_username'));
+      }
+    }
+  }, []);
 
   // Initialize Tebex checkout when needed
   const initTebexCheckout = useCallback(() => {
@@ -271,14 +297,16 @@ export default function CartPage() {
                             <path d="M14.983 3l.123 .006c2.014 .214 3.527 .672 4.966 1.673a1 1 0 0 1 .371 .488c1.876 5.315 2.373 9.987 1.451 12.28c-1.003 2.005 -2.606 3.553 -4.394 3.553c-.732 0 -1.693 -.968 -2.328 -2.045a21.512 21.512 0 0 0 2.103 -.493a1 1 0 1 0 -.55 -1.924c-3.32 .95 -6.13 .95 -9.45 0a1 1 0 0 0 -.55 1.924c.717 .204 1.416 .37 2.103 .494c-.635 1.075 -1.596 2.044 -2.328 2.044c-1.788 0 -3.391 -1.548 -4.428 -3.629c-.888 -2.217 -.39 -6.89 1.485 -12.204a1 1 0 0 1 .371 -.488c1.439 -1.001 2.952 -1.459 4.966 -1.673a1 1 0 0 1 .935 .435l.063 .107l.651 1.285l.137 -.016a12.97 12.97 0 0 1 2.643 0l.134 .016l.65 -1.284a1 1 0 0 1 .754 -.54l.122 -.009zm-5.983 7a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15zm6 0a2 2 0 0 0 -1.977 1.697l-.018 .154l-.005 .149l.005 .15a2 2 0 1 0 1.995 -2.15z"/>
                           </svg>
                           <span className="text-neutral-500 text-xs">Discord:</span>
-                          <a
-                            href="https://discord.gg/flakedev"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 text-xs font-semibold hover:text-blue-300 transition"
-                          >
-                            Connect
-                          </a>
+                          {discordId ? (
+                            <span className="text-indigo-300 text-xs font-semibold">{discordUsername || discordId}</span>
+                          ) : (
+                            <a
+                              href="/api/discord/oauth?returnTo=/cart"
+                              className="text-blue-400 text-xs font-semibold hover:text-blue-300 transition"
+                            >
+                              Connect
+                            </a>
+                          )}
                         </div>
                       </div>
 
@@ -422,39 +450,15 @@ export default function CartPage() {
                     : 'Secure Checkout'}
                 </button>
 
-                {/* Payment method icons */}
-                <div className="flex flex-wrap justify-center items-center gap-3 my-5">
-                  {/* Visa */}
-                  <svg viewBox="0 0 48 16" width="44" height="15" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
-                    <text x="0" y="13" fill="white" fontSize="13" fontWeight="800" fontFamily="Arial">VISA</text>
-                  </svg>
-                  {/* Mastercard */}
-                  <svg viewBox="0 0 38 24" width="38" height="24" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
-                    <circle cx="13" cy="12" r="12" fill="#eb001b"/>
-                    <circle cx="25" cy="12" r="12" fill="#f79e1b"/>
-                    <path d="M19 5.4a12 12 0 0 1 0 13.2A12 12 0 0 1 19 5.4z" fill="#ff5f00"/>
-                  </svg>
-                  {/* Amex */}
-                  <svg viewBox="0 0 48 16" width="44" height="15" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
-                    <text x="0" y="13" fill="#2E77BC" fontSize="10" fontWeight="700" fontFamily="Arial">AMEX</text>
-                  </svg>
-                  {/* Apple Pay */}
-                  <svg viewBox="0 0 50 20" width="50" height="20" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
-                    <text x="0" y="15" fill="white" fontSize="11" fontWeight="600" fontFamily="-apple-system,Arial">Apple Pay</text>
-                  </svg>
-                  {/* Google Pay */}
-                  <svg viewBox="0 0 60 20" width="60" height="20" xmlns="http://www.w3.org/2000/svg" className="opacity-60">
-                    <text x="0" y="15" fill="white" fontSize="11" fontWeight="600" fontFamily="Arial">Google Pay</text>
-                  </svg>
+                {/* Payment methods image */}
+                <div className="flex justify-center my-5">
+                  <img src="/we-accept.svg" alt="Payment methods we accept" width="280" height="40" className="opacity-80" />
                 </div>
 
                 {/* Powered by Tebex */}
                 <div className="flex justify-center items-center gap-2 mb-2">
-                  <span className="text-neutral-600 text-sm">Powered by</span>
-                  {/* Tebex wordmark SVG */}
-                  <svg width="52" height="16" viewBox="0 0 120 36" xmlns="http://www.w3.org/2000/svg" className="opacity-40 mt-[-1px]" fill="white">
-                    <text x="0" y="28" fontSize="28" fontWeight="800" fontFamily="Arial" letterSpacing="-1">tebex</text>
-                  </svg>
+                  <span className="text-neutral-600 text-sm font-medium">Powered by</span>
+                  <img src="/tebex-logo.svg" alt="Tebex" width="64" height="20" className="opacity-40 mt-[-2px]" />
                 </div>
                 <p className="text-xs text-neutral-600 text-center">
                   Our checkout process is owned &amp; operated by Tebex Limited, who handle product fulfilment, billing support and refunds.

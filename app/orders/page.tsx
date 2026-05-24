@@ -96,7 +96,7 @@ export default function OrdersPage() {
                 Having issues with your orders or need assistance? Join our Discord for support.
               </p>
               <a
-                href="https://discord.gg/flakedevelopment"
+                href="https://discord.gg/flakedev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition font-medium"

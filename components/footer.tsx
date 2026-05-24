@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useCurrency } from '@/contexts/currency-context';
+import { useBasket } from '@/contexts/basket-context';
 
 interface FooterProps {
   storeName?: string;
@@ -20,6 +21,7 @@ const currencies = [
 
 export function Footer({ storeName = 'Flake Development' }: FooterProps) {
   const { currency: selectedCurrency, setCurrency } = useCurrency();
+  const { username } = useBasket();
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -173,13 +175,18 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
                   </a>
                 </li>
                 <li>
-                  <a href="https://cfx.re/" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
+                  <a
+                    href={username ? `https://forum.cfx.re/u/${username}` : 'https://cfx.re/'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-neutral-400 hover:text-white transition"
+                  >
                     Cfx.re Profile
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
-                    GitHub
+                  <a href="https://www.youtube.com/@flakedevelopment/videos" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
+                    YouTube
                   </a>
                 </li>
               </ul>

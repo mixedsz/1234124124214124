@@ -116,8 +116,9 @@ export function BasketProvider({ children }: { children: ReactNode }) {
         ).toLowerCase();
 
         // "One of the options provided is invalid" on game server command packages
-        // means username_id is required. Retry with it if we have it.
-        if (detail.includes('options provided is invalid') && basket.username_id) {
+        // means username_id is required. Only retry if discord_id is not already provided
+        // (Discord packages don't need username_id and mixing them causes errors).
+        if (detail.includes('options provided is invalid') && basket.username_id && !variableData?.discord_id) {
           console.log('[BasketProvider] Retrying with username_id for game server command package');
           return await attemptAdd({ ...variableData, username_id: String(basket.username_id) });
         }
