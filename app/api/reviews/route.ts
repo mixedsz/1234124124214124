@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json');
-const BOT_TOKEN = process.env.REVIEWS_BOT_TOKEN;
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 export interface Review {
   id: string;

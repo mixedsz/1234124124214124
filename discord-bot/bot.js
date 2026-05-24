@@ -23,7 +23,7 @@ const LOGO_URL       = 'https://flakedevelopment.tebex.io/fd-favicon.png';
 const EMBED_COLOR    = 0x3b82f6; // blue
 
 const WEBSITE_URL       = process.env.WEBSITE_URL       || process.env.SITE_URL;
-const REVIEWS_BOT_TOKEN = process.env.REVIEWS_BOT_TOKEN;
+const DISCORD_BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 // ── Config helpers ────────────────────────────────────────────────────────────
 
@@ -261,14 +261,14 @@ async function handleReviewModal(interaction) {
   };
 
   try {
-    if (!WEBSITE_URL || !REVIEWS_BOT_TOKEN) {
-      console.warn('⚠️  WEBSITE_URL or REVIEWS_BOT_TOKEN is not set — skipping API call.');
+    if (!WEBSITE_URL || !DISCORD_BOT_TOKEN) {
+      console.warn('⚠️  WEBSITE_URL or DISCORD_BOT_TOKEN is not set — skipping API call.');
     } else {
       const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
         method:  'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization:  `Bearer ${REVIEWS_BOT_TOKEN}`,
+          Authorization:  `Bearer ${DISCORD_BOT_TOKEN}`,
         },
         body: JSON.stringify(payload),
       });
@@ -332,14 +332,14 @@ async function handleReviewCommand(interaction) {
   };
 
   try {
-    if (!WEBSITE_URL || !REVIEWS_BOT_TOKEN) {
-      console.warn('⚠️  WEBSITE_URL or REVIEWS_BOT_TOKEN is not set — skipping API call.');
+    if (!WEBSITE_URL || !DISCORD_BOT_TOKEN) {
+      console.warn('⚠️  WEBSITE_URL or DISCORD_BOT_TOKEN is not set — skipping API call.');
     } else {
       const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
         method:  'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization:  `Bearer ${REVIEWS_BOT_TOKEN}`,
+          Authorization:  `Bearer ${DISCORD_BOT_TOKEN}`,
         },
         body: JSON.stringify(payload),
       });
@@ -385,9 +385,9 @@ async function handleDeleteReview(interaction) {
 
   const id = interaction.options.getString('id', true);
 
-  if (!WEBSITE_URL || !REVIEWS_BOT_TOKEN) {
+  if (!WEBSITE_URL || !DISCORD_BOT_TOKEN) {
     return interaction.editReply({
-      content: '❌ WEBSITE_URL or REVIEWS_BOT_TOKEN is not configured.',
+      content: '❌ WEBSITE_URL or DISCORD_BOT_TOKEN is not configured.',
     });
   }
 
@@ -396,7 +396,7 @@ async function handleDeleteReview(interaction) {
       `${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(id)}`,
       {
         method:  'DELETE',
-        headers: { Authorization: `Bearer ${REVIEWS_BOT_TOKEN}` },
+        headers: { Authorization: `Bearer ${DISCORD_BOT_TOKEN}` },
       },
     );
 

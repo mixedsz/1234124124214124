@@ -233,9 +233,9 @@ export default async function HomePage() {
             </p>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-2">
               {[
-                { value: '40', suffix: 'K', label: 'Sales' },
-                { value: '42', suffix: 'K', label: 'Servers using Flake Scripts*' },
-                { value: '158', suffix: 'K', label: 'Players enjoying Flake Scripts*' },
+                { value: '11', suffix: 'K+', label: 'Sales' },
+                { value: '7', suffix: 'K+', label: 'Servers using Flake Scripts*' },
+                { value: '320', suffix: 'K+', label: 'Players enjoying Flake Scripts*' },
               ].map((stat) => (
                 <div key={stat.label} className="w-full text-center leading-none">
                   <div

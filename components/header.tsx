@@ -1,19 +1,30 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useRef, useEffect } from 'react';
-import { Menu, X, ShoppingCart, ChevronDown, Package, Settings, LogOut, User } from 'lucide-react';
+import { Menu, X, ShoppingCart, ChevronDown, LogOut, User, Loader2 } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
+import { createBasket, getAuthUrl, TEBEX_PROJECT_ID } from '@/lib/tebex';
+
+const BASKET_KEY = 'tebex_basket_ident';
+
+declare global {
+  interface Window {
+    Tebex?: {
+      checkout: { init: (c: { ident: string }) => void; launch: () => void; on: (e: string, cb: (d?: unknown) => void) => void; close: () => void; };
+      portal?: { init: (c: { token: string; theme?: string; colors?: { name: string; color: string }[] }) => void; launch: () => void; };
+    };
+  }
+}
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
-  
+
   const { itemCount, isAuthenticated, username, loading } = useBasket();
 
-  // Close profile dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
@@ -24,10 +35,41 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleFiveMLogin = async () => {
+    setLoginLoading(true);
+    try {
+      let ident = localStorage.getItem(BASKET_KEY);
+      if (!ident) {
+        const origin = window.location.origin;
+        const basket = await createBasket(`${origin}/cart`, `${origin}/checkout-complete`);
+        if (!basket) throw new Error('Could not create session');
+        ident = basket.ident;
+        localStorage.setItem(BASKET_KEY, ident);
+      }
+      const returnUrl = `${window.location.origin}/scripts?success=true`;
+      const authUrl = await getAuthUrl(ident, returnUrl);
+      if (!authUrl) throw new Error('Could not get auth URL');
+      window.location.replace(authUrl);
+    } catch {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleOpenPortal = () => {
+    setProfileOpen(false);
+    if (!window.Tebex?.portal) return;
+    window.Tebex.portal.init({
+      token: TEBEX_PROJECT_ID,
+      theme: 'dark',
+      colors: [{ name: 'primary', color: '#3B82F6' }],
+    });
+    window.Tebex.portal.launch();
+  };
+
   const handleLogout = () => {
-    // Clear basket from localStorage
-    localStorage.removeItem('tebex_basket_ident');
-    // Refresh the page to clear state
+    localStorage.removeItem(BASKET_KEY);
+    window.location.href = '/scripts';
+  };
     window.location.href = '/scripts';
   };
 
@@ -109,14 +151,13 @@ export function Header() {
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 rounded-xl bg-neutral-800 border border-neutral-700 shadow-xl overflow-hidden">
                     <div className="py-2">
-                      <Link
-                        href="/orders"
-                        onClick={() => setProfileOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition"
+                      <button
+                        onClick={handleOpenPortal}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-neutral-300 hover:bg-neutral-700 hover:text-white transition w-full text-left"
                       >
                         <Package className="w-4 h-4" />
                         Manage Orders & Subscriptions
-                      </Link>
+                      </button>
                       <a
                         href="https://discord.gg/flakedev"
                         target="_blank"
@@ -142,15 +183,20 @@ export function Header() {
                 )}
               </div>
             ) : (
-              <Link
-                href="/login"
-                className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition"
+              <button
+                onClick={handleFiveMLogin}
+                disabled={loginLoading}
+                className="hidden lg:flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed text-white text-sm font-medium transition"
               >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
-                </svg>
-                Login with FiveM
-              </Link>
+                {loginLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                  </svg>
+                )}
+                {loginLoading ? 'Connecting...' : 'Login with FiveM'}
+              </button>
             )}
 
             {/* Mobile menu button */}
@@ -208,14 +254,13 @@ export function Header() {
                       <span className="font-medium">{username}</span>
                     </div>
                   </div>
-                  <Link
-                    href="/orders"
-                    className="flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition"
-                    onClick={() => setMobileMenuOpen(false)}
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleOpenPortal(); }}
+                    className="flex items-center gap-2 text-sm font-medium text-neutral-300 hover:text-white transition text-left"
                   >
                     <Package className="w-4 h-4" />
                     Manage Orders
-                  </Link>
+                  </button>
                   <button
                     onClick={() => {
                       setMobileMenuOpen(false);
@@ -228,14 +273,16 @@ export function Header() {
                   </button>
                 </>
               ) : (
-                <Link
-                  href="/login"
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium transition w-fit"
-                  onClick={() => setMobileMenuOpen(false)}
+                <button
+                  onClick={() => { setMobileMenuOpen(false); handleFiveMLogin(); }}
+                  disabled={loginLoading}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-70 text-white text-sm font-medium transition w-fit"
                 >
+                  {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : (
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
                   </svg>
+                  )}
                   Login with FiveM
                 </Link>
               )}
