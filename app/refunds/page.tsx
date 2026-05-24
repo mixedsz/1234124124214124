@@ -1,7 +1,12 @@
+import type { Metadata } from 'next'
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import Link from 'next/link';
 
+
+export const metadata: Metadata = {
+  title: 'Refund Policy | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+}
 export default function RefundsPage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">

@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import Link from 'next/link';
 import { Book, ExternalLink, Search } from 'lucide-react';
 
+
+export const metadata: Metadata = {
+  title: 'Documentation | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+}
 export default function DocsPage() {
   const docCategories = [
     {

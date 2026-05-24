@@ -24,6 +24,8 @@ declare global {
 }
 
 export default function CartPage() {
+  useEffect(() => { document.title = 'Cart | Flake Development | QBCore, Qbox & ESX FiveM Scripts'; }, []);
+
   const { basket, loading, removeItem, itemCount, isAuthenticated, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const [processing, setProcessing] = useState(false);

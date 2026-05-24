@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { getPackage, TebexPackage, TebexPackageVariable } from '@/lib/tebex';
+import { getPackage, TebexPackage, TebexPackageVariable, createBasket, getAuthUrl } from '@/lib/tebex';
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -64,6 +64,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [errorDetail, setErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
   const [showErrorDetail, setShowErrorDetail] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [discordLinked, setDiscordLinked] = useState(false);
   const [discordId, setDiscordId] = useState<string | null>(null);
   const [discordVarIdentifier, setDiscordVarIdentifier] = useState<string | null>(null);
@@ -138,6 +140,29 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       !v.identifier?.toLowerCase().includes('discord') &&
       !v.description?.toLowerCase().includes('discord'),
   );
+
+  const handleFiveMLogin = async () => {
+    setLoginLoading(true);
+    setLoginError(null);
+    try {
+      const BASKET_KEY = 'tebex_basket_ident';
+      let ident = localStorage.getItem(BASKET_KEY);
+      if (!ident) {
+        const origin = window.location.origin;
+        const basket = await createBasket(`${origin}/cart`, `${origin}/checkout-complete`);
+        if (!basket) throw new Error('Could not create a session. Please try again.');
+        ident = basket.ident;
+        localStorage.setItem(BASKET_KEY, ident);
+      }
+      const returnUrl = `${window.location.origin}${window.location.pathname}`;
+      const authUrl = await getAuthUrl(ident, returnUrl);
+      if (!authUrl) throw new Error('Could not get authentication URL. Please try again.');
+      window.location.replace(authUrl);
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setLoginLoading(false);
+    }
+  };
 
   const handleAddToCart = useCallback(async () => {
     if (!pkg) return;
@@ -521,17 +546,32 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <p className="text-neutral-400 text-sm mb-6">
                 Click the button below, it&apos;ll take just a couple of seconds!
               </p>
+              {loginError && (
+                <p className="mb-4 text-red-400 text-sm text-center">{loginError}</p>
+              )}
               <div className="flex justify-center">
-                <Link
-                  href="/login"
-                  onClick={() => setShowLoginModal(false)}
-                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-lg bg-white/10 hover:bg-white/15 text-neutral-100 border border-white/10 transition"
+                <button
+                  onClick={handleFiveMLogin}
+                  disabled={loginLoading}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white transition"
                 >
-                  <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
-                  </svg>
-                  Login with FiveM
-                </Link>
+                  {loginLoading ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
+                      </svg>
+                      Login with FiveM
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

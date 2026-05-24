@@ -1,8 +1,13 @@
+import type { Metadata } from 'next'
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import Link from 'next/link';
 import { HelpCircle, MessageCircle, FileText, ExternalLink } from 'lucide-react';
 
+
+export const metadata: Metadata = {
+  title: 'Support | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+}
 export default function SupportPage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">

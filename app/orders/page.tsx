@@ -9,6 +9,8 @@ import { ExternalLink, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function OrdersPage() {
+  useEffect(() => { document.title = 'Orders | Flake Development | QBCore, Qbox & ESX FiveM Scripts'; }, []);
+
   const { isAuthenticated, username, basket } = useBasket();
 
   return (
