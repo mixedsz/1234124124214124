@@ -106,9 +106,14 @@ export async function POST(request: NextRequest) {
     created_at: new Date().toISOString(),
   };
 
-  const reviews = await readReviews();
-  reviews.push(review);
-  await writeReviews(reviews);
+  try {
+    const reviews = await readReviews();
+    reviews.push(review);
+    await writeReviews(reviews);
+  } catch (err) {
+    console.error('Failed to save review:', err);
+    return NextResponse.json({ error: `Failed to save review: ${(err as Error).message}` }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true, review }, { status: 201 });
 }
