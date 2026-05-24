@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { put, list } from '@vercel/blob';
 
-const REVIEWS_FILE = path.join(process.cwd(), 'data', 'reviews.json');
+export const dynamic = 'force-dynamic';
+
+const BLOB_PATHNAME = 'reviews.json';
 
 export interface Review {
   id: string;
@@ -19,16 +20,22 @@ export interface Review {
 
 async function readReviews(): Promise<Review[]> {
   try {
-    const raw = await fs.readFile(REVIEWS_FILE, 'utf-8');
-    return JSON.parse(raw);
+    const { blobs } = await list({ prefix: BLOB_PATHNAME });
+    if (!blobs.length) return [];
+    const res = await fetch(blobs[0].url, { cache: 'no-store' });
+    if (!res.ok) return [];
+    return await res.json();
   } catch {
     return [];
   }
 }
 
 async function writeReviews(reviews: Review[]): Promise<void> {
-  await fs.mkdir(path.dirname(REVIEWS_FILE), { recursive: true });
-  await fs.writeFile(REVIEWS_FILE, JSON.stringify(reviews, null, 2), 'utf-8');
+  await put(BLOB_PATHNAME, JSON.stringify(reviews), {
+    access: 'public',
+    addRandomSuffix: false,
+    contentType: 'application/json',
+  });
 }
 
 // GET /api/reviews — public, returns all reviews sorted newest first
@@ -44,7 +51,6 @@ export async function GET(request: NextRequest) {
     filtered = reviews.filter(r => String(r.product_id) === productId);
   }
 
-  // Sort newest first, cap at limit
   const sorted = filtered
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, limit);
@@ -65,7 +71,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   }
 
-  // Handle delete action
   if (body.action === 'delete' && body.review_id) {
     const reviews = await readReviews();
     const updated = reviews.filter(r => r.id !== body.review_id);
@@ -76,7 +81,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // Validate required fields
   const { discord_id, username, rating, content } = body;
   if (!discord_id || !username || !rating || !content) {
     return NextResponse.json(
@@ -106,9 +110,14 @@ export async function POST(request: NextRequest) {
     created_at: new Date().toISOString(),
   };
 
-  const reviews = await readReviews();
-  reviews.push(review);
-  await writeReviews(reviews);
+  try {
+    const reviews = await readReviews();
+    reviews.push(review);
+    await writeReviews(reviews);
+  } catch (err) {
+    console.error('Failed to save review:', err);
+    return NextResponse.json({ error: `Failed to save review: ${(err as Error).message}` }, { status: 500 });
+  }
 
   return NextResponse.json({ success: true, review }, { status: 201 });
 }
