@@ -445,13 +445,12 @@ export default function CartPage() {
 
                 {/* Payment methods image */}
                 <div className="flex justify-center my-5">
-                  <img src="/we-accept.svg" alt="Payment methods we accept" width="280" height="40" className="opacity-80" />
+                  <img src="/we-accept.svg" alt="Payment methods we accept" width="280" className="opacity-80" />
                 </div>
 
-                {/* Powered by Tebex */}
+                {/* Cash App */}
                 <div className="flex justify-center items-center gap-2 mb-2">
-                  <span className="text-neutral-600 text-sm font-medium">Powered by</span>
-                  <img src="/tebex-logo.svg" alt="Tebex" width="64" height="20" className="opacity-40 mt-[-2px]" />
+                  <img src="/cashapp-logo.svg" alt="Cash App" height="30" className="opacity-80" />
                 </div>
                 <p className="text-xs text-neutral-600 text-center">
                   Our checkout process is owned &amp; operated by Tebex Limited, who handle product fulfilment, billing support and refunds.
