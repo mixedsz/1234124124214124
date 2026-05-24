@@ -68,11 +68,17 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <div className="mb-3">
+              <div className="mb-3 overflow-hidden" style={{height: '46px', width: '220px'}}>
                 <img
                   src="/fd-wordmark.png"
                   alt="Flake Development"
-                  className="h-12 w-auto object-contain"
+                  style={{
+                    width: '461px',
+                    height: '307px',
+                    maxWidth: 'none',
+                    marginLeft: '-113px',
+                    marginTop: '-119px',
+                  }}
                 />
               </div>
               <p className="text-sm text-neutral-400 mb-4">

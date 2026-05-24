@@ -41,11 +41,11 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/fd-logo.jpg"
+              src="/fd-logo.svg"
               alt="Flake Development"
-              width={40}
-              height={40}
-              className="rounded-lg object-contain"
+              width={44}
+              height={44}
+              className="object-contain"
             />
           </Link>
 
