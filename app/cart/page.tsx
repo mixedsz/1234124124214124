@@ -444,8 +444,13 @@ export default function CartPage() {
                 </button>
 
                 {/* Payment methods image */}
-                <div className="flex justify-center my-5">
-                  <img src="/we-accept.svg" alt="Payment methods we accept" width="280" className="opacity-80" />
+                <div className="flex justify-center mt-5 mb-3">
+                  <img src="/we-accept.svg" alt="Payment methods we accept" width="200" height="32" className="opacity-80" />
+                </div>
+
+                {/* Cash App */}
+                <div className="flex justify-center mb-3">
+                  <img src="/cashapp-logo.svg" alt="Cash App" width="110" height="30" className="opacity-85" />
                 </div>
 
                 {/* Powered by Tebex */}

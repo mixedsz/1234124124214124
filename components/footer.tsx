@@ -217,6 +217,10 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
 
           {/* Bottom */}
           <div className="mt-12 pt-8 border-t border-neutral-800">
+            <div className="flex justify-center items-center gap-2 mb-4">
+              <span className="text-neutral-600 text-xs">Powered by</span>
+              <img src="/tebex-logo.svg" alt="Tebex" width="56" height="16" className="opacity-30 mt-[-1px]" />
+            </div>
             <p className="text-xs text-neutral-500 text-center">
               Copyright © 2026 Flake Development. Not affiliated with or endorsed by Rockstar North, Take-Two Interactive or other rights holders. FiveM® is a copyright and registered trademark of Take-Two Interactive Software, Inc.
             </p>
