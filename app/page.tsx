@@ -78,8 +78,15 @@ export default async function HomePage() {
 
   // Fetch real reviews; pad with static if fewer than 6 to keep marquee speed consistent
   const apiReviews = await readReviews().catch(() => []);
+  const seen = new Set<string>();
   const mappedApiReviews = apiReviews
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .filter(r => {
+      const key = `${r.discord_id}:${r.content.trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
     .slice(0, 20)
     .map(r => ({ text: r.content, author: `@${r.username}` }));
   const displayReviews = mappedApiReviews.length >= 6

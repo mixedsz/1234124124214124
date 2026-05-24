@@ -77,6 +77,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const reviews = await readReviews();
+    // Prevent duplicate: same user, same content within the last 60 seconds
+    const now = Date.now();
+    const isDuplicate = reviews.some(
+      r => r.discord_id === discord_id &&
+           r.content.trim() === review.content &&
+           now - new Date(r.created_at).getTime() < 60_000
+    );
+    if (isDuplicate) {
+      return NextResponse.json({ error: 'Duplicate review — please wait before submitting again' }, { status: 429 });
+    }
     reviews.push(review);
     await writeReviews(reviews);
   } catch (err) {
