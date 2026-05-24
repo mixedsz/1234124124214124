@@ -297,11 +297,7 @@ async function handleReviewModal(interaction) {
     } else {
       const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
         method:  'POST',
-<<<<<<< HEAD
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DISCORD_BOT_TOKEN}` },
-=======
         headers: { 'Content-Type': 'application/json' },
->>>>>>> f4e6692 (Remove REVIEWS_BOT_TOKEN auth gate from reviews API)
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
@@ -355,11 +351,7 @@ async function handleReviewCommand(interaction) {
     } else {
       const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
         method:  'POST',
-<<<<<<< HEAD
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${DISCORD_BOT_TOKEN}` },
-=======
         headers: { 'Content-Type': 'application/json' },
->>>>>>> f4e6692 (Remove REVIEWS_BOT_TOKEN auth gate from reviews API)
         body: JSON.stringify(payload),
       });
       if (!res.ok) {
@@ -394,30 +386,12 @@ async function handleDeleteReview(interaction) {
 
   const id = interaction.options.getString('id', true);
 
-<<<<<<< HEAD
-  if (!WEBSITE_URL || !DISCORD_BOT_TOKEN) {
-    return interaction.editReply({ content: '❌ WEBSITE_URL or DISCORD_BOT_TOKEN is not configured.' });
-  }
-
-  try {
-    const res = await fetch(`${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(id)}`, {
-      method:  'DELETE',
-      headers: { Authorization: `Bearer ${DISCORD_BOT_TOKEN}` },
-    });
-=======
   if (!WEBSITE_URL) {
-    return interaction.editReply({
-      content: '❌ WEBSITE_URL is not configured.',
-    });
+    return interaction.editReply({ content: '❌ WEBSITE_URL is not configured.' });
   }
 
   try {
-    const res = await fetch(
-      `${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(id)}`,
-      { method: 'DELETE' },
-    );
-
->>>>>>> f4e6692 (Remove REVIEWS_BOT_TOKEN auth gate from reviews API)
+    const res = await fetch(`${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       return interaction.editReply({ content: `❌ ${err.error || `Failed to delete review (HTTP ${res.status})`}` });
