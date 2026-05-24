@@ -21,13 +21,17 @@ export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
-  const [avatarError, setAvatarError] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   const { itemCount, isAuthenticated, username, loading } = useBasket();
 
   useEffect(() => {
-    setAvatarError(false);
+    if (!username) { setAvatarUrl(null); return; }
+    fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`)
+      .then((r) => r.json())
+      .then((d) => setAvatarUrl(d.url || null))
+      .catch(() => setAvatarUrl(null));
   }, [username]);
 
   useEffect(() => {
@@ -148,12 +152,12 @@ export function Header() {
                   className="flex items-center gap-2 px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-sm font-medium transition"
                 >
                   <div className="w-7 h-7 rounded-full bg-neutral-600 flex items-center justify-center overflow-hidden flex-shrink-0">
-                    {!avatarError && username ? (
+                    {avatarUrl ? (
                       <img
-                        src={`https://forum.cfx.re/user_avatar/forum.cfx.re/${encodeURIComponent(username.toLowerCase())}/40/2.png`}
-                        alt={username}
+                        src={avatarUrl}
+                        alt={username ?? ''}
                         className="w-full h-full object-cover"
-                        onError={() => setAvatarError(true)}
+                        onError={() => setAvatarUrl(null)}
                       />
                     ) : (
                       <User className="w-4 h-4" />
@@ -265,12 +269,12 @@ export function Header() {
                   <div className="pt-2 border-t border-neutral-800">
                     <div className="flex items-center gap-2 px-2 py-2 text-white">
                       <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center overflow-hidden flex-shrink-0">
-                        {!avatarError && username ? (
+                        {avatarUrl ? (
                           <img
-                            src={`https://forum.cfx.re/user_avatar/forum.cfx.re/${encodeURIComponent(username.toLowerCase())}/40/2.png`}
-                            alt={username}
+                            src={avatarUrl}
+                            alt={username ?? ''}
                             className="w-full h-full object-cover"
-                            onError={() => setAvatarError(true)}
+                            onError={() => setAvatarUrl(null)}
                           />
                         ) : (
                           <User className="w-5 h-5" />
