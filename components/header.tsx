@@ -57,15 +57,15 @@ export function Header() {
 
   const handleOpenPortal = () => {
     setProfileOpen(false);
-    try {
-      window.Tebex!.portal!.init({
+    if (window.Tebex?.portal) {
+      window.Tebex.portal.init({
         token: process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN || '',
         theme: 'dark',
         colors: [{ name: 'primary', color: '#3B82F6' }],
       });
-      window.Tebex!.portal!.launch();
-    } catch (e) {
-      console.error('[Portal] Failed to open portal:', e);
+      window.Tebex.portal.launch();
+    } else {
+      window.open('https://checkout.tebex.io/account', '_blank');
     }
   };
 
