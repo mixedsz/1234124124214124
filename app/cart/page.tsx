@@ -318,18 +318,26 @@ export default function CartPage() {
             )}
 
             {/* Subscribe & Save section */}
-            <div className="mt-8 bg-neutral-950 rounded-2xl border border-neutral-800 p-6">
-              <h2 className="text-xl font-extrabold text-white mb-2">Subscribe &amp; Save with Flake+</h2>
-              <p className="text-sm text-neutral-400 mb-4">
-                Get our entire collection, including new scripts on release day, for one low monthly price.{' '}
-                <strong className="text-white">Save up to 85%</strong> when compared to the usual upfront cost; with no price increases while you remain subscribed.
-              </p>
+            <div className="mt-8 flex items-center gap-5 py-5 border-t border-neutral-800">
+              {/* FD+ badge */}
+              <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                <span className="text-blue-400 font-black text-lg tracking-tight">FD+</span>
+              </div>
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white mb-0.5">Subscribe &amp; Save with Flake+</p>
+                <p className="text-xs text-neutral-400 leading-snug">
+                  Get every script for one monthly price.{' '}
+                  <strong className="text-white">Save up to 85%</strong> vs. buying individually.
+                </p>
+              </div>
+              {/* CTA */}
               <Link
                 href="/subscription"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 text-sm font-semibold transition"
+                className="flex-shrink-0 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 text-blue-400 text-sm font-semibold transition whitespace-nowrap"
               >
-                <span>Learn More</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                Learn More
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14"/><path d="M13 18l6 -6"/><path d="M13 6l6 6"/>
                 </svg>
               </Link>
