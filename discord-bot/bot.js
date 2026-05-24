@@ -465,4 +465,8 @@ async function handleDeleteReview(interaction) {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
+// Minimal HTTP server so Render web service detects an open port
+const http = require('http');
+http.createServer((_, res) => res.end('OK')).listen(process.env.PORT || 3000);
+
 client.login(process.env.DISCORD_BOT_TOKEN);
