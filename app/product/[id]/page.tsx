@@ -5,7 +5,7 @@ import { Footer } from '@/components/footer';
 import { getPackage, TebexPackage, TebexPackageVariable } from '@/lib/tebex';
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, AlertCircle, Check } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
 import { useCurrency } from '@/contexts/currency-context';
@@ -63,13 +63,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [variableValues, setVariableValues] = useState<Record<string, string>>({});
   const [errorDetail, setErrorDetail] = useState<{ status: number; body: unknown; raw: string } | null>(null);
   const [showErrorDetail, setShowErrorDetail] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [discordLinked, setDiscordLinked] = useState(false);
   const [discordId, setDiscordId] = useState<string | null>(null);
   const [discordVarIdentifier, setDiscordVarIdentifier] = useState<string | null>(null);
   const [needsDiscord, setNeedsDiscord] = useState(false);
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Handle return from Tebex Discord ident via our ident-callback
@@ -143,7 +143,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (!pkg) return;
 
     if (!isAuthenticated) {
-      router.push('/login');
+      setShowLoginModal(true);
       return;
     }
 
@@ -195,7 +195,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     } finally {
       setAdding(false);
     }
-  }, [pkg, isAuthenticated, router, requiredVariables, variableValues, needsDiscord, discordLinked, discordId, discordVarIdentifier, addItem, quantity]);
+  }, [pkg, isAuthenticated, setShowLoginModal, requiredVariables, variableValues, needsDiscord, discordLinked, discordId, discordVarIdentifier, addItem, quantity]);
 
   if (loading) {
     return (
@@ -213,7 +213,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <div className="min-h-screen bg-neutral-900 flex flex-col">
         <Header />
         <div className="mx-auto max-w-7xl px-4 py-12 w-full">
-          <Link href="/store" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition">
+          <Link href="/scripts" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition">
             <ArrowLeft className="w-4 h-4" /> Back to Store
           </Link>
           <div className="bg-red-900/20 border border-red-900 rounded-xl p-8 text-red-200">
@@ -239,7 +239,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <Header />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <Link href="/store" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-10 transition">
+        <Link href="/scripts" className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-10 transition">
           <ArrowLeft className="w-4 h-4" />
           Back to Store
         </Link>
@@ -345,7 +345,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             )}
 
             {/* Feedback */}
-            {error && (
+            {error && !(needsDiscord && !discordLinked) && (
               <div className="mb-4 bg-red-900/20 border border-red-900 rounded-xl p-4 text-red-300 text-sm">
                 <div className="flex gap-2">
                   <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -492,6 +492,51 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       </main>
 
       <Footer />
+
+      {/* FiveM Login Modal */}
+      {showLoginModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLoginModal(false); }}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden border border-neutral-800">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <h2 className="text-xl font-bold text-white">Login with FiveM</h2>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="text-neutral-400 hover:text-white transition p-1"
+              >
+                <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
+                  <path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+            {/* Body */}
+            <div className="px-6 pb-6">
+              <p className="text-neutral-300 mb-4 leading-relaxed">
+                Before you can add this to your basket, we need you to log in with your Cfx.re/FiveM account. This is so we know which Keymaster to send the assets to after checkout.
+              </p>
+              <p className="text-neutral-400 text-sm mb-6">
+                Click the button below, it&apos;ll take just a couple of seconds!
+              </p>
+              <div className="flex justify-center">
+                <Link
+                  href="/login"
+                  onClick={() => setShowLoginModal(false)}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-lg bg-white/10 hover:bg-white/15 text-neutral-100 border border-white/10 transition"
+                >
+                  <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
+                  </svg>
+                  Login with FiveM
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

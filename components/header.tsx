@@ -28,7 +28,7 @@ export function Header() {
     // Clear basket from localStorage
     localStorage.removeItem('tebex_basket_ident');
     // Refresh the page to clear state
-    window.location.href = '/store';
+    window.location.href = '/scripts';
   };
 
   // Determine if user should see profile (authenticated with username)
@@ -57,7 +57,7 @@ export function Header() {
               Subscription
             </Link>
             <Link
-              href="/store"
+              href="/scripts"
               className="text-sm font-medium text-neutral-300 hover:text-white transition"
             >
               Scripts
@@ -176,7 +176,7 @@ export function Header() {
                 Subscription
               </Link>
               <Link
-                href="/store"
+                href="/scripts"
                 className="text-sm font-medium text-neutral-300 hover:text-white transition"
                 onClick={() => setMobileMenuOpen(false)}
               >

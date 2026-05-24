@@ -46,7 +46,7 @@ export default function CheckoutCompletePage() {
               Back to Home
             </Link>
             <Link
-              href="/store"
+              href="/scripts"
               className="inline-flex items-center gap-2 px-8 py-3 border border-blue-600 text-blue-400 hover:bg-blue-600/10 font-semibold rounded-lg transition"
             >
               Continue Shopping

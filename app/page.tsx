@@ -4,8 +4,14 @@ import { ProductCard } from '@/components/product-card';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
+import type { Metadata } from 'next';
 
 export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+  description: 'Flake Development makes the most popular Grizzley World, Windy City, District 10 / Premium scripts for your FiveM server, compatible with QBCore, Qbox & ESX.',
+};
 
 const REVIEWS = [
   {
@@ -90,29 +96,32 @@ export default async function HomePage() {
             <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[120px]" />
           </div>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-            <div className="max-w-3xl">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight text-balance">
-                The most popular scripts for your FiveM server.
-              </h1>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/store"
-                  className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-neutral-200 transition"
-                >
-                  Browse Scripts
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/subscription"
-                  className="text-blue-400 hover:text-blue-300 transition text-sm font-medium"
-                >
-                  Get our full collection for $35/month.{' '}
-                  <span className="underline">Learn more →</span>
-                </Link>
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+              {/* Left: headline + CTAs */}
+              <div>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight text-balance">
+                  The most popular scripts for your FiveM server.
+                </h1>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/scripts"
+                    className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-neutral-200 transition"
+                  >
+                    Browse Scripts
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <Link
+                    href="/subscription"
+                    className="text-blue-400 hover:text-blue-300 transition text-sm font-medium"
+                  >
+                    Get our full collection for $35/month.{' '}
+                    <span className="underline">Learn more →</span>
+                  </Link>
+                </div>
               </div>
 
-              {/* Feature list below browse button */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Right: feature list */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {FEATURES.map((f, i) => (
                   <div key={i} className="flex gap-4 items-start">
                     <div className="flex-shrink-0 text-blue-500">
@@ -151,7 +160,7 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-10 flex justify-center">
                   <Link
-                    href="/store"
+                    href="/scripts"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-semibold border border-blue-600/30 transition"
                   >
                     View All

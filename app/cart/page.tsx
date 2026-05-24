@@ -214,7 +214,7 @@ export default function CartPage() {
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <Link
-          href="/store"
+          href="/scripts"
           className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -239,7 +239,7 @@ export default function CartPage() {
                 <p className="text-neutral-400 text-lg mb-2">Your cart is empty</p>
                 <p className="text-neutral-600 text-sm mb-6">Add some scripts to get started</p>
                 <Link
-                  href="/store"
+                  href="/scripts"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl transition font-semibold"
                 >
                   Browse Scripts

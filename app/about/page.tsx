@@ -109,7 +109,7 @@ export default async function AboutPage() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
-                href="/store"
+                href="/scripts"
                 className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
               >
                 Browse Scripts

@@ -26,6 +26,10 @@ export default function SubscriptionPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    document.title = 'Flake Subscriptions | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+  }, []);
+
+  useEffect(() => {
     async function load() {
       try {
         const cats: TebexCategory[] = await fetch('/api/categories').then(r => r.json());
@@ -206,7 +210,7 @@ export default function SubscriptionPage() {
             <p className="text-neutral-400 text-lg mb-4">No subscriptions available at the moment.</p>
             <p className="text-neutral-500 text-sm">
               Check back soon or{' '}
-              <Link href="/store" className="text-blue-400 hover:text-blue-300">
+              <Link href="/scripts" className="text-blue-400 hover:text-blue-300">
                 browse our scripts
               </Link>
             </p>

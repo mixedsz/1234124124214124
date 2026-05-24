@@ -121,7 +121,7 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
               <h3 className="font-semibold text-white mb-4">Pages</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/store" className="text-sm text-neutral-400 hover:text-white transition">
+                  <Link href="/scripts" className="text-sm text-neutral-400 hover:text-white transition">
                     All Scripts
                   </Link>
                 </li>

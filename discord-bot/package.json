@@ -1,13 +1,15 @@
 {
-  "name": "flake-reviews-bot",
+  "name": "flake-review-bot",
   "version": "1.0.0",
-  "description": "Discord bot for submitting reviews to the Flake Development store",
+  "description": "Discord review bot for Flake Development",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js",
-    "register": "node register-commands.js"
+    "start":    "node bot.js",
+    "deploy":   "node deploy-commands.js",
+    "register": "node deploy-commands.js"
   },
   "dependencies": {
-    "discord.js": "^14.16.0"
+    "discord.js": "^14.15.3",
+    "dotenv": "^16.4.5"
   }
 }
