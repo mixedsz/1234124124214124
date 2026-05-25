@@ -27,6 +27,7 @@ export interface TebexPackage {
   name: string;
   description: string;
   image?: string;
+  images?: string[];
   type: string;
   category: {
     id: number;

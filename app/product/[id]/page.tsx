@@ -6,7 +6,7 @@ import { getPackage, TebexPackage, TebexPackageVariable, createBasket, getAuthUr
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { ShoppingCart, AlertCircle, Check, Gift } from 'lucide-react';
+import { ShoppingCart, AlertCircle, Check, Gift, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
 import { useCurrency } from '@/contexts/currency-context';
 import { marked } from 'marked';
@@ -53,6 +53,11 @@ function parseDescription(description: string): string {
     .replace(/<p>/g, '<p class="mb-2">');
 }
 
+function getYouTubeId(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m?.[1] ?? null;
+}
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,6 +84,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [showGiftErrorDetail, setShowGiftErrorDetail] = useState(false);
   const [giftAdded, setGiftAdded] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [activeMedia, setActiveMedia] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
@@ -90,6 +97,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       .then((d) => setAvatarUrl(d.url || null))
       .catch(() => setAvatarUrl(null));
   }, [username]);
+
+  useEffect(() => {
+    setActiveMedia(0);
+  }, [pkg?.id]);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightboxOpen(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightboxOpen]);
 
   // Handle return from Tebex Discord ident via our ident-callback
   const discordLinkedParam = searchParams.get('discord_linked') === '1';
@@ -327,17 +345,133 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
-          {/* Image */}
+          {/* Media carousel */}
           <div>
-            <div className="bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 aspect-video">
-              {pkg.image ? (
-                <img src={pkg.image} alt={pkg.name} className="w-full h-full object-contain" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
-                  <span className="text-6xl font-bold text-blue-500/50">{pkg.name.charAt(0)}</span>
-                </div>
-              )}
-            </div>
+            {(() => {
+              const mediaItems: string[] = pkg.images && pkg.images.length > 0
+                ? pkg.images
+                : pkg.image ? [pkg.image] : [];
+              const cur = mediaItems[activeMedia] ?? '';
+              const ytId = cur ? getYouTubeId(cur) : null;
+              const isVideo = !!ytId;
+              return (
+                <>
+                  <div className="relative bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 aspect-video group">
+                    {mediaItems.length === 0 ? (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+                        <span className="text-6xl font-bold text-blue-500/50">{pkg.name.charAt(0)}</span>
+                      </div>
+                    ) : isVideo ? (
+                      <iframe
+                        src={`https://www.youtube.com/embed/${ytId}`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        title={pkg.name}
+                      />
+                    ) : (
+                      <>
+                        <img
+                          src={cur}
+                          alt={pkg.name}
+                          className="w-full h-full object-contain cursor-zoom-in"
+                          onClick={() => setLightboxOpen(true)}
+                        />
+                        <button
+                          onClick={() => setLightboxOpen(true)}
+                          className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white"
+                        >
+                          <ZoomIn className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Prev/Next arrows */}
+                    {mediaItems.length > 1 && (
+                      <>
+                        <button
+                          onClick={() => setActiveMedia(i => (i - 1 + mediaItems.length) % mediaItems.length)}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={() => setActiveMedia(i => (i + 1) % mediaItems.length)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white transition"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </>
+                    )}
+
+                    {/* Slide counter */}
+                    {mediaItems.length > 1 && (
+                      <div className="absolute bottom-3 right-3 bg-black/60 rounded-md px-2 py-0.5 text-xs text-white font-medium">
+                        {activeMedia + 1} / {mediaItems.length}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Thumbnail strip */}
+                  {mediaItems.length > 1 && (
+                    <div className="flex gap-2 mt-2 overflow-x-auto pb-1">
+                      {mediaItems.map((item, i) => {
+                        const tid = getYouTubeId(item);
+                        const thumb = tid
+                          ? `https://img.youtube.com/vi/${tid}/mqdefault.jpg`
+                          : item;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => setActiveMedia(i)}
+                            className={`flex-shrink-0 w-16 h-11 rounded-lg overflow-hidden border-2 transition ${i === activeMedia ? 'border-blue-500' : 'border-neutral-700 hover:border-neutral-500'}`}
+                          >
+                            <img src={thumb} alt="" className="w-full h-full object-cover" />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Lightbox */}
+                  {lightboxOpen && !isVideo && (
+                    <div
+                      className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4"
+                      onClick={() => setLightboxOpen(false)}
+                    >
+                      <img
+                        src={cur}
+                        alt={pkg.name}
+                        className="max-w-full max-h-full object-contain rounded-xl"
+                        onClick={e => e.stopPropagation()}
+                      />
+                      <button
+                        onClick={() => setLightboxOpen(false)}
+                        className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                      {mediaItems.length > 1 && (
+                        <>
+                          <button
+                            onClick={e => { e.stopPropagation(); setActiveMedia(i => (i - 1 + mediaItems.length) % mediaItems.length); }}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <button
+                            onClick={e => { e.stopPropagation(); setActiveMedia(i => (i + 1) % mediaItems.length); }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Details */}
