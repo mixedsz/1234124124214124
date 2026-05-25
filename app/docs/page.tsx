@@ -190,6 +190,21 @@ export default function DocsIntroPage() {
               </StepperStep>
             </div>
 
+            {/* Discord CTA */}
+            <div className="mt-4 pt-8 border-t border-neutral-800">
+              <p className="text-neutral-500 text-sm">
+                If you need more help, join our Discord:{' '}
+                <a
+                  href="https://discord.gg/flakedev"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:text-blue-300 underline transition"
+                >
+                  discord.gg/flakedev
+                </a>
+              </p>
+            </div>
+
             {/* Footer nav */}
             <div className="flex items-center justify-end mt-10">
               <Link
