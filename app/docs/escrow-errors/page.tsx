@@ -229,13 +229,6 @@ export default function EscrowErrorsPage() {
                 <ChevronRight className="w-4 h-4 rotate-180" />
                 Previous: Introduction
               </Link>
-              <Link
-                href="/support"
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 border border-blue-600/30 text-blue-400 text-sm font-semibold transition"
-              >
-                Still stuck? Open a ticket
-                <ExternalLink className="w-4 h-4" />
-              </Link>
             </div>
           </div>
         </main>

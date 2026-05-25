@@ -205,8 +205,7 @@ export default function DocsIntroPage() {
             </div>
 
             {/* Footer nav */}
-            <div className="flex items-center justify-between mt-10">
-              <div />
+            <div className="flex items-center justify-end mt-10">
               <Link
                 href="/docs/escrow-errors"
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 hover:text-white text-sm font-medium transition"
