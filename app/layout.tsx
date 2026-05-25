@@ -35,35 +35,6 @@ export default function RootLayout({
       <head>
         <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
-          // Prevent Google Translate from translating the page title
-          (function() {
-            var t = document.querySelector('title');
-            if (t) t.setAttribute('translate', 'no');
-          })();
-
-          // Block GT "Original text" balloon (#goog-gt-tt).
-          // GT pre-creates the element hidden then shows it by mutating its inline style,
-          // so we lock it by watching its style attribute directly.
-          (function() {
-            function lockGTTooltip(el) {
-              el.style.cssText = 'display:none!important';
-              new MutationObserver(function() {
-                el.style.cssText = 'display:none!important';
-              }).observe(el, { attributes: true, attributeFilter: ['style'] });
-            }
-            function findAndLock() {
-              var el = document.getElementById('goog-gt-tt');
-              if (el) { lockGTTooltip(el); return; }
-              var bodyObs = new MutationObserver(function(_, obs) {
-                var found = document.getElementById('goog-gt-tt');
-                if (found) { lockGTTooltip(found); obs.disconnect(); }
-              });
-              bodyObs.observe(document.body, { childList: true, subtree: true });
-            }
-            if (document.body) { findAndLock(); }
-            else { document.addEventListener('DOMContentLoaded', findAndLock); }
-          })();
-
           window.googleTranslateElementInit = function() {
             new google.translate.TranslateElement({
               pageLanguage: 'en',
