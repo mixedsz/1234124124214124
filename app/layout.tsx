@@ -35,6 +35,40 @@ export default function RootLayout({
       <head>
         <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
+          // Prevent Google Translate from translating the page title
+          (function() {
+            var t = document.querySelector('title');
+            if (t) t.setAttribute('translate', 'no');
+          })();
+
+          // Nuke the GT "Original text" balloon as soon as it's added to the DOM
+          (function() {
+            var observer = new MutationObserver(function(mutations) {
+              mutations.forEach(function(m) {
+                m.addedNodes.forEach(function(node) {
+                  if (node.nodeType !== 1) return;
+                  var el = node;
+                  var id = el.id || '';
+                  var cls = (el.className && typeof el.className === 'string') ? el.className : '';
+                  if (
+                    id === 'goog-gt-tt' ||
+                    cls.indexOf('goog-te-balloon') !== -1 ||
+                    cls.indexOf('goog-tooltip') !== -1 ||
+                    cls.indexOf('goog-te-bubble') !== -1
+                  ) {
+                    el.style.cssText = 'display:none!important';
+                  }
+                  // Also check children (GT sometimes nests inside a wrapper)
+                  var inner = el.querySelectorAll && el.querySelectorAll('#goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip, .goog-te-bubble');
+                  if (inner) inner.forEach(function(n) { n.style.cssText = 'display:none!important'; });
+                });
+              });
+            });
+            document.addEventListener('DOMContentLoaded', function() {
+              observer.observe(document.body, { childList: true, subtree: true });
+            });
+          })();
+
           window.googleTranslateElementInit = function() {
             new google.translate.TranslateElement({
               pageLanguage: 'en',
