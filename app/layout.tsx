@@ -38,6 +38,13 @@ export default function RootLayout({
           (function() {
             var t = document.querySelector('title');
             if (t) t.setAttribute('translate', 'no');
+            document.addEventListener('mouseover', function(e) {
+              var el = e.target;
+              if (el && el.classList && el.classList.contains('goog-text-highlight')) {
+                el.style.setProperty('background-color', 'transparent', 'important');
+                el.style.setProperty('box-shadow', 'none', 'important');
+              }
+            }, false);
           })();
           window.googleTranslateElementInit = function() {
             new google.translate.TranslateElement({

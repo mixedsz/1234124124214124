@@ -202,6 +202,17 @@ span.goog-text-highlight {
   outline: none !important;
 }
 
+/* Prevent GT from detecting hover on translated font elements (kills highlight at source) */
+.translated-ltr font,
+.translated-rtl font {
+  pointer-events: none !important;
+}
+/* Re-enable pointer events on links inside translated content */
+.translated-ltr font a,
+.translated-rtl font a {
+  pointer-events: auto !important;
+}
+
 /* Status indicator */
 .sf-status {
   display: inline-flex;
