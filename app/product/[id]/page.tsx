@@ -164,6 +164,11 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
         new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'),
         '$1'
       );
+      // Pass 1c: bare inline heading (no block wrapper) e.g. <strong>Dependencies</strong><br>
+      stripped = stripped.replace(
+        new RegExp(`(?:<(?:strong|b|em|i|span)[^>]*>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/(?:strong|b|em|i|span)>)*\\s*<br\\s*/?>\\s*`, 'gi'),
+        ''
+      );
 
       for (const item of items) {
         const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -240,6 +245,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
   const [pendingAutoAdd, setPendingAutoAdd] = useState(false);
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const [fiveMToastUsername, setFiveMToastUsername] = useState<string | null>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
   const handleAddToCartRef = useRef<() => void>(() => {});
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
@@ -311,6 +318,22 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     }
   }, [basket?.ident, discordLinkedParam, discordIdParam, refreshBasket]);
 
+  // Detect return from FiveM auth — no URL params, use localStorage flag
+  useEffect(() => {
+    if (!isAuthenticated || !username) return;
+    const pending = localStorage.getItem('tebex_fivem_auth_pending');
+    if (!pending) return;
+    localStorage.removeItem('tebex_fivem_auth_pending');
+    setFiveMToastUsername(username);
+    setFiveMToast(true);
+    setTimeout(() => setFiveMToast(false), 4000);
+    const pendingPkg = localStorage.getItem('tebex_pending_add_pkg');
+    if (pendingPkg) {
+      localStorage.removeItem('tebex_pending_add_pkg');
+      setPendingAutoAdd(true);
+    }
+  }, [isAuthenticated, username]);
+
   useEffect(() => {
     const loadPackage = async () => {
       try {
@@ -370,6 +393,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       const returnUrl = `${window.location.origin}${window.location.pathname}`;
       const authUrl = await getAuthUrl(ident, returnUrl);
       if (!authUrl) throw new Error('Could not get authentication URL. Please try again.');
+      localStorage.setItem('tebex_fivem_auth_pending', '1');
       window.location.replace(authUrl);
     } catch (err) {
       setLoginError(err instanceof Error ? err.message : 'An unexpected error occurred.');
@@ -411,6 +435,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     if (!pkg) return;
 
     if (!isAuthenticated) {
+      if (pkg) localStorage.setItem('tebex_pending_add_pkg', String(pkg.id));
       setShowLoginModal(true);
       return;
     }
@@ -468,12 +493,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   // Keep ref in sync so the auto-add effect always has the latest version
   useEffect(() => { handleAddToCartRef.current = handleAddToCart; }, [handleAddToCart]);
 
-  // After Discord connect, auto-add if there was a pending intent
+  // After Discord/FiveM connect, auto-add if there was a pending intent
   useEffect(() => {
-    if (!pendingAutoAdd || !discordLinked || !pkg) return;
+    if (!pendingAutoAdd || !pkg) return;
+    if (needsDiscord && !discordLinked) return;
     setPendingAutoAdd(false);
     setTimeout(() => handleAddToCartRef.current(), 100);
-  }, [pendingAutoAdd, discordLinked, pkg]);
+  }, [pendingAutoAdd, needsDiscord, discordLinked, pkg]);
 
   if (loading) {
     return (
@@ -993,8 +1019,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       {(added || giftAdded) && (
         <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
           <div className="w-full max-w-md pointer-events-auto animate-in slide-in-from-top-3 duration-300 drop-shadow-2xl">
-            <div className="bg-neutral-900 border border-neutral-700 rounded-2xl overflow-hidden shadow-2xl">
-              <div className="h-0.5 bg-gradient-to-r from-green-500 via-blue-500 to-blue-600" />
+            <div className="bg-neutral-900 border border-blue-600/40 rounded-2xl overflow-hidden shadow-2xl">
               <div className="p-4">
                 <div className="flex items-start gap-3">
                   {pkg?.image ? (
@@ -1082,6 +1107,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           <div>
             <p className="text-white font-semibold text-sm">Discord Connected!</p>
             <p className="text-[#7289da] text-xs mt-0.5">{discordId ? `Account ID: ${discordId}` : 'Your account has been linked'}</p>
+          </div>
+        </div>
+      )}
+
+      {/* FiveM connected toast */}
+      {fiveMToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-red-600/20 border border-red-500/40 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
+          <svg width="20" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-red-400 flex-shrink-0" style={{ fill: 'currentColor' }}>
+            <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
+          </svg>
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-red-300 text-xs mt-0.5">{fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}</p>
           </div>
         </div>
       )}
