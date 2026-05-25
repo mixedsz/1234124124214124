@@ -35,6 +35,10 @@ export default function RootLayout({
       <head>
         <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var t = document.querySelector('title');
+            if (t) t.setAttribute('translate', 'no');
+          })();
           window.googleTranslateElementInit = function() {
             new google.translate.TranslateElement({
               pageLanguage: 'en',
