@@ -139,11 +139,19 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
       if (lineText === hLower || lineText === hLowerSingular) { headIdx = i; break; }
     }
 
+    // Known section headings — stop collecting when we hit another section
+    const KNOWN_SECTIONS = new Set([
+      'requirements', 'requirement', 'dependencies', 'dependency',
+      'compatible with', 'compatible', 'compatibles',
+      'framework', 'frameworks', 'preview',
+    ]);
+
     if (headIdx >= 0) {
       for (let i = headIdx + 1; i < lines.length; i++) {
         const l = lines[i];
-        // Stop at next section: Capital+colon, or [Bracketed heading]
-        if (/^[A-Z][^:]{0,40}:\s*$/.test(l) || /^\[.+\]$/.test(l)) break;
+        const normalized = l.replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
+        // Stop at next section: Capital+colon, [Bracketed], or a known section name
+        if (/^[A-Z][^:]{0,40}:\s*$/.test(l) || /^\[.+\]$/.test(l) || KNOWN_SECTIONS.has(normalized)) break;
         const clean = l.replace(/^[-*•]\s*/, '').trim();
         if (clean.length > 0) items.push(clean);
         if (items.length >= 12) break;
@@ -192,6 +200,16 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
         stripped = stripped.replace(
           new RegExp(`(<(?:p|div)[^>]*>)\\s*[-*•]?\\s*${iEsc}\\s*(?:<br\\s*/?>)?\\s*`, 'gi'),
           '$1'
+        );
+      }
+
+      // Nuclear pass: remove any item text that survived all other passes
+      for (const item of items) {
+        if (!stripped.includes(item)) continue;
+        const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        stripped = stripped.replace(
+          new RegExp(`(?:<(?:strong|b|em|i|span)[^>]*>)*[-*•]?\\s*${iEsc}\\s*(?:<\\/(?:strong|b|em|i|span)>)*(?:<br\\s*/?>)?`, 'gi'),
+          ''
         );
       }
 
@@ -674,7 +692,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   {/* Lightbox */}
                   {lightboxOpen && !isVideo && (
                     <div
-                      className="fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4"
+                      className="fixed inset-0 z-[99999] bg-black flex items-center justify-center p-4"
                       onClick={() => setLightboxOpen(false)}
                     >
                       <img
@@ -1022,7 +1040,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       <Footer />
 
       {/* Cart added notification — drops down from top */}
-      {(added || giftAdded) && (
+      {(added || giftAdded) && !lightboxOpen && (
         <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
           <div className="w-full max-w-md pointer-events-auto animate-in slide-in-from-top-3 duration-300 drop-shadow-2xl">
             <div className="bg-neutral-900 border border-blue-600/40 rounded-2xl overflow-hidden shadow-2xl">
@@ -1077,7 +1095,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       )}
 
       {/* Sticky bottom bar — appears when Add to Cart scrolls out of view */}
-      {showStickyBar && (
+      {showStickyBar && !lightboxOpen && (
         <div className="fixed bottom-0 inset-x-0 z-40 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800 py-3 animate-in slide-in-from-bottom-2 duration-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">

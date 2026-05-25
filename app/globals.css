@@ -262,3 +262,10 @@ span.goog-text-highlight {
 .docs-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Hide scrollbar arrow buttons globally */
+::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
