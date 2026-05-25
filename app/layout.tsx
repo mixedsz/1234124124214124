@@ -7,6 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://flakedev.store'),
   title: {
     default: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
     template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
@@ -18,6 +19,16 @@ export const metadata: Metadata = {
       { url: '/fd-favicon.png', type: 'image/png' },
     ],
     apple: '/fd-favicon.png',
+  },
+  openGraph: {
+    title: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+    description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
+    images: [{ url: '/fd-wordmark.png', width: 1200, height: 400 }],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/fd-wordmark.png'],
   },
 }
 

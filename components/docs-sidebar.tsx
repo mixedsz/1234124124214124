@@ -285,7 +285,7 @@ export function DocsSidebar() {
   }
 
   return (
-    <div className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-neutral-800">
+    <div className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-blue-500/20 bg-blue-950/10">
       <aside className="flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4 docs-scrollbar">
         {/* Brand label */}
         <div className="mb-4 px-2">

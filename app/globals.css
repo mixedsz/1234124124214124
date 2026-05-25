@@ -265,7 +265,6 @@ span.goog-text-highlight {
 
 /* Hide scrollbar arrow buttons globally */
 ::-webkit-scrollbar-button {
-  display: none;
   height: 0;
   width: 0;
 }

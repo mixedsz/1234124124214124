@@ -117,14 +117,69 @@ function getReqType(item: string): ReqType {
   return 'default';
 }
 
+const KNOWN_SECTIONS = new Set([
+  'requirements', 'requirement', 'dependencies', 'dependency',
+  'compatible with', 'compatible', 'compatibles',
+  'framework', 'frameworks', 'preview',
+]);
+
 function extractSection(raw: string, heading: string): { items: string[]; stripped: string } {
   const items: string[] = [];
   const hClean = heading.replace(/\?$/, '');
   const hLower = hClean.toLowerCase();
   const hLowerSingular = hLower.endsWith('s') ? hLower.slice(0, -1) : hLower;
 
+  const matchHead = (text: string) => {
+    const t = text.replace(/[:\s]+$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
+    return t === hLower || t === hLowerSingular;
+  };
+
+  const isNextSection = (text: string) => {
+    const t = text.replace(/[:\s]+$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
+    return KNOWN_SECTIONS.has(t) || /^[A-Z][^:]{0,40}:\s*$/.test(text.trim());
+  };
+
   if (/<[a-z]/i.test(raw)) {
-    // Convert HTML to plain text for reliable line-based parsing
+    // DOM-based primary path — always runs in browser since pkg is fetched client-side
+    if (typeof document !== 'undefined') {
+      const wrap = document.createElement('div');
+      wrap.innerHTML = raw;
+      const children = Array.from(wrap.children) as Element[];
+
+      let headEl: Element | null = null;
+      for (const el of children) {
+        if (matchHead(el.textContent ?? '')) { headEl = el; break; }
+      }
+
+      if (headEl) {
+        const toRemove: Element[] = [headEl];
+        let sibling = headEl.nextElementSibling;
+
+        while (sibling) {
+          const text = (sibling.textContent ?? '').trim();
+          const inner = sibling.innerHTML.trim().toLowerCase();
+          if (!text || inner === '<br>' || inner === '<br/>') {
+            toRemove.push(sibling);
+            sibling = sibling.nextElementSibling;
+            continue;
+          }
+          if (isNextSection(text)) break;
+          const clean = text.replace(/^[-*•]\s*/, '').trim();
+          if (clean) { items.push(clean); toRemove.push(sibling); }
+          if (items.length >= 12) break;
+          sibling = sibling.nextElementSibling;
+        }
+
+        if (items.length > 0) {
+          for (const el of toRemove) el.parentNode?.removeChild(el);
+          return { items, stripped: wrap.innerHTML.trim() };
+        }
+      }
+
+      return { items: [], stripped: raw };
+    }
+
+    // Regex fallback (SSR path — pkg is null so this never runs, but kept for safety)
     const plain = raw
       .replace(/<br\s*\/?>/gi, '\n')
       .replace(/<\/(?:p|div|li|ul|ol|h[1-6])>\s*/gi, '\n')
@@ -134,23 +189,14 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     const lines = plain.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     let headIdx = -1;
     for (let i = 0; i < lines.length; i++) {
-      // Strip surrounding brackets (e.g. [Compatible with]) and trailing colon before comparing
       const lineText = lines[i].replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
       if (lineText === hLower || lineText === hLowerSingular) { headIdx = i; break; }
     }
-
-    // Known section headings — stop collecting when we hit another section
-    const KNOWN_SECTIONS = new Set([
-      'requirements', 'requirement', 'dependencies', 'dependency',
-      'compatible with', 'compatible', 'compatibles',
-      'framework', 'frameworks', 'preview',
-    ]);
 
     if (headIdx >= 0) {
       for (let i = headIdx + 1; i < lines.length; i++) {
         const l = lines[i];
         const normalized = l.replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
-        // Stop at next section: Capital+colon, [Bracketed], or a known section name
         if (/^[A-Z][^:]{0,40}:\s*$/.test(l) || /^\[.+\]$/.test(l) || KNOWN_SECTIONS.has(normalized)) break;
         const clean = l.replace(/^[-*•]\s*/, '').trim();
         if (clean.length > 0) items.push(clean);
@@ -161,59 +207,21 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     if (items.length > 0) {
       const headEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       let stripped = raw;
-
-      // Pass 1a: heading as standalone block (<p>[Heading]</p>)
       stripped = stripped.replace(
-        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
-        ''
+        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'), ''
       );
-      // Pass 1b: heading inline at start of block followed by <br> (<p><strong>[Heading]</strong><br>items)
       stripped = stripped.replace(
-        new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'),
-        '$1'
+        new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'), '$1'
       );
-      // Pass 1c: entire bare-inline section — heading (inline-tagged or bare) + <br>-separated items
-      // Matches e.g. <strong>Dependencies</strong><br>- ox_lib<br>- wasabi_crutch...
-      const itemAlts = items.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-      stripped = stripped.replace(
-        new RegExp(
-          `(?:<(?:strong|b|em|i|span)[^>]*>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/(?:strong|b|em|i|span)>)*` +
-          `(?:\\s*<br\\s*/?>\\s*(?:<(?:strong|b|em|i|span)[^>]*>)*[-*•]?\\s*(?:${itemAlts})\\s*(?:<\\/(?:strong|b|em|i|span)>)*)+`,
-          'gi'
-        ),
-        ''
-      );
-
       for (const item of items) {
         const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // Pass 2a: item as standalone block element
         stripped = stripped.replace(
-          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
-          ''
+          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'), ''
         );
-        // Pass 2b: item preceded by <br> within a block
         stripped = stripped.replace(
-          new RegExp(`<br\\s*/?>\\s*(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*`, 'gi'),
-          ''
-        );
-        // Pass 2c: item at very start of block (left there after heading removal)
-        stripped = stripped.replace(
-          new RegExp(`(<(?:p|div)[^>]*>)\\s*[-*•]?\\s*${iEsc}\\s*(?:<br\\s*/?>)?\\s*`, 'gi'),
-          '$1'
+          new RegExp(`<br\\s*/?>\\s*(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*`, 'gi'), ''
         );
       }
-
-      // Nuclear pass: remove any item text that survived all other passes
-      for (const item of items) {
-        if (!stripped.includes(item)) continue;
-        const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        stripped = stripped.replace(
-          new RegExp(`(?:<(?:strong|b|em|i|span)[^>]*>)*[-*•]?\\s*${iEsc}\\s*(?:<\\/(?:strong|b|em|i|span)>)*(?:<br\\s*/?>)?`, 'gi'),
-          ''
-        );
-      }
-
-      // Clean up empty containers
       stripped = stripped.replace(/<(?:ul|ol)[^>]*>\s*<\/(?:ul|ol)>/gi, '');
       stripped = stripped.replace(/<(?:p|div)[^>]*>\s*<\/(?:p|div)>/gi, '');
       return { items, stripped: stripped.trim() };
