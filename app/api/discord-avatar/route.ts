@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 export const runtime = 'nodejs';
 
 async function resolveAvatarUrl(id: string): Promise<string | null> {
+  // Allow a hardcoded env override for the site owner (avoids needing the bot token on the website)
+  if (process.env.OWNER_DISCORD_ID === id && process.env.OWNER_AVATAR_URL) {
+    return process.env.OWNER_AVATAR_URL;
+  }
+
   const token = process.env.DISCORD_BOT_TOKEN;
   if (!token) return null;
   try {

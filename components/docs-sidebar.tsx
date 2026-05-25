@@ -104,7 +104,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake Bodybag',
-        href: '/docs/flake-bodybag',
+        href: '/docs/flake_bodybag',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
@@ -117,7 +117,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake Loading Screen',
-        href: '/docs/flake-loading',
+        href: '/docs/flake_loading',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
@@ -128,7 +128,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake Physical Therapy',
-        href: '/docs/flake-physicaltherapy',
+        href: '/docs/flake_physicaltherapy',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
@@ -141,7 +141,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake One-Hand Weapons',
-        href: '/docs/flake-onehandweapon',
+        href: '/docs/flake_onehandweapon',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
@@ -152,7 +152,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake Blackmarkets',
-        href: '/docs/flake-blackmarkets',
+        href: '/docs/flake_blackmarkets',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
@@ -164,7 +164,7 @@ const NAV: NavGroup[] = [
       },
       {
         title: 'Flake Wearables',
-        href: '/docs/flake-wearables',
+        href: '/docs/flake_wearables',
         sections: [
           { label: 'Overview', id: 'overview' },
           { label: 'Installation', id: 'installation' },
