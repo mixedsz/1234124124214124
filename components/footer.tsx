@@ -281,6 +281,19 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
             <p className="text-xs text-neutral-500 text-center mt-2">
               Our checkout process is owned & operated by Tebex Limited, who handle product fulfillment, billing support and refunds. Displayed prices may be estimates using a conversion rate; updated prices will be shown in your checkout before purchase.
             </p>
+            <div className="flex justify-center mt-6">
+              <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition">
+                <img
+                  src="/api/discord-avatar?id=498945637539381252"
+                  alt="flakedev"
+                  className="w-7 h-7 rounded-full flex-shrink-0 object-cover"
+                />
+                <div className="flex flex-col leading-none">
+                  <span className="text-[9px] text-neutral-500 uppercase tracking-widest">Designed &amp; Built by</span>
+                  <span className="text-xs font-bold text-white mt-0.5 tracking-wide">FLAKE</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
