@@ -26,33 +26,7 @@ async function fetchYouTubeRSS(channelId: string): Promise<{ videoId: string; ti
 }
 
 async function getLatestYouTubeVideo(): Promise<{ videoId: string; title: string } | null> {
-  // Use hardcoded channel ID if set in env (most reliable — avoids scraping)
-  const envChannelId = process.env.YOUTUBE_CHANNEL_ID;
-  if (envChannelId) {
-    try { return await fetchYouTubeRSS(envChannelId); } catch {}
-  }
-
-  // Try scraping the channel page for the ID
-  try {
-    const channelRes = await fetch('https://www.youtube.com/@flakedevelopment', {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-      },
-      next: { revalidate: 3600 },
-    });
-    if (channelRes.ok) {
-      const html = await channelRes.text();
-      const idMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/);
-      if (idMatch) {
-        const result = await fetchYouTubeRSS(idMatch[1]);
-        if (result) return result;
-      }
-    }
-  } catch {}
-
-  return null;
+  return fetchYouTubeRSS('UChl49qE7X_bOhdZmO6Hv4EA');
 }
 
 const REVIEWS = [
@@ -406,34 +380,32 @@ export default async function HomePage() {
                     key={i}
                     className="w-[300px] lg:w-[340px] flex-shrink-0 flex flex-col bg-[#1e1f22] border border-white/[0.06] rounded-2xl p-5 shadow-lg"
                   >
-                    {/* Header: avatar+name on left, stars on right */}
-                    <div className="flex items-center justify-between mb-4">
-                      {/* Avatar stacked above name */}
-                      <div className="flex flex-col items-center gap-1.5">
-                        {avatarSrc ? (
-                          <img
-                            src={avatarSrc}
-                            alt={name}
-                            className="w-11 h-11 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <div className={`w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-base ring-2 ring-white/10 ${avatarBg(name)}`}>
-                            {name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <span className="text-white/90 font-semibold text-[11px] leading-tight max-w-[80px] text-center truncate">{name}</span>
-                      </div>
-                      {/* Stars */}
-                      <div className="flex gap-0.5">
-                        {[1,2,3,4,5].map(s => (
-                          <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        ))}
+                    {/* Avatar + name + stars — all left-aligned */}
+                    <div className="flex items-start gap-3 mb-4">
+                      {avatarSrc ? (
+                        <img
+                          src={avatarSrc}
+                          alt={name}
+                          className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10 mt-0.5"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/10 mt-0.5 ${avatarBg(name)}`}>
+                          {name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-white font-semibold text-sm leading-tight truncate max-w-[200px]">{name}</p>
+                        <div className="flex gap-0.5 mt-1.5">
+                          {[1,2,3,4,5].map(s => (
+                            <Star key={s} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
                       </div>
                     </div>
 
                     {/* Review text */}
-                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-5 flex-1 italic">
+                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-5 flex-1">
                       &ldquo;{review.text}&rdquo;
                     </p>
 
