@@ -118,8 +118,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Review content must be 1000 characters or less' }, { status: 400 });
   }
 
+  const reviewId = body.id || `${Date.now()}-${discord_id}`;
+  const createdAt = body.created_at || new Date().toISOString();
+
   const review: Review = {
-    id: `${Date.now()}-${discord_id}`,
+    id: reviewId,
     discord_id,
     username,
     avatar_url: body.avatar_url,
@@ -128,11 +131,14 @@ export async function POST(request: NextRequest) {
     product_name: body.product_name,
     product_id: body.product_id,
     verified_purchase: body.verified_purchase ?? false,
-    created_at: new Date().toISOString(),
+    created_at: createdAt,
   };
 
   try {
     const reviews = await readReviews();
+    if (body.id && reviews.some(r => r.id === body.id)) {
+      return NextResponse.json({ error: 'Review already exists' }, { status: 409 });
+    }
     reviews.push(review);
     await writeReviews(reviews);
   } catch (err) {
@@ -143,14 +149,25 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, review }, { status: 201 });
 }
 
-// DELETE /api/reviews?id=...
+// DELETE /api/reviews?id=... OR DELETE /api/reviews?username=...
 export async function DELETE(request: NextRequest) {
-  const id = new URL(request.url).searchParams.get('id');
-  if (!id) {
-    return NextResponse.json({ error: 'Review id required' }, { status: 400 });
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  const username = searchParams.get('username');
+
+  if (!id && !username) {
+    return NextResponse.json({ error: 'Review id or username required' }, { status: 400 });
   }
 
   const reviews = await readReviews();
+
+  if (username) {
+    const updated = reviews.filter(r => r.username !== username);
+    const deleted = reviews.length - updated.length;
+    await writeReviews(updated);
+    return NextResponse.json({ success: true, deleted });
+  }
+
   const updated = reviews.filter(r => r.id !== id);
   if (updated.length === reviews.length) {
     return NextResponse.json({ error: 'Review not found' }, { status: 404 });
