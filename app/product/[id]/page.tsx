@@ -58,6 +58,43 @@ function getYouTubeId(url: string): string | null {
   return m?.[1] ?? null;
 }
 
+function buildMediaItems(pkg: TebexPackage): string[] {
+  const seen = new Set<string>();
+  const items: string[] = [];
+  const add = (url: string) => {
+    const normalized = url.trim();
+    if (normalized && !seen.has(normalized)) {
+      seen.add(normalized);
+      items.push(normalized);
+    }
+  };
+
+  // Images array (Tebex may return strings or objects)
+  if (pkg.images && pkg.images.length > 0) {
+    for (const img of pkg.images) {
+      if (typeof img === 'string') add(img);
+      else {
+        const obj = img as Record<string, string>;
+        add(obj.url ?? obj.src ?? obj.path ?? '');
+      }
+    }
+  }
+
+  // Single main image
+  if (pkg.image) add(pkg.image);
+
+  // YouTube URLs embedded in description (deduplicated)
+  if (pkg.description) {
+    const ytRe = /https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})[^\s<"]*/g;
+    let m: RegExpExecArray | null;
+    while ((m = ytRe.exec(pkg.description)) !== null) {
+      add(m[0].replace(/[)\].,;]+$/, ''));
+    }
+  }
+
+  return items;
+}
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -348,9 +385,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Media carousel */}
           <div>
             {(() => {
-              const mediaItems: string[] = pkg.images && pkg.images.length > 0
-                ? pkg.images
-                : pkg.image ? [pkg.image] : [];
+              const mediaItems = buildMediaItems(pkg);
               const cur = mediaItems[activeMedia] ?? '';
               const ytId = cur ? getYouTubeId(cur) : null;
               const isVideo = !!ytId;
