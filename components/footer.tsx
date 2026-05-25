@@ -156,7 +156,7 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
               </p>
 
               {/* Currency dropdown */}
-              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={dropdownRef}>
+              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={dropdownRef} translate="no">
                 <span>Currency:</span>
                 <button
                   onClick={() => setCurrencyOpen(o => !o)}
@@ -186,7 +186,7 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
               </div>
 
               {/* Language dropdown */}
-              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={langDropdownRef}>
+              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={langDropdownRef} translate="no">
                 <span>Language:</span>
                 <button
                   onClick={() => setLangOpen(o => !o)}
