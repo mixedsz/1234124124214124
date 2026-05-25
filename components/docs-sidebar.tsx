@@ -162,6 +162,17 @@ const NAV: NavGroup[] = [
           { label: 'Troubleshooting', id: 'troubleshooting' },
         ],
       },
+      {
+        title: 'Flake Wearables',
+        href: '/docs/flake-wearables',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Adding Items', id: 'adding-items' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
     ],
   },
   {

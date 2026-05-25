@@ -72,8 +72,16 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [ownerAvatar, setOwnerAvatar] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetch('/api/discord-avatar?id=498945637539381252&json=1')
+      .then(r => r.json())
+      .then(({ url }) => setOwnerAvatar(url ?? null))
+      .catch(() => setOwnerAvatar(null));
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('tebex_language');
@@ -283,11 +291,17 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
             </p>
             <div className="flex justify-center mt-6">
               <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition">
-                <img
-                  src="/api/discord-avatar?id=498945637539381252"
-                  alt="flakedev"
-                  className="w-7 h-7 rounded-full flex-shrink-0 object-cover"
-                />
+                {ownerAvatar ? (
+                  <img
+                    src={ownerAvatar}
+                    alt="flakedev"
+                    className="w-7 h-7 rounded-full flex-shrink-0 object-cover"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-[11px] font-bold select-none">
+                    F
+                  </div>
+                )}
                 <div className="flex flex-col leading-none">
                   <span className="text-[9px] text-neutral-500 uppercase tracking-widest">Designed &amp; Built by</span>
                   <span className="text-xs font-bold text-white mt-0.5 tracking-wide">FLAKE</span>

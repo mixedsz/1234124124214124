@@ -142,6 +142,15 @@ const SCRIPTS = [
     color: 'from-neutral-600/20 to-neutral-900/10',
     border: 'border-neutral-700/30',
   },
+  {
+    emoji: '👕',
+    title: 'Flake Wearables',
+    desc: 'Equippable accessories — chains, watches, bags, vests, decals and t-shirts via ox_lib context menu.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake-wearables',
+    color: 'from-purple-600/20 to-purple-900/10',
+    border: 'border-purple-700/30',
+  },
 ];
 
 export default function DocsIntroPage() {
