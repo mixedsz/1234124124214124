@@ -22,36 +22,14 @@ marked.use({
 function parseDescription(description: string): string {
   if (!description) return '';
 
-  // If already HTML, apply styling and also convert any inline markdown within it
+  // HTML from Tebex — convert any leftover **bold** markdown, let .prose CSS handle the rest
   if (description.includes('<p>') || description.includes('<br') || description.includes('<ul>')) {
-    return description
-      // Convert **bold** markdown that Tebex sometimes leaves in HTML descriptions
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
-      // Convert bare `- item` lines that aren't inside <ul> tags
-      .replace(/^- (.+)$/gm, '<span class="block ml-4 text-neutral-300 before:content-[\'•\'] before:mr-2">$1</span>')
-      .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
-      .replace(/<strong(?! class)/g, '<strong class="font-bold text-white"')
-      .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
-      .replace(/<li>/g, '<li class="text-neutral-300">');
+    return description.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   }
 
-  // Pre-process plain text / markdown: ensure blank line before list items
-  const processed = description
-    .replace(/(?<!\n)\n([-*] )/g, '\n\n$1');
-
-  // Parse as markdown
-  const html = marked.parse(processed, { async: false }) as string;
-
-  // Add styling classes
-  return html
-    .replace(/<a /g, '<a class="text-blue-400 hover:text-blue-300 underline" ')
-    .replace(/<strong>/g, '<strong class="font-bold text-white">')
-    .replace(/<ul>/g, '<ul class="list-disc list-inside space-y-1 my-2">')
-    .replace(/<li>/g, '<li class="text-neutral-300">')
-    .replace(/<h1>/g, '<h1 class="text-xl font-bold text-white mt-4 mb-2">')
-    .replace(/<h2>/g, '<h2 class="text-lg font-bold text-white mt-3 mb-2">')
-    .replace(/<h3>/g, '<h3 class="text-base font-bold text-white mt-2 mb-1">')
-    .replace(/<p>/g, '<p class="mb-2">');
+  // Markdown / plain text — ensure blank line before list items so marked parses them correctly
+  const processed = description.replace(/(?<!\n)\n([-*] )/g, '\n\n$1');
+  return marked.parse(processed, { async: false }) as string;
 }
 
 function getYouTubeId(url: string): string | null {
@@ -98,6 +76,21 @@ const KNOWN_DEP_URLS: Record<string, string> = {
   ak47_qbcrutch:        'https://menanak47.tebex.io/package/6419368',
   esx_ambulancejob:     'https://github.com/esx-framework/ESX-Legacy-Addons/tree/main/%5Besx_addons%5D/esx_ambulancejob',
 };
+
+const KNOWN_FRAMEWORK_URLS: Record<string, string> = {
+  esx:        'https://github.com/esx-framework/esx_core',
+  esextended: 'https://github.com/esx-framework/esx_core',
+  qbcore:     'https://github.com/qbcore-framework/qb-core',
+  qbox:       'https://github.com/Qbox-project/qbx_core',
+};
+
+function getFrameworkUrl(name: string): string | null {
+  const norm = name.toLowerCase().replace(/[-_/ ]/g, '');
+  for (const [key, url] of Object.entries(KNOWN_FRAMEWORK_URLS)) {
+    if (norm.includes(key)) return url;
+  }
+  return null;
+}
 
 function getDepUrl(item: string): string | null {
   const norm = item.toLowerCase().replace(/[-_ ]/g, '');
@@ -1056,15 +1049,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {frameworkItems.length > 0 && (
               <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
                 <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Framework</p>
-                <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
                   {frameworkItems.map((fw, i) => {
-                    const lo = fw.toLowerCase();
-                    const cls = lo.includes('esx') ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
-                      : lo.includes('qbox') ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/20'
-                      : lo.includes('qb') ? 'bg-red-500/15 text-red-400 border border-red-500/20'
-                      : 'bg-blue-500/15 text-blue-400 border border-blue-500/20';
+                    const url = getFrameworkUrl(fw);
+                    const label = fw.replace(/[()[\]]/g, '').trim();
                     return (
-                      <span key={i} className={`px-2.5 py-1 ${cls} text-xs font-semibold rounded-lg`}>{fw}</span>
+                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 flex-shrink-0">
+                          <path d="M14 4h6v6h-6z"/><path d="M4 14h6v6h-6z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                        </svg>
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
+                            {label}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
+                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

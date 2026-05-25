@@ -219,76 +219,30 @@ span.goog-text-highlight {
   50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
 }
 
-/* Prose styling for description markdown */
-.prose a {
-  color: rgb(96, 165, 250);
-  text-decoration: underline;
-}
-.prose a:hover {
-  color: rgb(147, 197, 253);
-}
-.prose strong {
-  color: white;
-  font-weight: 700;
-}
-.prose ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin: 0.5rem 0;
-}
-.prose li {
-  color: rgb(163, 163, 163);
-  margin: 0.25rem 0;
-}
-.prose p {
-  margin-bottom: 0.5rem;
-}
+/* Prose styling for description content */
+.prose a { color: rgb(96, 165, 250); text-decoration: underline; }
+.prose a:hover { color: rgb(147, 197, 253); }
+.prose strong { color: white; font-weight: 700; }
+.prose em { color: rgb(163, 163, 163); font-style: italic; }
+.prose ul { list-style-type: disc; padding-left: 1.5rem; margin: 0.5rem 0; }
+.prose ol { list-style-type: decimal; padding-left: 1.5rem; margin: 0.5rem 0; }
+.prose li { color: rgb(163, 163, 163); margin: 0.25rem 0; }
+.prose p { margin-bottom: 0.5rem; }
+.prose h1 { font-size: 1.25rem; font-weight: 700; color: white; margin: 1rem 0 0.5rem; }
+.prose h2 { font-size: 1.1rem; font-weight: 700; color: white; margin: 0.75rem 0 0.4rem; }
+.prose h3 { font-size: 1rem; font-weight: 600; color: white; margin: 0.5rem 0 0.25rem; }
 
-/* Global page scrollbar — must define ::-webkit-scrollbar first or button rules are ignored */
-html {
-  scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
-}
-html::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-html::-webkit-scrollbar-track {
-  background: #0a0a0a;
-}
-html::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-html::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-html::-webkit-scrollbar-button {
-  display: none;
-  height: 0;
-  width: 0;
-}
+/* Scrollbars — define ::-webkit-scrollbar before button/thumb or button rule is ignored */
+html { scrollbar-width: thin; scrollbar-color: #333 transparent; }
+html::-webkit-scrollbar { width: 8px; height: 8px; }
+html::-webkit-scrollbar-track { background: #0a0a0a; }
+html::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+html::-webkit-scrollbar-thumb:hover { background: #555; }
+html::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
 
-/* Docs sidebar scrollbar */
-.docs-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: #333 transparent;
-}
-.docs-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.docs-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.docs-scrollbar::-webkit-scrollbar-thumb {
-  background: #333;
-  border-radius: 4px;
-}
-.docs-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-.docs-scrollbar::-webkit-scrollbar-button {
-  display: none;
-  height: 0;
-  width: 0;
-}
+.docs-scrollbar { scrollbar-width: thin; scrollbar-color: #333 transparent; }
+.docs-scrollbar::-webkit-scrollbar { width: 4px; }
+.docs-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.docs-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+.docs-scrollbar::-webkit-scrollbar-thumb:hover { background: #555; }
+.docs-scrollbar::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
