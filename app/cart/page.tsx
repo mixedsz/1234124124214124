@@ -7,7 +7,7 @@ import { TEBEX_PROJECT_ID } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
 import Link from 'next/link';
 import { useState, useEffect, useCallback } from 'react';
-import { Trash2, ArrowLeft, AlertCircle, LogIn, X, Lock, Gift } from 'lucide-react';
+import { Trash2, ArrowLeft, AlertCircle, LogIn, X, Lock, Gift, TrendingUp } from 'lucide-react';
 
 // Declare Tebex global
 declare global {
@@ -31,6 +31,7 @@ export default function CartPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [upsellProducts, setUpsellProducts] = useState<Array<{ id: number; name: string; image?: string; base_price: number; total_price: number; discount: number; currency: string }>>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [discordLinked, setDiscordLinked] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -53,6 +54,16 @@ export default function CartPage() {
   const [giftCardCode, setGiftCardCode] = useState('');
   const [giftCardError, setGiftCardError] = useState<string | null>(null);
   const [giftCardSuccess, setGiftCardSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/upsell-products')
+      .then(r => r.json())
+      .then(data => {
+        const cartIds = new Set((basket?.packages || []).map((p) => p.id));
+        setUpsellProducts(data.filter((p: { id: number }) => !cartIds.has(p.id)).slice(0, 4));
+      })
+      .catch(() => {});
+  }, [basket?.packages]);
 
   // Restore Discord linked state from localStorage or Tebex ident return param
   useEffect(() => {
@@ -79,11 +90,13 @@ export default function CartPage() {
 
     try {
       // Initialize Tebex checkout with basket ident
+      const lang = typeof localStorage !== 'undefined' ? localStorage.getItem('tebex_language') : null;
       window.Tebex.checkout.init({
         ident: basket.ident,
         theme: 'dark',
         colors: [{ name: 'primary', color: '#3B82F6' }],
-      });
+        ...(lang ? { locale: lang } : {}),
+      } as Parameters<typeof window.Tebex.checkout.init>[0]);
 
       // Listen for checkout events
       window.Tebex.checkout.on('payment:complete', () => {
@@ -499,6 +512,54 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+        {/* Upsell: You Might Also Like */}
+        {upsellProducts.length > 0 && (
+          <div className="mt-16 pt-10 border-t border-neutral-800">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+                <TrendingUp className="w-4 h-4 text-blue-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white">You Might Also Like</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {upsellProducts.map(pkg => {
+                const price = pkg.discount > 0 ? Math.max(0, pkg.base_price - pkg.discount) : pkg.total_price;
+                return (
+                  <Link
+                    key={pkg.id}
+                    href={`/product/${pkg.id}`}
+                    className="group bg-neutral-950 rounded-xl border border-neutral-800 hover:border-blue-500/50 overflow-hidden transition-all duration-200"
+                  >
+                    <div className="aspect-video bg-neutral-800 overflow-hidden">
+                      {pkg.image ? (
+                        <img
+                          src={pkg.image}
+                          alt={pkg.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-2xl font-bold text-blue-500/40">{pkg.name.charAt(0)}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-3">
+                      <p className="text-white text-xs font-semibold line-clamp-1 group-hover:text-blue-400 transition-colors">{pkg.name}</p>
+                      <div className="flex items-baseline gap-1.5 mt-1">
+                        <span className="text-blue-400 text-sm font-bold">
+                          {price === 0 ? 'Free' : formatPrice(price)}
+                        </span>
+                        {pkg.discount > 0 && (
+                          <span className="text-neutral-600 text-xs line-through">{formatPrice(pkg.base_price)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </main>
 
       <Footer />

@@ -9,6 +9,36 @@ import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 export const revalidate = 60;
 
+async function getLatestYouTubeVideo(): Promise<{ videoId: string; title: string } | null> {
+  try {
+    const channelRes = await fetch('https://www.youtube.com/@flakedevelopment', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      next: { revalidate: 3600 },
+    });
+    if (!channelRes.ok) return null;
+    const html = await channelRes.text();
+    const idMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/);
+    if (!idMatch) return null;
+
+    const rssRes = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${idMatch[1]}`,
+      { next: { revalidate: 3600 } }
+    );
+    if (!rssRes.ok) return null;
+    const xml = await rssRes.text();
+
+    const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
+    const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
+    if (!videoIdMatch) return null;
+    return {
+      videoId: videoIdMatch[1],
+      title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
+    };
+  } catch {
+    return null;
+  }
+}
+
 const REVIEWS = [
   { text: "good and fast services im talking everything yu need highly recommend ‼️🔥", author: "@ImJustTeejayyll" },
   { text: "I've been buying scripts from Flake since I first started my server, and every single one has been straight 🔥. Flake recently presented an opportunity for the GW-inspired base, and me and my partner jumped on it right away. Between the open-source scripts and the custom ones he's built personally, the quality and attention to detail speak for themselves. I've seen the hours he puts in to perfect his work — dude's dedicated. Flake is a one-stop shop for anything you need to elevate your FiveM server. Can't recommend him enough. 💯", author: "@WAR" },
@@ -92,9 +122,10 @@ function fmtDate(s: string) {
 function isSnowflake(id: string) { return /^\d{17,19}$/.test(id); }
 
 export default async function HomePage() {
-  const [webstore, categories] = await Promise.all([
+  const [webstore, categories, latestVideo] = await Promise.all([
     getWebstore(),
     getCategories(),
+    getLatestYouTubeVideo().catch(() => null),
   ]);
 
   const storeName = webstore?.name || 'Flake Development';
@@ -141,40 +172,78 @@ export default async function HomePage() {
             <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-600/5 blur-[120px]" />
           </div>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
-            <div className="max-w-3xl">
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight text-balance">
-                The most popular scripts for your FiveM server.
-              </h1>
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <Link
-                  href="/scripts"
-                  className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-neutral-200 transition"
-                >
-                  Browse Scripts
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <Link
-                  href="/subscription"
-                  className="text-blue-400 hover:text-blue-300 transition text-sm font-medium"
-                >
-                  Get our full collection for $35/month.{' '}
-                  <span className="underline">Learn more →</span>
-                </Link>
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+              {/* Left: text + feature list */}
+              <div>
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-white leading-tight text-balance">
+                  The most popular scripts for your FiveM server.
+                </h1>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Link
+                    href="/scripts"
+                    className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-neutral-200 transition"
+                  >
+                    Browse Scripts
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
+                  <Link
+                    href="/subscription"
+                    className="text-blue-400 hover:text-blue-300 transition text-sm font-medium"
+                  >
+                    Get our full collection for $35/month.{' '}
+                    <span className="underline">Learn more →</span>
+                  </Link>
+                </div>
+
+                {/* Feature list */}
+                <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {FEATURES.map((f, i) => (
+                    <div key={i} className="flex gap-4 items-start">
+                      <div className="flex-shrink-0 text-blue-500">
+                        {f.icon}
+                      </div>
+                      <div>
+                        <p className="text-white font-bold text-base">{f.title}</p>
+                        <p className="text-neutral-500 text-sm mt-0.5">{f.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
-              {/* Feature list below browse button */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-6">
-                {FEATURES.map((f, i) => (
-                  <div key={i} className="flex gap-4 items-start">
-                    <div className="flex-shrink-0 text-blue-500">
-                      {f.icon}
+              {/* Right: Script Showcase video card */}
+              <div className="hidden lg:block">
+                <div className="bg-neutral-800/40 rounded-2xl overflow-hidden border border-neutral-700/60 shadow-2xl">
+                  {/* Card header */}
+                  <div className="flex items-center justify-between px-4 py-3 bg-neutral-800/80 border-b border-neutral-700/60">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded bg-red-600/20 flex items-center justify-center flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="text-red-400">
+                          <path d="M6 4l15 8l-15 8z"/>
+                        </svg>
+                      </div>
+                      <span className="text-white text-[11px] font-bold tracking-wider uppercase">Script Showcase</span>
                     </div>
-                    <div>
-                      <p className="text-white font-bold text-base">{f.title}</p>
-                      <p className="text-neutral-500 text-sm mt-0.5">{f.desc}</p>
-                    </div>
+                    <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded tracking-widest uppercase">LIVE DEMO</span>
                   </div>
-                ))}
+                  {/* Video */}
+                  <div className="aspect-video">
+                    <iframe
+                      src={latestVideo
+                        ? `https://www.youtube.com/embed/${latestVideo.videoId}`
+                        : 'https://www.youtube.com/embed/nU5cgB1Waro?si=9dh37UpGBy6P6cQf'}
+                      title={latestVideo?.title || 'Flake Development Script Showcase'}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      allowFullScreen
+                    />
+                  </div>
+                  {/* Caption */}
+                  <div className="px-4 py-3 text-center">
+                    <p className="text-neutral-400 text-xs italic">See our premium scripts in action</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
