@@ -134,7 +134,8 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     const lines = plain.split('\n').map(l => l.trim()).filter(l => l.length > 0);
     let headIdx = -1;
     for (let i = 0; i < lines.length; i++) {
-      const lineText = lines[i].replace(/:$/, '').trim().toLowerCase();
+      // Strip surrounding brackets (e.g. [Compatible with]) and trailing colon before comparing
+      const lineText = lines[i].replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
       if (lineText === hLower || lineText === hLowerSingular) { headIdx = i; break; }
     }
 
@@ -152,9 +153,9 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     if (items.length > 0) {
       const headEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       let stripped = raw;
-      // Remove heading block — handles <p><strong>heading</strong></p> and plain <p>heading</p>
+      // Remove heading block — handles <p><strong>heading</strong></p>, plain <p>heading</p>, and [bracketed] variants
       stripped = stripped.replace(
-        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*${headEsc}:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
+        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
         ''
       );
       for (const item of items) {
@@ -173,7 +174,7 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
   // Plain text / markdown fallback
   const hEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const textPat = new RegExp(
-    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?${hEsc}:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?){1,15})`,
+    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?\\[?${hEsc}\\]?:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?){1,15})`,
     'i'
   );
   const tm = raw.match(textPat);
@@ -811,24 +812,26 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
-              <button
-                onClick={handleAddToCart}
-                disabled={adding}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 text-white font-bold py-4 rounded-xl transition flex items-center justify-center gap-2"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                {adding ? 'Adding to Cart...' : isAuthenticated ? 'Add to Cart' : 'Login to Purchase'}
-              </button>
-
-              {!pkg.disable_gifting && (
+              <div className="flex gap-3">
                 <button
-                  onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); } else { setShowGiftModal(true); } }}
-                  className="w-full flex items-center justify-center gap-2 border border-neutral-700 hover:border-blue-500/50 bg-blue-600/5 hover:bg-blue-600/15 text-neutral-400 hover:text-blue-300 font-bold py-4 rounded-xl transition"
+                  onClick={handleAddToCart}
+                  disabled={adding}
+                  className="flex-1 bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 text-white font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2"
                 >
-                  <Gift className="w-4 h-4" />
-                  Gift
+                  <ShoppingCart className="w-5 h-5" />
+                  {adding ? 'Adding...' : isAuthenticated ? 'Add to Cart' : 'Login to Purchase'}
                 </button>
-              )}
+
+                {!pkg.disable_gifting && (
+                  <button
+                    onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); } else { setShowGiftModal(true); } }}
+                    className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl border border-neutral-700 hover:border-blue-500/50 bg-neutral-800/50 hover:bg-blue-600/10 text-neutral-300 hover:text-blue-300 font-semibold transition"
+                  >
+                    <Gift className="w-4 h-4" />
+                    Gift
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="my-6 border-t border-neutral-800" />
