@@ -524,7 +524,7 @@ export default function FlakeSmokingDocsPage() {
         </div>
       </div>
 
-      <Footer />
+      <Footer showCta={false} />
     </div>
   );
 }

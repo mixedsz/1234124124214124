@@ -251,7 +251,7 @@ export default function EscrowErrorsPage() {
         </div>
       </div>
 
-      <Footer />
+      <Footer showCta={false} />
     </div>
   );
 }

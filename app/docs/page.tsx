@@ -222,7 +222,7 @@ export default function DocsIntroPage() {
         </div>
       </div>
 
-      <Footer />
+      <Footer showCta={false} />
     </div>
   );
 }

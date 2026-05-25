@@ -7,6 +7,7 @@ import { useBasket } from '@/contexts/basket-context';
 
 interface FooterProps {
   storeName?: string;
+  showCta?: boolean;
 }
 
 const currencies = [
@@ -18,7 +19,7 @@ const currencies = [
   { code: 'PLN', flag: '🇵🇱', label: 'Polish Złoty' },
 ];
 
-export function Footer({ storeName = 'Flake Development' }: FooterProps) {
+export function Footer({ storeName = 'Flake Development', showCta = true }: FooterProps) {
   const { currency: selectedCurrency, setCurrency } = useCurrency();
   const { username } = useBasket();
   const [currencyOpen, setCurrencyOpen] = useState(false);
@@ -37,7 +38,7 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
   return (
     <footer className="bg-neutral-900 border-t border-neutral-800">
       {/* Support CTA Section */}
-      <div className="bg-neutral-900 py-16">
+      {showCta && <div className="bg-neutral-900 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-center py-12 px-10 rounded-3xl bg-gradient-to-br from-blue-950/60 to-neutral-900 border border-blue-900/20 text-center">
             <div className="bg-white/5 rounded-full relative w-[70px] h-[70px] p-[5px] mb-4 flex items-center justify-center">
@@ -60,7 +61,7 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
             </Link>
           </div>
         </div>
-      </div>
+      </div>}
 
       {/* Main Footer */}
       <div className="py-12 border-t border-neutral-800">
