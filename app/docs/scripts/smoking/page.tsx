@@ -2,7 +2,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
-import { ChevronRight, AlertTriangle, Info, Zap } from 'lucide-react';
+import { ChevronRight, AlertTriangle, Info, Zap, Check } from 'lucide-react';
 import { CodeBlock } from '@/components/docs-code-block';
 
 // ── Primitives ────────────────────────────────────────────────────────────────
