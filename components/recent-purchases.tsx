@@ -78,25 +78,20 @@ export function RecentPurchases() {
                 <div
                   key={i}
                   title={b.username}
-                  className="flex-shrink-0 flex flex-col items-center gap-1.5"
+                  className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-neutral-800"
                 >
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-neutral-800">
-                    {b.avatarUrl ? (
-                      <img
-                        src={b.avatarUrl}
-                        alt={b.username}
-                        className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
-                      />
-                    ) : (
-                      <div className={`w-full h-full flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}>
-                        {b.username.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                  </div>
-                  <span className="text-neutral-500 text-[10px] font-medium truncate max-w-[64px] text-center">
-                    {b.username}
-                  </span>
+                  {b.avatarUrl ? (
+                    <img
+                      src={b.avatarUrl}
+                      alt={b.username}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className={`w-full h-full flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}>
+                      {b.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
               ))}
         </div>
