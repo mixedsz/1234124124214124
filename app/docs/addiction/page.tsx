@@ -112,7 +112,7 @@ export default function FlakeAddictionDocsPage() {
               <ChevronRight className="w-3 h-3" />
               <Link href="/docs" className="hover:text-neutral-400 transition">Documentation</Link>
               <ChevronRight className="w-3 h-3" />
-              <Link href="/docs/scripts/addiction" className="hover:text-neutral-400 transition">Scripts</Link>
+              <Link href="/docs/addiction" className="hover:text-neutral-400 transition">Scripts</Link>
               <ChevronRight className="w-3 h-3" />
               <span className="text-neutral-400">Flake Addiction</span>
             </div>

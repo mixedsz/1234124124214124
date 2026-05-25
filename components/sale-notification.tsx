@@ -51,12 +51,10 @@ export function SaleNotification() {
   if (!visible || products.length === 0) return null;
 
   const p = products[index];
-  const pct = Math.round(p.discount);
-  // Use total_price if it's genuinely discounted, otherwise derive from percentage
-  const discountedPrice = p.total_price < p.base_price
-    ? p.total_price
-    : p.base_price * (1 - p.discount / 100);
-  const save = p.base_price - discountedPrice;
+  // discount = dollar amount off (Tebex Headless API absolute value)
+  const discountedPrice = Math.max(0, p.base_price - p.discount);
+  const save = p.discount;
+  const pct = Math.round((p.discount / p.base_price) * 100);
 
   return (
     <div className="fixed bottom-6 right-6 z-50 w-72 bg-neutral-900 border border-neutral-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">

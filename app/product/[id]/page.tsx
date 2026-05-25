@@ -3,7 +3,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getPackage, TebexPackage, TebexPackageVariable, createBasket, getAuthUrl, addToBasket } from '@/lib/tebex';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ShoppingCart, AlertCircle, Check, Gift, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
@@ -108,6 +108,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [activeMedia, setActiveMedia] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const actionsRef = useRef<HTMLDivElement>(null);
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
@@ -130,6 +132,14 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [lightboxOpen]);
+
+  useEffect(() => {
+    const el = actionsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(([entry]) => setShowStickyBar(!entry.isIntersecting), { threshold: 0 });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [pkg?.id]);
 
   // Handle return from Tebex Discord ident via our ident-callback
   const discordLinkedParam = searchParams.get('discord_linked') === '1';
@@ -346,6 +356,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   }
 
   const hasDiscount = pkg.discount > 0;
+  // discount field = dollar amount off (not percentage)
+  const salePrice = hasDiscount ? Math.max(0, pkg.base_price - pkg.discount) : pkg.total_price;
   const parsedDescription = parseDescription(pkg.description);
 
   return (
@@ -520,7 +532,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="mb-8 pb-8 border-b border-neutral-800">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-black text-white">
-                  {pkg.total_price === 0 ? 'Free' : formatPrice(pkg.total_price)}
+                  {salePrice === 0 ? 'Free' : formatPrice(salePrice)}
                 </span>
                 {hasDiscount && (
                   <span className="text-xl text-neutral-600 line-through">
@@ -679,7 +691,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             )}
 
             {/* Actions */}
-            <div className="space-y-3">
+            <div className="space-y-3" ref={actionsRef}>
               {!pkg.disable_quantity && (
                 <div className="flex items-center gap-4 mb-4">
                   <label className="text-neutral-300 text-sm font-medium">Quantity:</label>
@@ -733,6 +745,34 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       </main>
 
       <Footer />
+
+      {/* Sticky bottom bar — appears when Add to Cart scrolls out of view */}
+      {showStickyBar && (
+        <div className="fixed bottom-0 inset-x-0 z-40 bg-neutral-900/95 backdrop-blur-sm border-t border-neutral-800 py-3 animate-in slide-in-from-bottom-2 duration-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              {pkg.image && (
+                <img src={pkg.image} alt={pkg.name} className="w-11 h-11 rounded-xl object-cover flex-shrink-0 border border-neutral-700" />
+              )}
+              <div className="min-w-0">
+                <p className="text-white font-semibold text-sm leading-tight truncate">{pkg.name}</p>
+                <div className="flex items-baseline gap-2 mt-0.5">
+                  <span className="text-blue-400 font-bold text-sm">{salePrice === 0 ? 'Free' : formatPrice(salePrice)}</span>
+                  {hasDiscount && <span className="text-neutral-600 text-xs line-through">{formatPrice(pkg.base_price)}</span>}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleAddToCart}
+              disabled={adding}
+              className="flex-shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-500 disabled:bg-neutral-700 text-white font-bold px-6 py-2.5 rounded-xl transition text-sm"
+            >
+              <ShoppingCart className="w-4 h-4" />
+              {adding ? 'Adding...' : isAuthenticated ? 'Add to Cart' : 'Login to Purchase'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Discord connected toast */}
       {discordToast && (
