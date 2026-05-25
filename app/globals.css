@@ -191,6 +191,12 @@ body { top: 0 !important; }
 .goog-tooltip,
 .goog-tooltip-text-bubble { display: none !important; }
 
+/* Remove hover highlight on translated text spans */
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+
 /* Status indicator */
 .sf-status {
   display: inline-flex;
