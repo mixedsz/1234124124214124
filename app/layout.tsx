@@ -37,13 +37,13 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             document.querySelector('title')?.setAttribute('translate', 'no');
+            // Capture-phase intercept: fires before GT's own element-level listeners.
+            // Stops GT from ever adding the hover highlight to translated <font> elements.
             document.addEventListener('mouseover', function(e) {
-              var el = e.target;
-              if (el && el.classList && el.classList.contains('goog-text-highlight')) {
-                el.style.setProperty('background-color', 'transparent', 'important');
-                el.style.setProperty('box-shadow', 'none', 'important');
+              if (e.target && e.target.tagName === 'FONT') {
+                e.stopImmediatePropagation();
               }
-            });
+            }, true);
           })();
           window.googleTranslateElementInit = function() {
             new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
