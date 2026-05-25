@@ -5,7 +5,6 @@ import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
-
 export const revalidate = 60;
 
 const REVIEWS = [
@@ -79,6 +78,17 @@ const FEATURES = [
   },
 ];
 
+const AVATAR_COLORS = ['bg-blue-600','bg-purple-600','bg-green-600','bg-rose-600','bg-orange-500','bg-indigo-600','bg-teal-600','bg-pink-600'];
+function avatarBg(str: string) {
+  const hash = [...str].reduce((a, c) => a + c.charCodeAt(0), 0);
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
+}
+function fmtDate(s: string) {
+  const d = new Date(s);
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+}
+function isSnowflake(id: string) { return /^\d{17,19}$/.test(id); }
+
 export default async function HomePage() {
   const [webstore, categories] = await Promise.all([
     getWebstore(),
@@ -109,7 +119,7 @@ export default async function HomePage() {
       return true;
     })
     .slice(0, 50)
-    .map(r => ({ text: r.content, author: `@${r.username}` }));
+    .map(r => ({ text: r.content, author: r.username, avatar_url: r.avatar_url, discord_id: r.discord_id, created_at: r.created_at }));
   const displayReviews = mappedApiReviews.length >= 6
     ? mappedApiReviews
     : [...mappedApiReviews, ...REVIEWS].slice(0, Math.max(REVIEWS.length, mappedApiReviews.length));
@@ -293,30 +303,57 @@ export default async function HomePage() {
 
           <div className="reviews-wrapper flex flex-row overflow-hidden mt-12">
             <div className="animate-marquee flex gap-4 pl-4">
-              {doubledReviews.map((review, i) => (
-                <div
-                  key={i}
-                  className="w-[320px] lg:w-[350px] flex-shrink-0 flex flex-col justify-between bg-neutral-900 border border-neutral-800 rounded-2xl p-6"
-                >
-                  <div>
-                    <div className="flex gap-1 text-blue-500 mb-4">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className="w-5 h-5 fill-blue-500 text-blue-500" />
+              {doubledReviews.map((review, i) => {
+                const name = review.author.startsWith('@') ? review.author.slice(1) : review.author;
+                const avatarSrc = (review as {avatar_url?: string; discord_id?: string}).avatar_url
+                  || ((review as {discord_id?: string}).discord_id && isSnowflake((review as {discord_id?: string}).discord_id!)
+                    ? `/api/discord-avatar?id=${(review as {discord_id?: string}).discord_id}`
+                    : null);
+                const createdAt = (review as {created_at?: string}).created_at;
+                return (
+                  <div
+                    key={i}
+                    className="w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col bg-neutral-900 border border-neutral-800 rounded-2xl p-6"
+                  >
+                    {/* Avatar + username */}
+                    <div className="flex items-center gap-4 mb-6">
+                      {avatarSrc ? (
+                        <img
+                          src={avatarSrc}
+                          alt={name}
+                          className="w-14 h-14 rounded-full object-cover flex-shrink-0"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-xl ${avatarBg(name)}`}>
+                          {name.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-white font-semibold text-base leading-tight">{name}</span>
+                    </div>
+
+                    {/* Stars – right-aligned */}
+                    <div className="flex gap-1 justify-end mb-4">
+                      {[1,2,3,4,5].map(s => (
+                        <Star key={s} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                       ))}
                     </div>
-                    <p className="text-neutral-300 text-sm leading-relaxed line-clamp-5">
-                      {review.text}
+
+                    {/* Review text */}
+                    <p className="text-neutral-300 text-sm leading-relaxed line-clamp-5 flex-1">
+                      &ldquo;{review.text}&rdquo;
                     </p>
+
+                    {/* Bottom row */}
+                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
+                      <span className="text-neutral-600 text-xs">{createdAt ? fmtDate(createdAt) : ''}</span>
+                      <span className="px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-700/40 text-emerald-400 text-[10px] font-bold tracking-widest uppercase">
+                        VERIFIED PURCHASE
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-5 text-sm text-neutral-500">
-                    {/* Discord Icon */}
-                    <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
-                    </svg>
-                    <span>{review.author}</span>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

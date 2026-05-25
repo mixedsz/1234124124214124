@@ -348,9 +348,19 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           {/* Media carousel */}
           <div>
             {(() => {
-              const mediaItems: string[] = pkg.images && pkg.images.length > 0
+              // Extract YouTube URLs embedded in the description (iframes, links, etc.)
+              const ytInDesc = Array.from(
+                (pkg.description || '').matchAll(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/g),
+                m => `https://www.youtube.com/watch?v=${m[1]}`
+              );
+              const baseImages: string[] = pkg.images && pkg.images.length > 0
                 ? pkg.images
                 : pkg.image ? [pkg.image] : [];
+              // Deduplicate: don't add a YT URL already present in baseImages
+              const mediaItems: string[] = [
+                ...baseImages,
+                ...ytInDesc.filter(u => !baseImages.some(b => b.includes(u.split('=')[1]))),
+              ];
               const cur = mediaItems[activeMedia] ?? '';
               const ytId = cur ? getYouTubeId(cur) : null;
               const isVideo = !!ytId;

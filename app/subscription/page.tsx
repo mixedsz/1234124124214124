@@ -20,7 +20,7 @@ export default function SubscriptionPage() {
   const [scripts, setScripts] = useState<TebexPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
+  const [groupIndex, setGroupIndex] = useState(0);
   const { itemCount } = useBasket();
   const { formatPrice } = useCurrency();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -48,12 +48,12 @@ export default function SubscriptionPage() {
         const allSubs = subCats.flatMap((cat: TebexCategory) => cat.packages || []);
         setSubscriptions(allSubs);
         
-        // Get ALL scripts for rotating display, deduplicated by id
+        // Get ALL scripts for rotating display, deduplicated by id, shuffled
         const seen = new Set<number>();
         const allScripts = scriptCats
           .flatMap((cat: TebexCategory) => cat.packages || [])
           .filter(pkg => { if (seen.has(pkg.id)) return false; seen.add(pkg.id); return true; });
-        setScripts(allScripts);
+        setScripts([...allScripts].sort(() => Math.random() - 0.5));
       } catch (err) {
         console.error('Error loading subscriptions:', err);
         setError('Failed to load subscriptions. Please try again later.');
@@ -64,26 +64,20 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // Rotate through scripts every 3 seconds, advancing by 5 each time (no overlap)
+  // Rotate through scripts every 3 seconds in clean non-overlapping groups of 5
   useEffect(() => {
     if (scripts.length <= 5) return;
-
     intervalRef.current = setInterval(() => {
-      setCurrentScriptIndex((prev) => {
-        const next = prev + 5;
-        return next >= scripts.length ? 0 : next;
+      setGroupIndex(prev => {
+        const totalGroups = Math.ceil(scripts.length / 5);
+        return (prev + 1) % totalGroups;
       });
     }, 3000);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [scripts.length]);
 
-  // Get 5 scripts starting from current index, wrapping with modulo so no repeats within a batch
-  const displayedScripts = Array.from({ length: Math.min(5, scripts.length) }, (_, i) =>
-    scripts[(currentScriptIndex + i) % scripts.length]
-  );
+  // Slice a clean non-overlapping batch — no modulo wrap within a batch
+  const displayedScripts = scripts.slice(groupIndex * 5, groupIndex * 5 + 5);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
