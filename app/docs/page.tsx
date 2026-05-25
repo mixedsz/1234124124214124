@@ -98,7 +98,7 @@ function CodeBlock({ code, lang = 'bash', filename }: { code: string; lang?: str
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
-      <pre className="bg-neutral-950 px-4 py-4 overflow-x-auto text-sm leading-relaxed">
+      <pre className="bg-neutral-800/60 px-4 py-4 overflow-x-auto text-sm leading-relaxed">
         <code className="text-green-400 font-mono">{code}</code>
       </pre>
     </div>
@@ -202,7 +202,7 @@ export default function DocsPage() {
   const [active] = useState('#intro');
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header />
 
       <div className="flex flex-1 max-w-[1400px] mx-auto w-full">
