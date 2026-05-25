@@ -72,16 +72,10 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [ownerAvatar, setOwnerAvatar] = useState<string | null>(null);
+  const [ownerAvatar] = useState('https://cdn.discordapp.com/avatars/498945637539381252/9c2021803d4c9d6a007f91e31d3d6bfb.webp?size=128');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetch('/api/discord-avatar?id=498945637539381252&json=1')
-      .then(r => r.json())
-      .then(({ url }) => setOwnerAvatar(url ?? null))
-      .catch(() => setOwnerAvatar(null));
-  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem('tebex_language');
