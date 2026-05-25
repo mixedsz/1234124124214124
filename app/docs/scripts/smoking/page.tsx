@@ -1,11 +1,9 @@
-'use client';
-
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ChevronRight, Copy, Check, AlertTriangle, Info, Zap } from 'lucide-react';
+import { ChevronRight, AlertTriangle, Info, Zap } from 'lucide-react';
+import { CodeBlock } from '@/components/docs-code-block';
 
 // ── Primitives ────────────────────────────────────────────────────────────────
 
@@ -14,29 +12,6 @@ function Inline({ children }: { children: React.ReactNode }) {
     <code className="bg-blue-500/10 border border-blue-500/20 px-1.5 py-0.5 rounded text-xs text-blue-300 font-mono">
       {children}
     </code>
-  );
-}
-
-function CodeBlock({ code, filename }: { code: string; filename?: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <div className="rounded-xl overflow-hidden border border-neutral-700/60 my-4">
-      <div className="flex items-center justify-between bg-neutral-800 px-4 py-2 border-b border-neutral-700/60">
-        <span className="text-neutral-400 text-xs font-mono">{filename ?? 'lua'}</span>
-        <button onClick={copy} className="flex items-center gap-1.5 text-neutral-500 hover:text-neutral-200 transition text-xs">
-          {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-          {copied ? 'Copied' : 'Copy'}
-        </button>
-      </div>
-      <pre className="bg-neutral-800/50 px-4 py-4 overflow-x-auto text-sm leading-relaxed">
-        <code className="text-green-400 font-mono whitespace-pre">{code}</code>
-      </pre>
-    </div>
   );
 }
 
@@ -283,7 +258,7 @@ export default function FlakeSmokingDocsPage() {
               <p className="text-neutral-400 text-sm leading-relaxed mb-2">
                 Place the <Inline>flake_smoking</Inline> folder into your server&apos;s <Inline>resources</Inline> directory. Add the following to your <Inline>server.cfg</Inline>:
               </p>
-              <CodeBlock code="ensure flake_smoking" filename="server.cfg" />
+              <CodeBlock code="ensure flake_smoking" filename="server.cfg" whitespace py="py-4" my="my-4" />
 
               <SectionH3>Step 2 — Add Items</SectionH3>
               <p className="text-neutral-400 text-sm leading-relaxed mb-2">Depending on your framework and inventory, add the provided item definitions:</p>
@@ -343,7 +318,7 @@ export default function FlakeSmokingDocsPage() {
               <p className="text-neutral-400 text-sm leading-relaxed mb-2">
                 Every smokable item is defined as a table entry inside <Inline>Config.Smoke</Inline>:
               </p>
-              <CodeBlock filename="config/config.lua" code={`{
+              <CodeBlock filename="config/config.lua" whitespace py="py-4" my="my-4" code={`{
     Item            = "item_name",       -- Inventory item name
     Prop            = "prop_model",      -- GTA prop model name
     Health          = 25,                -- Health restored per puff

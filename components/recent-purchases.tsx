@@ -78,19 +78,21 @@ export function RecentPurchases() {
                 <div
                   key={i}
                   title={b.username}
-                  className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-neutral-800"
+                  className={`relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-neutral-800 flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}
                 >
-                  {b.avatarUrl ? (
+                  {b.username.charAt(0).toUpperCase()}
+                  {b.avatarUrl && (
                     <img
                       src={b.avatarUrl}
                       alt={b.username}
-                      className="w-full h-full object-cover"
+                      width={64}
+                      height={64}
+                      loading="lazy"
+                      decoding="async"
                       referrerPolicy="no-referrer"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                     />
-                  ) : (
-                    <div className={`w-full h-full flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}>
-                      {b.username.charAt(0).toUpperCase()}
-                    </div>
                   )}
                 </div>
               ))}

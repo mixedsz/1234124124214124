@@ -1,11 +1,8 @@
-'use client';
-
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
-import { useState } from 'react';
-import { ChevronRight, Copy, Check, AlertTriangle, ExternalLink, BookOpen } from 'lucide-react';
+import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check } from 'lucide-react';
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 
@@ -48,31 +45,6 @@ function Inline({ children }: { children: React.ReactNode }) {
     <code className="bg-neutral-800 border border-neutral-700 px-1.5 py-0.5 rounded text-xs text-blue-300 font-mono">
       {children}
     </code>
-  );
-}
-
-function CodeBlock({ code, filename }: { code: string; filename?: string }) {
-  const [copied, setCopied] = useState(false);
-  const copy = () => {
-    navigator.clipboard.writeText(code).catch(() => {});
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <div className="rounded-xl overflow-hidden border border-neutral-700/60 my-3">
-      {filename && (
-        <div className="flex items-center justify-between bg-neutral-800 px-4 py-2 border-b border-neutral-700/60">
-          <span className="text-neutral-400 text-xs font-mono">{filename}</span>
-          <button onClick={copy} className="flex items-center gap-1.5 text-neutral-500 hover:text-neutral-200 transition text-xs">
-            {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-            {copied ? 'Copied' : 'Copy'}
-          </button>
-        </div>
-      )}
-      <pre className="bg-neutral-800/50 px-4 py-3 overflow-x-auto text-sm">
-        <code className="text-green-400 font-mono">{code}</code>
-      </pre>
-    </div>
   );
 }
 
