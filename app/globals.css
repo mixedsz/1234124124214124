@@ -186,10 +186,10 @@ body { top: 0 !important; }
 .skiptranslate > iframe { display: none !important; }
 
 /* Hide Google Translate "Original text" hover popup */
+#goog-gt-tt,
 .goog-te-balloon-frame,
 .goog-tooltip,
-.goog-tooltip-text-bubble,
-.goog-text-highlight { display: none !important; }
+.goog-tooltip-text-bubble { display: none !important; }
 
 /* Status indicator */
 .sf-status {

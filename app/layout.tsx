@@ -41,32 +41,27 @@ export default function RootLayout({
             if (t) t.setAttribute('translate', 'no');
           })();
 
-          // Nuke the GT "Original text" balloon as soon as it's added to the DOM
+          // Block GT "Original text" balloon (#goog-gt-tt).
+          // GT pre-creates the element hidden then shows it by mutating its inline style,
+          // so we lock it by watching its style attribute directly.
           (function() {
-            var observer = new MutationObserver(function(mutations) {
-              mutations.forEach(function(m) {
-                m.addedNodes.forEach(function(node) {
-                  if (node.nodeType !== 1) return;
-                  var el = node;
-                  var id = el.id || '';
-                  var cls = (el.className && typeof el.className === 'string') ? el.className : '';
-                  if (
-                    id === 'goog-gt-tt' ||
-                    cls.indexOf('goog-te-balloon') !== -1 ||
-                    cls.indexOf('goog-tooltip') !== -1 ||
-                    cls.indexOf('goog-te-bubble') !== -1
-                  ) {
-                    el.style.cssText = 'display:none!important';
-                  }
-                  // Also check children (GT sometimes nests inside a wrapper)
-                  var inner = el.querySelectorAll && el.querySelectorAll('#goog-gt-tt, .goog-te-balloon-frame, .goog-tooltip, .goog-te-bubble');
-                  if (inner) inner.forEach(function(n) { n.style.cssText = 'display:none!important'; });
-                });
+            function lockGTTooltip(el) {
+              el.style.cssText = 'display:none!important';
+              new MutationObserver(function() {
+                el.style.cssText = 'display:none!important';
+              }).observe(el, { attributes: true, attributeFilter: ['style'] });
+            }
+            function findAndLock() {
+              var el = document.getElementById('goog-gt-tt');
+              if (el) { lockGTTooltip(el); return; }
+              var bodyObs = new MutationObserver(function(_, obs) {
+                var found = document.getElementById('goog-gt-tt');
+                if (found) { lockGTTooltip(found); obs.disconnect(); }
               });
-            });
-            document.addEventListener('DOMContentLoaded', function() {
-              observer.observe(document.body, { childList: true, subtree: true });
-            });
+              bodyObs.observe(document.body, { childList: true, subtree: true });
+            }
+            if (document.body) { findAndLock(); }
+            else { document.addEventListener('DOMContentLoaded', findAndLock); }
           })();
 
           window.googleTranslateElementInit = function() {
