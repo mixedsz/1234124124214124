@@ -1052,6 +1052,25 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               </div>
             )}
 
+            {/* Framework card */}
+            {frameworkItems.length > 0 && (
+              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
+                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Framework</p>
+                <div className="flex flex-wrap gap-2">
+                  {frameworkItems.map((fw, i) => {
+                    const lo = fw.toLowerCase();
+                    const cls = lo.includes('esx') ? 'bg-orange-500/15 text-orange-400 border border-orange-500/20'
+                      : lo.includes('qbox') ? 'bg-yellow-500/15 text-yellow-400 border border-yellow-500/20'
+                      : lo.includes('qb') ? 'bg-red-500/15 text-red-400 border border-red-500/20'
+                      : 'bg-blue-500/15 text-blue-400 border border-blue-500/20';
+                    return (
+                      <span key={i} className={`px-2.5 py-1 ${cls} text-xs font-semibold rounded-lg`}>{fw}</span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Compatible With card */}
             {compatibleItems.length > 0 && (
               <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
