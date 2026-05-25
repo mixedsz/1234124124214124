@@ -159,16 +159,50 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     const wrap = document.createElement('div');
     wrap.innerHTML = raw;
 
+    // Returns text of an element BEFORE the first <br> child node.
+    // Needed because Tebex sometimes puts heading + first item in one <p> like:
+    //   <p><strong>Dependencies</strong><br>- ox_lib</p>
+    const textBeforeBr = (el: Element): string => {
+      let t = '';
+      for (const node of Array.from(el.childNodes)) {
+        if (node.nodeName.toLowerCase() === 'br') break;
+        t += node.textContent ?? '';
+      }
+      return t;
+    };
+
+    // Returns items packed after the first <br> inside the same element.
+    const itemsAfterBr = (el: Element): string[] => {
+      const result: string[] = [];
+      let seenBr = false;
+      for (const node of Array.from(el.childNodes)) {
+        if (node.nodeName.toLowerCase() === 'br') { seenBr = true; continue; }
+        if (seenBr) {
+          const t = (node.textContent ?? '').trim();
+          const clean = t.replace(/^[-*•]\s*/, '').trim();
+          if (clean) result.push(clean);
+        }
+      }
+      return result;
+    };
+
     let headEl: Element | null = null;
+    let inlineItems: string[] = [];
+
     for (const el of Array.from(wrap.children)) {
-      if (matchHead(el.textContent ?? '')) { headEl = el; break; }
+      if (matchHead(textBeforeBr(el))) {
+        headEl = el;
+        inlineItems = itemsAfterBr(el);
+        break;
+      }
     }
 
     if (headEl) {
       const toRemove: Element[] = [headEl];
-      let sibling = headEl.nextElementSibling;
+      items.push(...inlineItems);
 
-      while (sibling) {
+      let sibling = headEl.nextElementSibling;
+      while (sibling && items.length < 12) {
         const text = (sibling.textContent ?? '').trim();
         const inner = sibling.innerHTML.trim().toLowerCase();
         if (!text || inner === '<br>' || inner === '<br/>') {
@@ -179,7 +213,6 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
         if (isNextSection(text)) break;
         const clean = text.replace(/^[-*•]\s*/, '').trim();
         if (clean) { items.push(clean); toRemove.push(sibling); }
-        if (items.length >= 12) break;
         sibling = sibling.nextElementSibling;
       }
 
