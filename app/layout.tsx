@@ -36,7 +36,20 @@ export default function RootLayout({
         <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
-            document.querySelector('title')?.setAttribute('translate', 'no');
+            var titleEl = document.querySelector('title');
+            var origTitle = titleEl ? titleEl.textContent : '';
+            var restoring = false;
+            if (titleEl) {
+              titleEl.setAttribute('translate', 'no');
+              new MutationObserver(function() {
+                if (restoring) return;
+                if (document.title !== origTitle) {
+                  restoring = true;
+                  document.title = origTitle;
+                  restoring = false;
+                }
+              }).observe(titleEl, { childList: true, characterData: true, subtree: true });
+            }
             // Capture-phase intercept: fires before GT's own element-level listeners.
             // Stops GT from ever adding the hover highlight to translated <font> elements.
             document.addEventListener('mouseover', function(e) {

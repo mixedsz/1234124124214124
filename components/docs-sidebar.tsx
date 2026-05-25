@@ -126,6 +126,42 @@ const NAV: NavGroup[] = [
           { label: 'Troubleshooting', id: 'troubleshooting' },
         ],
       },
+      {
+        title: 'Flake Physical Therapy',
+        href: '/docs/flake-physicaltherapy',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Usage', id: 'usage' },
+          { label: 'Crutch Support', id: 'crutch' },
+          { label: 'Adding Locations', id: 'locations' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
+      {
+        title: 'Flake One-Hand Weapons',
+        href: '/docs/flake-onehandweapon',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Commands', id: 'commands' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
+      {
+        title: 'Flake Blackmarkets',
+        href: '/docs/flake-blackmarkets',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Usage', id: 'usage' },
+          { label: 'Commands', id: 'commands' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
     ],
   },
   {

@@ -115,6 +115,33 @@ const SCRIPTS = [
     color: 'from-blue-600/20 to-blue-900/10',
     border: 'border-blue-700/30',
   },
+  {
+    emoji: '🏥',
+    title: 'Flake Physical Therapy',
+    desc: 'Guided rehabilitation system — players complete exercise steps to recover from injuries and remove crutches.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake-physicaltherapy',
+    color: 'from-green-600/20 to-green-900/10',
+    border: 'border-green-700/30',
+  },
+  {
+    emoji: '🔫',
+    title: 'Flake One-Hand Weapons',
+    desc: 'Toggle a realistic one-handed weapon animation for any weapon via keybind or always-on mode.',
+    tags: ['Standalone', 'FiveM'],
+    href: '/docs/flake-onehandweapon',
+    color: 'from-orange-600/20 to-orange-900/10',
+    border: 'border-orange-700/30',
+  },
+  {
+    emoji: '🕵️',
+    title: 'Flake Blackmarkets',
+    desc: 'Hidden illicit shops with police detection, dynamic stock, NPC vendors, and admin controls.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake-blackmarkets',
+    color: 'from-neutral-600/20 to-neutral-900/10',
+    border: 'border-neutral-700/30',
+  },
 ];
 
 export default function DocsIntroPage() {
