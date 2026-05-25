@@ -128,6 +128,7 @@ async function fetchAllMessages(channel) {
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
+    GatewayIntentBits.MessageContent,
   ],
 });
 
