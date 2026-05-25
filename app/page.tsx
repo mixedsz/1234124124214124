@@ -313,9 +313,7 @@ export default async function HomePage() {
                 const avatarSrc = storedUrl
                   || (discordId && isSnowflake(discordId)
                     ? `/api/discord-avatar?id=${discordId}`
-                    : discordId
-                      ? `/api/discord-avatar?username=${encodeURIComponent(discordId)}`
-                      : null);
+                    : null);
                 const createdAt = (review as {created_at?: string}).created_at;
                 return (
                   <div
