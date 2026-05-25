@@ -1,8 +1,11 @@
+import type { Metadata } from 'next';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check } from 'lucide-react';
+
+export const metadata: Metadata = { title: 'Docs' };
 
 // ── Shared primitives ─────────────────────────────────────────────────────────
 

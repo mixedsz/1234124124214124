@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { X, Tag } from 'lucide-react';
+import { X, Percent } from 'lucide-react';
 
 interface SaleProduct {
   id: number;
@@ -51,18 +51,24 @@ export function SaleNotification() {
   if (!visible || products.length === 0) return null;
 
   const p = products[index];
-  const save = p.base_price - p.total_price;
   const pct = Math.round(p.discount);
+  // Use total_price if it's genuinely discounted, otherwise derive from percentage
+  const discountedPrice = p.total_price < p.base_price
+    ? p.total_price
+    : p.base_price * (1 - p.discount / 100);
+  const save = p.base_price - discountedPrice;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-72 bg-neutral-900 border border-neutral-700 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-6 right-6 z-50 w-72 bg-neutral-900 border border-neutral-700/80 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
       {/* Header bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-green-950/60 border-b border-green-800/40">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-neutral-800/80 border-b border-neutral-700/60">
         <div className="flex items-center gap-1.5">
-          <Tag className="w-3 h-3 text-green-400" />
-          <span className="text-green-400 text-[11px] font-bold tracking-widest uppercase">Limited Sale</span>
+          <div className="w-5 h-5 rounded-md bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+            <Percent className="w-3 h-3 text-blue-400" />
+          </div>
+          <span className="text-white text-[11px] font-bold tracking-wider uppercase">Limited Sale</span>
           {products.length > 1 && (
-            <span className="text-green-700 text-[10px] ml-1">{index + 1}/{products.length}</span>
+            <span className="text-neutral-500 text-[10px] ml-1">{index + 1}/{products.length}</span>
           )}
         </div>
         <button onClick={dismiss} className="text-neutral-500 hover:text-white transition">
@@ -79,14 +85,14 @@ export function SaleNotification() {
             className="w-16 h-16 rounded-xl object-cover flex-shrink-0 border border-neutral-700"
           />
         ) : (
-          <div className="w-16 h-16 rounded-xl bg-blue-600/20 border border-neutral-700 flex items-center justify-center flex-shrink-0">
+          <div className="w-16 h-16 rounded-xl bg-blue-600/10 border border-neutral-700 flex items-center justify-center flex-shrink-0">
             <span className="text-blue-400 font-bold text-xl">{p.name.charAt(0)}</span>
           </div>
         )}
         <div className="flex-1 min-w-0">
           <p className="text-white font-semibold text-sm leading-snug line-clamp-2">{p.name}</p>
           <div className="flex items-baseline gap-2 mt-1.5">
-            <span className="text-green-400 font-bold">{fmt(p.total_price, p.currency)}</span>
+            <span className="text-blue-400 font-bold">{fmt(discountedPrice, p.currency)}</span>
             <span className="text-neutral-500 text-xs line-through">{fmt(p.base_price, p.currency)}</span>
           </div>
           <p className="text-neutral-500 text-[11px] mt-0.5">
@@ -100,7 +106,7 @@ export function SaleNotification() {
         <Link
           href={`/product/${p.id}`}
           onClick={dismiss}
-          className="block text-center py-2.5 rounded-xl bg-green-600 hover:bg-green-500 text-white font-bold text-sm transition"
+          className="block text-center py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition"
         >
           Claim Deal Now
         </Link>

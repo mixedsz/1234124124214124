@@ -6,7 +6,10 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'Flake Development - Premium FiveM Scripts',
+  title: {
+    default: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+    template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+  },
   description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
   icons: {
     icon: [
