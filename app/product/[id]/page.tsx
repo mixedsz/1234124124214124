@@ -4,6 +4,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getPackage, TebexPackage, TebexPackageVariable, createBasket, getAuthUrl, addToBasket } from '@/lib/tebex';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ShoppingCart, AlertCircle, Check, Gift, ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react';
@@ -123,6 +124,16 @@ const KNOWN_SECTIONS = new Set([
   'framework', 'frameworks', 'preview',
 ]);
 
+function normalizeLine(text: string) {
+  return text
+    .replace(/<[^>]+>/g, '')       // strip inline HTML tags like <a>
+    .replace(/^\*{1,3}|\*{1,3}$/g, '')  // strip bold/italic markers
+    .replace(/^#+\s*/, '')          // strip # heading markers
+    .replace(/[:\s]+$/, '')         // strip trailing colon/whitespace
+    .replace(/^\[|\]$/g, '')        // strip surrounding [brackets]
+    .trim().toLowerCase();
+}
+
 function extractSection(raw: string, heading: string): { items: string[]; stripped: string } {
   const items: string[] = [];
   const hClean = heading.replace(/\?$/, '');
@@ -130,118 +141,88 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
   const hLowerSingular = hLower.endsWith('s') ? hLower.slice(0, -1) : hLower;
 
   const matchHead = (text: string) => {
-    const t = text.replace(/[:\s]+$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
+    const t = normalizeLine(text);
     return t === hLower || t === hLowerSingular;
   };
 
   const isNextSection = (text: string) => {
-    const t = text.replace(/[:\s]+$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
-    return KNOWN_SECTIONS.has(t) || /^[A-Z][^:]{0,40}:\s*$/.test(text.trim());
+    const plain = text.replace(/<[^>]+>/g, '').trim();
+    const t = normalizeLine(plain);
+    return KNOWN_SECTIONS.has(t) || /^[A-Z][^:]{0,40}:\s*$/.test(plain);
   };
 
-  if (/<[a-z]/i.test(raw)) {
-    // DOM-based primary path — always runs in browser since pkg is fetched client-side
-    if (typeof document !== 'undefined') {
-      const wrap = document.createElement('div');
-      wrap.innerHTML = raw;
-      const children = Array.from(wrap.children) as Element[];
+  // Only use DOM for block-level HTML (p, div, ul, li, h1-6, br).
+  // Plain text with inline tags like <a> must go through line-based path.
+  const hasBlockHTML = /<(?:p|div|ul|ol|li|h[1-6]|br)\b/i.test(raw);
 
-      let headEl: Element | null = null;
-      for (const el of children) {
-        if (matchHead(el.textContent ?? '')) { headEl = el; break; }
-      }
+  if (hasBlockHTML && typeof document !== 'undefined') {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = raw;
 
-      if (headEl) {
-        const toRemove: Element[] = [headEl];
-        let sibling = headEl.nextElementSibling;
+    let headEl: Element | null = null;
+    for (const el of Array.from(wrap.children)) {
+      if (matchHead(el.textContent ?? '')) { headEl = el; break; }
+    }
 
-        while (sibling) {
-          const text = (sibling.textContent ?? '').trim();
-          const inner = sibling.innerHTML.trim().toLowerCase();
-          if (!text || inner === '<br>' || inner === '<br/>') {
-            toRemove.push(sibling);
-            sibling = sibling.nextElementSibling;
-            continue;
-          }
-          if (isNextSection(text)) break;
-          const clean = text.replace(/^[-*•]\s*/, '').trim();
-          if (clean) { items.push(clean); toRemove.push(sibling); }
-          if (items.length >= 12) break;
+    if (headEl) {
+      const toRemove: Element[] = [headEl];
+      let sibling = headEl.nextElementSibling;
+
+      while (sibling) {
+        const text = (sibling.textContent ?? '').trim();
+        const inner = sibling.innerHTML.trim().toLowerCase();
+        if (!text || inner === '<br>' || inner === '<br/>') {
+          toRemove.push(sibling);
           sibling = sibling.nextElementSibling;
+          continue;
         }
-
-        if (items.length > 0) {
-          for (const el of toRemove) el.parentNode?.removeChild(el);
-          return { items, stripped: wrap.innerHTML.trim() };
-        }
-      }
-
-      return { items: [], stripped: raw };
-    }
-
-    // Regex fallback (SSR path — pkg is null so this never runs, but kept for safety)
-    const plain = raw
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<\/(?:p|div|li|ul|ol|h[1-6])>\s*/gi, '\n')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
-
-    const lines = plain.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let headIdx = -1;
-    for (let i = 0; i < lines.length; i++) {
-      const lineText = lines[i].replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
-      if (lineText === hLower || lineText === hLowerSingular) { headIdx = i; break; }
-    }
-
-    if (headIdx >= 0) {
-      for (let i = headIdx + 1; i < lines.length; i++) {
-        const l = lines[i];
-        const normalized = l.replace(/:$/, '').replace(/^\[|\]$/g, '').trim().toLowerCase();
-        if (/^[A-Z][^:]{0,40}:\s*$/.test(l) || /^\[.+\]$/.test(l) || KNOWN_SECTIONS.has(normalized)) break;
-        const clean = l.replace(/^[-*•]\s*/, '').trim();
-        if (clean.length > 0) items.push(clean);
+        if (isNextSection(text)) break;
+        const clean = text.replace(/^[-*•]\s*/, '').trim();
+        if (clean) { items.push(clean); toRemove.push(sibling); }
         if (items.length >= 12) break;
+        sibling = sibling.nextElementSibling;
       }
+
+      if (items.length > 0) {
+        for (const el of toRemove) el.parentNode?.removeChild(el);
+        return { items, stripped: wrap.innerHTML.trim() };
+      }
+    }
+
+    return { items: [], stripped: raw };
+  }
+
+  // Line-by-line fallback: handles markdown, plain text, and text mixed with inline HTML.
+  // Skips blank lines between heading and items (Tebex markdown has blank lines between each item).
+  const lines = raw.split('\n');
+  let headIdx = -1;
+
+  for (let i = 0; i < lines.length; i++) {
+    if (matchHead(lines[i])) { headIdx = i; break; }
+  }
+
+  if (headIdx >= 0) {
+    let lastItemIdx = headIdx;
+
+    for (let i = headIdx + 1; i < lines.length; i++) {
+      const trimmed = lines[i].trim();
+      if (!trimmed) continue; // skip blank lines between items
+      if (isNextSection(trimmed)) break;
+      const clean = trimmed.replace(/<[^>]+>/g, '').replace(/^[-*•]\s*/, '').trim();
+      if (clean.length > 0) {
+        items.push(clean);
+        lastItemIdx = i;
+      }
+      if (items.length >= 12) break;
     }
 
     if (items.length > 0) {
-      const headEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      let stripped = raw;
-      stripped = stripped.replace(
-        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'), ''
-      );
-      stripped = stripped.replace(
-        new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'), '$1'
-      );
-      for (const item of items) {
-        const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        stripped = stripped.replace(
-          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'), ''
-        );
-        stripped = stripped.replace(
-          new RegExp(`<br\\s*/?>\\s*(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*`, 'gi'), ''
-        );
-      }
-      stripped = stripped.replace(/<(?:ul|ol)[^>]*>\s*<\/(?:ul|ol)>/gi, '');
-      stripped = stripped.replace(/<(?:p|div)[^>]*>\s*<\/(?:p|div)>/gi, '');
-      return { items, stripped: stripped.trim() };
+      // Remove heading through last item, plus any trailing blank lines
+      let removeEnd = lastItemIdx;
+      while (removeEnd + 1 < lines.length && !lines[removeEnd + 1].trim()) removeEnd++;
+      const stripped = [...lines.slice(0, headIdx), ...lines.slice(removeEnd + 1)].join('\n').trim();
+      return { items, stripped };
     }
-  }
-
-  // Plain text / markdown fallback
-  const hEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const textPat = new RegExp(
-    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?\\[?${hEsc}\\]?:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?){1,15})`,
-    'i'
-  );
-  const tm = raw.match(textPat);
-  if (tm?.[1]) {
-    for (const line of tm[1].split('\n')) {
-      const clean = line.replace(/^[ \t]*[-*•][ \t]*/, '').replace(/\*{1,2}/g, '').trim();
-      if (/^[A-Z][^:]{0,40}:\s*$/.test(clean) || /^\[.+\]$/.test(clean)) break;
-      if (clean.length > 1) items.push(clean);
-    }
-    if (items.length > 0) return { items, stripped: raw.replace(tm[0], '\n').trim() };
   }
 
   return { items: [], stripped: raw };
@@ -697,10 +678,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </div>
                   )}
 
-                  {/* Lightbox */}
-                  {lightboxOpen && !isVideo && (
+                  {/* Lightbox — rendered via portal on document.body to escape stacking contexts */}
+                  {lightboxOpen && !isVideo && typeof document !== 'undefined' && createPortal(
                     <div
-                      className="fixed inset-0 z-[99999] bg-black flex items-center justify-center p-4"
+                      className="fixed inset-0 bg-black flex items-center justify-center p-4"
+                      style={{ zIndex: 2147483647 }}
                       onClick={() => setLightboxOpen(false)}
                     >
                       <img
@@ -712,6 +694,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                       <button
                         onClick={() => setLightboxOpen(false)}
                         className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition"
+                        style={{ zIndex: 2147483647 }}
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -731,7 +714,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                           </button>
                         </>
                       )}
-                    </div>
+                    </div>,
+                    document.body
                   )}
                 </>
               );

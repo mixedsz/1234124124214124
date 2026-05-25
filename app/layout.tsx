@@ -23,12 +23,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
     description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
-    images: [{ url: 'https://flakedev.com/fd-wordmark.png', width: 1200, height: 400 }],
+    images: [{ url: 'https://1234124124214124-6a9kku8w2-tests-projects-20ed4f97.vercel.app/fd-wordmark.png', width: 1200, height: 400 }],
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    images: ['https://flakedev.com/fd-wordmark.png'],
+    images: ['https://1234124124214124-6a9kku8w2-tests-projects-20ed4f97.vercel.app/fd-wordmark.png'],
   },
 }
 
