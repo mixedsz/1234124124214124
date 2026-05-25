@@ -3,6 +3,7 @@
  * "One of the options provided is invalid" and similar errors.
  *
  * Usage (from browser or curl):
+ *   GET  /api/debug/tebex?id=PACKAGE_ID  — see raw package fields (no auth needed)
  *   POST /api/debug/tebex
  *   Header: x-debug-key: YOUR_DEBUG_KEY  (set DEBUG_KEY env var on Vercel)
  *   Body: { "action": "addPackage", "ident": "...", "packageId": 123 }
@@ -14,6 +15,20 @@ import { NextRequest, NextResponse } from 'next/server';
 const TEBEX_API_BASE = 'https://headless.tebex.io/api';
 const PUBLIC_TOKEN = process.env.NEXT_PUBLIC_TEBEX_PUBLIC_TOKEN;
 const DEBUG_KEY = process.env.DEBUG_KEY;
+
+// GET /api/debug/tebex?id=PACKAGE_ID — returns raw Tebex package JSON
+export async function GET(request: NextRequest) {
+  const id = request.nextUrl.searchParams.get('id');
+  if (!id) {
+    return NextResponse.json({ error: 'Pass ?id=PACKAGE_ID' }, { status: 400 });
+  }
+  const url = `${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/packages/${id}`;
+  const res = await fetch(url, { cache: 'no-store' });
+  const body = await res.text();
+  let parsed: unknown = body;
+  try { parsed = JSON.parse(body); } catch { /* keep as string */ }
+  return NextResponse.json({ status: res.status, url, body: parsed });
+}
 
 export async function POST(request: NextRequest) {
   // Require a debug key so random people can't probe your basket IDs
