@@ -418,67 +418,43 @@ async function handleRestore(interaction) {
     content: `⏳ Found **${reviewMessages.length}** messages. Importing to website…`,
   });
 
-  // Get configured results channel
-  const config = readConfig();
-  const resultsChannelId = config[interaction.guildId]?.resultsChannelId;
-  const resultsChannel = resultsChannelId
-    ? await client.channels.fetch(resultsChannelId).catch(() => null)
-    : null;
+  // Build all payloads up front, then send in a single atomic batch request
+  const payloads = reviewMessages.map(msg => ({
+    id:                `restored-${msg.id}`,
+    discord_id:        msg.author.id,
+    username:          msg.author.username,
+    avatar_url:        discordAvatarURL(msg.author),
+    rating:            5,
+    content:           msg.content.trim().slice(0, 1000),
+    verified_purchase: false,
+    created_at:        msg.timestamp,
+  }));
 
   let imported = 0;
   let skipped  = 0;
   let failed   = 0;
 
-  for (let i = 0; i < reviewMessages.length; i++) {
-    const msg    = reviewMessages[i];
-    const author = msg.author;
-    const avatarUrl = discordAvatarURL(author);
+  try {
+    const res = await fetch(`${WEBSITE_URL}/api/reviews/batch`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ reviews: payloads }),
+    });
 
-    const payload = {
-      id:                `restored-${msg.id}`,
-      discord_id:        author.id,
-      username:          author.username,
-      avatar_url:        avatarUrl,
-      rating:            5,
-      content:           msg.content.trim().slice(0, 1000),
-      verified_purchase: false,
-      created_at:        msg.timestamp,
-    };
-
-    try {
-      const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      imported = data.imported ?? 0;
+      skipped  = data.skipped  ?? 0;
+      failed   = data.failed   ?? 0;
+    } else {
+      const err = await res.json().catch(() => ({}));
+      return interaction.editReply({
+        content: `❌ Batch import failed: ${err.error || `HTTP ${res.status}`}`,
       });
-
-      if (res.status === 409) {
-        skipped++; // already imported
-      } else if (res.ok) {
-        const data = await res.json().catch(() => ({}));
-        imported++;
-        if (resultsChannel?.isTextBased()) {
-          const userLike = { username: author.username, displayAvatarURL: () => avatarUrl };
-          await resultsChannel.send({
-            embeds: [buildResultEmbed(userLike, 5, '⭐⭐⭐⭐⭐', msg.content.slice(0, 300), data.review?.id)],
-          }).catch(() => {});
-          await sleep(100);
-        }
-      } else {
-        failed++;
-      }
-    } catch {
-      failed++;
     }
-
-    await sleep(150);
-
-    // Progress update every 10 messages
-    if ((i + 1) % 10 === 0 || i === reviewMessages.length - 1) {
-      await interaction.editReply({
-        content: `⏳ **${i + 1}/${reviewMessages.length}** — ✅ ${imported} imported · ⏭️ ${skipped} skipped · ❌ ${failed} failed`,
-      }).catch(() => {});
-    }
+  } catch (err) {
+    console.error('Batch import error:', err);
+    return interaction.editReply({ content: '❌ Network error — could not reach the store API.' });
   }
 
   await interaction.editReply({
