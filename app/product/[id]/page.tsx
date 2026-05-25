@@ -142,8 +142,8 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     if (headIdx >= 0) {
       for (let i = headIdx + 1; i < lines.length; i++) {
         const l = lines[i];
-        // Stop at next section heading (Capital letter, ends with colon, short)
-        if (/^[A-Z][^:]{0,40}:\s*$/.test(l)) break;
+        // Stop at next section: Capital+colon, or [Bracketed heading]
+        if (/^[A-Z][^:]{0,40}:\s*$/.test(l) || /^\[.+\]$/.test(l)) break;
         const clean = l.replace(/^[-*•]\s*/, '').trim();
         if (clean.length > 0) items.push(clean);
         if (items.length >= 12) break;
@@ -153,20 +153,40 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
     if (items.length > 0) {
       const headEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       let stripped = raw;
-      // Remove heading block — handles <p><strong>heading</strong></p>, plain <p>heading</p>, and [bracketed] variants
+
+      // Pass 1a: heading as standalone block (<p>[Heading]</p>)
       stripped = stripped.replace(
         new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
         ''
       );
+      // Pass 1b: heading inline at start of block followed by <br> (<p><strong>[Heading]</strong><br>items)
+      stripped = stripped.replace(
+        new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'),
+        '$1'
+      );
+
       for (const item of items) {
-        const itemEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const iEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Pass 2a: item as standalone block element
         stripped = stripped.replace(
-          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${itemEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
+          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
           ''
         );
+        // Pass 2b: item preceded by <br> within a block
+        stripped = stripped.replace(
+          new RegExp(`<br\\s*/?>\\s*(?:<[^>]+>)*\\s*[-*•]?\\s*${iEsc}\\s*(?:<\\/[^>]+>)*`, 'gi'),
+          ''
+        );
+        // Pass 2c: item at very start of block (left there after heading removal)
+        stripped = stripped.replace(
+          new RegExp(`(<(?:p|div)[^>]*>)\\s*[-*•]?\\s*${iEsc}\\s*(?:<br\\s*/?>)?\\s*`, 'gi'),
+          '$1'
+        );
       }
-      // Remove empty list containers left behind
+
+      // Clean up empty containers
       stripped = stripped.replace(/<(?:ul|ol)[^>]*>\s*<\/(?:ul|ol)>/gi, '');
+      stripped = stripped.replace(/<(?:p|div)[^>]*>\s*<\/(?:p|div)>/gi, '');
       return { items, stripped: stripped.trim() };
     }
   }
@@ -181,7 +201,7 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
   if (tm?.[1]) {
     for (const line of tm[1].split('\n')) {
       const clean = line.replace(/^[ \t]*[-*•][ \t]*/, '').replace(/\*{1,2}/g, '').trim();
-      if (/^[A-Z][^:]{0,40}:\s*$/.test(clean)) break;
+      if (/^[A-Z][^:]{0,40}:\s*$/.test(clean) || /^\[.+\]$/.test(clean)) break;
       if (clean.length > 1) items.push(clean);
     }
     if (items.length > 0) return { items, stripped: raw.replace(tm[0], '\n').trim() };
@@ -219,7 +239,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [activeMedia, setActiveMedia] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [pendingAutoAdd, setPendingAutoAdd] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const handleAddToCartRef = useRef<() => void>(() => {});
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
   const { formatPrice } = useCurrency();
   const searchParams = useSearchParams();
@@ -274,13 +296,18 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       if (discordIdParam) {
         setDiscordId(discordIdParam);
         localStorage.setItem('discord_ident_id', discordIdParam);
-        console.log('[ProductPage] Discord ID from Tebex ident:', discordIdParam);
       }
       refreshBasket();
       const url = new URL(window.location.href);
       url.searchParams.delete('discord_linked');
       url.searchParams.delete('discord_id');
       window.history.replaceState({}, '', url.toString());
+      // Auto-add if the user had clicked Add to Cart before connecting Discord
+      const pendingPkg = localStorage.getItem('tebex_pending_add_pkg');
+      if (pendingPkg) {
+        localStorage.removeItem('tebex_pending_add_pkg');
+        setPendingAutoAdd(true);
+      }
     }
   }, [basket?.ident, discordLinkedParam, discordIdParam, refreshBasket]);
 
@@ -420,7 +447,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
       await addItem(pkg.id, quantity, Object.keys(varData).length > 0 ? varData : undefined);
       setAdded(true);
-      setTimeout(() => setAdded(false), 3000);
+      setTimeout(() => setAdded(false), 5000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to add to cart';
       const detail = (err as Error & { tebexDetail?: { status: number; body: { title?: string; detail?: string }; raw: string } }).tebexDetail;
@@ -437,6 +464,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       setAdding(false);
     }
   }, [pkg, isAuthenticated, setShowLoginModal, requiredVariables, variableValues, needsDiscord, discordLinked, discordId, discordVarIdentifier, addItem, quantity]);
+
+  // Keep ref in sync so the auto-add effect always has the latest version
+  useEffect(() => { handleAddToCartRef.current = handleAddToCart; }, [handleAddToCart]);
+
+  // After Discord connect, auto-add if there was a pending intent
+  useEffect(() => {
+    if (!pendingAutoAdd || !discordLinked || !pkg) return;
+    setPendingAutoAdd(false);
+    setTimeout(() => handleAddToCartRef.current(), 100);
+  }, [pendingAutoAdd, discordLinked, pkg]);
 
   if (loading) {
     return (
@@ -482,9 +519,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const compat1 = extractSection(req2.stripped, 'Compatible with');
   const compat2 = extractSection(compat1.stripped, 'Compatibles');
   const compat3 = extractSection(compat2.stripped, 'Compatible');
+  const fw1 = extractSection(compat3.stripped, 'Framework');
+  const fw2 = extractSection(fw1.stripped, 'Frameworks');
   const requirementItems = [...req1.items, ...req2.items];
   const compatibleItems = [...compat1.items, ...compat2.items, ...compat3.items];
-  const parsedDescription = parseDescription(compat3.stripped);
+  const frameworkItems = [...fw1.items, ...fw2.items];
+  const parsedDescription = parseDescription(fw2.stripped);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -646,11 +686,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <div>
                 <p className="text-blue-400 text-sm font-medium mb-2">{pkg.category?.name}</p>
 
-                {/* Framework Badges - Light variant style like Mantine */}
+                {/* Framework Badges */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  <span className="px-2.5 py-1 bg-red-500/15 text-red-400 text-xs font-semibold rounded">QBCore</span>
-                  <span className="px-2.5 py-1 bg-yellow-500/15 text-yellow-400 text-xs font-semibold rounded">Qbox</span>
-                  <span className="px-2.5 py-1 bg-orange-500/15 text-orange-400 text-xs font-semibold rounded">ESX</span>
+                  {(frameworkItems.length > 0 ? frameworkItems : ['QBCore', 'Qbox', 'ESX']).map((fw, i) => {
+                    const lo = fw.toLowerCase();
+                    const cls = lo.includes('esx') ? 'bg-orange-500/15 text-orange-400'
+                      : lo.includes('qbox') ? 'bg-yellow-500/15 text-yellow-400'
+                      : lo.includes('qb') ? 'bg-red-500/15 text-red-400'
+                      : 'bg-blue-500/15 text-blue-400';
+                    return <span key={i} className={`px-2.5 py-1 ${cls} text-xs font-semibold rounded`}>{fw}</span>;
+                  })}
                 </div>
 
                 <h1 className="text-3xl font-bold text-white">{pkg.name}</h1>
@@ -702,18 +747,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 </div>
               </div>
             )}
-            {added && (
-              <div className="mb-4 bg-green-900/20 border border-green-800 rounded-xl p-4 text-green-300 text-sm flex gap-2">
-                <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                Added to cart successfully!
-              </div>
-            )}
-            {giftAdded && (
-              <div className="mb-4 bg-green-900/20 border border-green-800 rounded-xl p-4 text-green-300 text-sm flex gap-2">
-                <Gift className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                Gift added to cart!
-              </div>
-            )}
 
             {/* Discord connect — shown when package needs Discord (uses Tebex ident bot) */}
             {needsDiscord && (
@@ -740,17 +773,21 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                     </button>
                   </div>
                 ) : (
-                  <a
-                    href={basket && typeof window !== 'undefined'
-                      ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${window.location.origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${encodeURIComponent(window.location.pathname)}`)}`
-                      : '#'}
+                  <button
+                    onClick={() => {
+                      if (pkg) localStorage.setItem('tebex_pending_add_pkg', String(pkg.id));
+                      const url = basket
+                        ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${window.location.origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${encodeURIComponent(window.location.pathname)}`)}`
+                        : '#';
+                      window.location.href = url;
+                    }}
                     className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 hover:border-[#5865F2]/50 text-[#7289da] hover:text-[#8da0e1] font-semibold transition"
                   >
                     <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 71 55" fill="currentColor">
                       <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.44077 45.4204 0.52529C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.52529C25.5141 0.44359 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z"/>
                     </svg>
                     Connect Discord to Purchase
-                  </a>
+                  </button>
                 )}
               </div>
             )}
@@ -951,6 +988,62 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
       </main>
 
       <Footer />
+
+      {/* Cart added notification — drops down from top */}
+      {(added || giftAdded) && (
+        <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
+          <div className="w-full max-w-md pointer-events-auto animate-in slide-in-from-top-3 duration-300 drop-shadow-2xl">
+            <div className="bg-neutral-900 border border-neutral-700 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="h-0.5 bg-gradient-to-r from-green-500 via-blue-500 to-blue-600" />
+              <div className="p-4">
+                <div className="flex items-start gap-3">
+                  {pkg?.image ? (
+                    <img src={pkg.image} alt={pkg?.name} className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-neutral-800" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-xl bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+                      <ShoppingCart className="w-6 h-6 text-blue-400" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <div className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-2.5 h-2.5 text-green-400" />
+                      </div>
+                      <span className="text-green-400 text-xs font-bold uppercase tracking-wide">
+                        {giftAdded ? 'Gift Added to Cart!' : 'Added to Cart!'}
+                      </span>
+                    </div>
+                    <p className="text-white font-bold text-sm leading-snug truncate">{pkg?.name}</p>
+                    {pkg && <p className="text-neutral-500 text-xs mt-0.5">{salePrice === 0 ? 'Free' : formatPrice(salePrice)}</p>}
+                  </div>
+                  <button
+                    onClick={() => { setAdded(false); setGiftAdded(false); }}
+                    className="text-neutral-600 hover:text-neutral-300 transition p-0.5 flex-shrink-0 mt-0.5"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <Link
+                    href="/cart"
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm transition"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    View Cart
+                  </Link>
+                  <Link
+                    href="/scripts"
+                    onClick={() => { setAdded(false); setGiftAdded(false); }}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-neutral-700 hover:border-neutral-600 text-neutral-300 hover:text-white font-semibold text-sm transition"
+                  >
+                    Continue Shopping
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sticky bottom bar — appears when Add to Cart scrolls out of view */}
       {showStickyBar && (
