@@ -210,7 +210,7 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
           sibling = sibling.nextElementSibling;
           continue;
         }
-        if (isNextSection(text)) break;
+        if (isNextSection(textBeforeBr(sibling))) break;
         const clean = text.replace(/^[-*•]\s*/, '').trim();
         if (clean) { items.push(clean); toRemove.push(sibling); }
         sibling = sibling.nextElementSibling;
@@ -593,7 +593,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const compat3 = extractSection(compat2.stripped, 'Compatible');
   const fw1 = extractSection(compat3.stripped, 'Framework');
   const fw2 = extractSection(fw1.stripped, 'Frameworks');
-  const requirementItems = [...req1.items, ...req2.items];
+  const requirementItems = req1.items;
+  const dependencyItems = req2.items;
   const compatibleItems = [...compat1.items, ...compat2.items, ...compat3.items];
   const frameworkItems = [...fw1.items, ...fw2.items];
   const parsedDescription = parseDescription(fw2.stripped);
@@ -1004,6 +1005,36 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                             <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>
                           </svg>
                         )}
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
+                            {label}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
+                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Dependencies card */}
+            {dependencyItems.length > 0 && (
+              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
+                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Dependencies</p>
+                <div className="space-y-2">
+                  {dependencyItems.map((item, i) => {
+                    const url = getDepUrl(item);
+                    const label = item.replace(/https?:\/\/[^\s)>\]]+/g, '').replace(/[()[\]]/g, '').trim();
+                    return (
+                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 flex-shrink-0">
+                          <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>
+                        </svg>
                         {url ? (
                           <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
                             {label}
