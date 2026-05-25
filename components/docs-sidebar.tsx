@@ -42,6 +42,8 @@ const NAV: NavSection[] = [
     defaultOpen: true,
     items: [
       { title: 'Flake Smoking & Vaping', href: '/docs/scripts/smoking' },
+      { title: 'Flake Shops', href: '/docs/scripts/shops' },
+      { title: 'Flake Addiction', href: '/docs/scripts/addiction' },
     ],
   },
   {

@@ -2,6 +2,7 @@ import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { ProductCard } from '@/components/product-card';
 import { RecentPurchases } from '@/components/recent-purchases';
+import { SaleNotification } from '@/components/sale-notification';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
@@ -382,6 +383,7 @@ export default async function HomePage() {
       </main>
 
       <Footer storeName={storeName} />
+      <SaleNotification />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { CreditCard } from 'lucide-react';
 
 interface Buyer {
   username: string;
+  packageName: string;
   avatarUrl: string | null;
 }
 
@@ -23,14 +24,14 @@ export function RecentPurchases() {
 
   async function load() {
     try {
-      const list: { username: string }[] = await fetch('/api/recent-purchases').then(r => r.json());
+      const list: { username: string; packageName: string }[] = await fetch('/api/recent-purchases').then(r => r.json());
       const withAvatars: Buyer[] = await Promise.all(
-        list.map(async ({ username }) => {
+        list.map(async ({ username, packageName }) => {
           try {
             const { url } = await fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`).then(r => r.json());
-            return { username, avatarUrl: url ?? null };
+            return { username, packageName, avatarUrl: url ?? null };
           } catch {
-            return { username, avatarUrl: null };
+            return { username, packageName, avatarUrl: null };
           }
         })
       );
@@ -75,25 +76,40 @@ export function RecentPurchases() {
                 <div key={i} className="w-16 h-16 rounded-2xl bg-neutral-800 animate-pulse flex-shrink-0" />
               ))
             : buyers.map((b, i) => (
-                <div
-                  key={i}
-                  title={b.username}
-                  className={`relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-neutral-800 flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}
-                >
-                  {b.username.charAt(0).toUpperCase()}
-                  {b.avatarUrl && (
-                    <img
-                      src={b.avatarUrl}
-                      alt={b.username}
-                      width={64}
-                      height={64}
-                      loading="lazy"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                      className="absolute inset-0 w-full h-full object-cover"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                    />
-                  )}
+                <div key={i} className="relative flex-shrink-0 group">
+                  {/* Avatar */}
+                  <div
+                    className={`relative w-16 h-16 rounded-2xl overflow-hidden border border-neutral-800 flex items-center justify-center text-white font-bold text-xl ${avatarBg(b.username)}`}
+                  >
+                    {b.username.charAt(0).toUpperCase()}
+                    {b.avatarUrl && (
+                      <img
+                        src={b.avatarUrl}
+                        alt={b.username}
+                        width={64}
+                        height={64}
+                        loading="lazy"
+                        decoding="async"
+                        referrerPolicy="no-referrer"
+                        className="absolute inset-0 w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    )}
+                  </div>
+
+                  {/* Tooltip */}
+                  <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-20">
+                    <div className="bg-neutral-800 border border-neutral-700 rounded-xl px-3 py-2 whitespace-nowrap shadow-xl">
+                      <p className="text-white text-xs font-semibold">{b.username}</p>
+                      {b.packageName && (
+                        <p className="text-neutral-400 text-[11px] mt-0.5 max-w-[160px] truncate">{b.packageName}</p>
+                      )}
+                    </div>
+                    {/* Arrow */}
+                    <div className="flex justify-center">
+                      <div className="w-2 h-2 bg-neutral-800 border-r border-b border-neutral-700 rotate-45 -mt-1" />
+                    </div>
+                  </div>
                 </div>
               ))}
         </div>

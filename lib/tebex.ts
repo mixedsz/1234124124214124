@@ -22,12 +22,19 @@ export interface TebexPackageVariable {
   options?: Array<{ name: string; value: string }>;
 }
 
+export interface TebexMedia {
+  type: 'image' | 'video' | string;
+  name: string | null;
+  url: string;
+  primary: boolean;
+}
+
 export interface TebexPackage {
   id: number;
   name: string;
   description: string;
   image?: string;
-  images?: string[];
+  media?: TebexMedia[];
   type: string;
   category: {
     id: number;

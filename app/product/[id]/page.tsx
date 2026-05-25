@@ -69,27 +69,12 @@ function buildMediaItems(pkg: TebexPackage): string[] {
     }
   };
 
-  // Images array (Tebex may return strings or objects)
-  if (pkg.images && pkg.images.length > 0) {
-    for (const img of pkg.images) {
-      if (typeof img === 'string') add(img);
-      else {
-        const obj = img as Record<string, string>;
-        add(obj.url ?? obj.src ?? obj.path ?? '');
-      }
-    }
-  }
-
-  // Single main image
-  if (pkg.image) add(pkg.image);
-
-  // YouTube URLs embedded in description (deduplicated)
-  if (pkg.description) {
-    const ytRe = /https?:\/\/(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})[^\s<"]*/g;
-    let m: RegExpExecArray | null;
-    while ((m = ytRe.exec(pkg.description)) !== null) {
-      add(m[0].replace(/[)\].,;]+$/, ''));
-    }
+  if (pkg.media && pkg.media.length > 0) {
+    // Primary items first, then non-primary
+    for (const m of pkg.media.filter(m => m.primary)) add(m.url);
+    for (const m of pkg.media.filter(m => !m.primary)) add(m.url);
+  } else if (pkg.image) {
+    add(pkg.image);
   }
 
   return items;

@@ -15,7 +15,7 @@ export async function GET() {
     if (!res.ok) return NextResponse.json([]);
 
     const raw = await res.json();
-    const payments: Array<{ player?: { name?: string } }> = Array.isArray(raw) ? raw : (raw.data ?? []);
+    const payments: Array<{ player?: { name?: string }; packages?: Array<{ name?: string }> }> = Array.isArray(raw) ? raw : (raw.data ?? []);
 
     const seen = new Set<string>();
     const buyers = payments
@@ -25,8 +25,8 @@ export async function GET() {
         seen.add(name);
         return true;
       })
-      .slice(0, 12)
-      .map(p => ({ username: p.player!.name! }));
+      .slice(0, 20)
+      .map(p => ({ username: p.player!.name!, packageName: p.packages?.[0]?.name ?? '' }));
 
     return NextResponse.json(buyers);
   } catch {
