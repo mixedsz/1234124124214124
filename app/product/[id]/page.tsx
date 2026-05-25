@@ -80,6 +80,75 @@ function buildMediaItems(pkg: TebexPackage): string[] {
   return items;
 }
 
+// ── Requirements extraction ────────────────────────────────────────────────────
+
+const KNOWN_DEP_URLS: Record<string, string> = {
+  oxmysql:       'https://github.com/overextended/oxmysql/releases/latest',
+  ox_lib:        'https://github.com/overextended/ox_lib/releases/latest',
+  ox_inventory:  'https://github.com/overextended/ox_inventory/releases/latest',
+  ox_target:     'https://github.com/overextended/ox_target/releases/latest',
+  ox_doorlock:   'https://github.com/overextended/ox_doorlock/releases/latest',
+  oxlib:         'https://github.com/overextended/ox_lib/releases/latest',
+};
+
+function getDepUrl(item: string): string | null {
+  const norm = item.toLowerCase().replace(/[-_ ]/g, '');
+  for (const [key, url] of Object.entries(KNOWN_DEP_URLS)) {
+    if (norm.includes(key.replace(/[-_]/g, ''))) return url;
+  }
+  const m = item.match(/https?:\/\/[^\s)>\]]+/);
+  return m ? m[0] : null;
+}
+
+type ReqType = 'framework' | 'onesync' | 'server' | 'dependency' | 'default';
+function getReqType(item: string): ReqType {
+  const lo = item.toLowerCase();
+  if (lo.includes('qbcore') || lo.includes('esx') || lo.includes('qbox') || lo.includes('framework')) return 'framework';
+  if (lo.includes('onesync') || lo.includes('one sync')) return 'onesync';
+  if (lo.match(/server\s*v\d|artifact|v7290|fxserver|\d{4}\s*or\s*(newer|later)/)) return 'server';
+  if (getDepUrl(item)) return 'dependency';
+  return 'default';
+}
+
+function extractSection(raw: string, heading: string): { items: string[]; stripped: string } {
+  const items: string[] = [];
+
+  // HTML descriptions
+  if (/<[a-z]/i.test(raw)) {
+    const headPat = new RegExp(
+      `<[^>]+>[^<]*${heading}[^<]*<\\/[^>]+>\\s*(<ul>[\\s\\S]*?<\\/ul>|(?:<p>(?!.*<ul)[\\s\\S]*?<\\/p>\\s*){1,15})`,
+      'i'
+    );
+    const hm = raw.match(headPat);
+    if (hm) {
+      const inner = hm[1];
+      const itemPat = /<(?:li|p)[^>]*>([\s\S]*?)<\/(?:li|p)>/gi;
+      let im: RegExpExecArray | null;
+      while ((im = itemPat.exec(inner)) !== null) {
+        const text = im[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').trim();
+        if (text && text.toLowerCase() !== heading.toLowerCase()) items.push(text);
+      }
+      if (items.length > 0) return { items, stripped: raw.replace(hm[0], '').trim() };
+    }
+  }
+
+  // Plain text / markdown
+  const textPat = new RegExp(
+    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?${heading}:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?)+?)(?=\\n{2,}|\\n[ \\t]*(?:#{1,3}|\\*{1,2})[^*]|$)`,
+    'i'
+  );
+  const tm = raw.match(textPat);
+  if (tm?.[1]) {
+    for (const line of tm[1].split('\n')) {
+      const clean = line.replace(/^[ \t]*[-*•][ \t]*/, '').replace(/\*{1,2}/g, '').trim();
+      if (clean.length > 1) items.push(clean);
+    }
+    if (items.length > 0) return { items, stripped: raw.replace(tm[0], '\n').trim() };
+  }
+
+  return { items: [], stripped: raw };
+}
+
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(null);
   const [loading, setLoading] = useState(true);
@@ -358,7 +427,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const hasDiscount = pkg.discount > 0;
   // discount field = dollar amount off (not percentage)
   const salePrice = hasDiscount ? Math.max(0, pkg.base_price - pkg.discount) : pkg.total_price;
-  const parsedDescription = parseDescription(pkg.description);
+
+  // Strip Requirements / Dependencies sections before rendering description
+  const req1 = extractSection(pkg.description || '', 'Requirements?');
+  const req2 = extractSection(req1.stripped, 'Dependencies');
+  const requirementItems = [...req1.items, ...req2.items];
+  const parsedDescription = parseDescription(req2.stripped);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -567,6 +641,54 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 <span>Protected by Cfx.re asset escrow</span>
               </div>
             </div>
+
+            {/* Requirements card */}
+            {requirementItems.length > 0 && (
+              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
+                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Requirements</p>
+                <div className="space-y-2">
+                  {requirementItems.map((item, i) => {
+                    const type = getReqType(item);
+                    const url = getDepUrl(item);
+                    const label = item.replace(/https?:\/\/[^\s)>\]]+/g, '').replace(/[()[\]]/g, '').trim();
+                    return (
+                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
+                        {type === 'framework' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 flex-shrink-0">
+                            <path d="M14 4h6v6h-6z"/><path d="M4 14h6v6h-6z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                          </svg>
+                        )}
+                        {type === 'onesync' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400 flex-shrink-0">
+                            <path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/>
+                          </svg>
+                        )}
+                        {type === 'server' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 flex-shrink-0">
+                            <path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/>
+                          </svg>
+                        )}
+                        {(type === 'dependency' || type === 'default') && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 flex-shrink-0">
+                            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>
+                          </svg>
+                        )}
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
+                            {label}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
+                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Description with proper markdown rendering */}
             <div className="mb-8 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
