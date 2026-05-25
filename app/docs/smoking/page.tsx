@@ -1,5 +1,3 @@
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, Info, Zap, Check } from 'lucide-react';
@@ -153,9 +151,6 @@ const ON_THIS_PAGE = [
 
 export default function FlakeSmokingDocsPage() {
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header />
-
       <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
         <DocsSidebar />
 
@@ -498,8 +493,5 @@ export default function FlakeSmokingDocsPage() {
         </aside>
         </div>
       </div>
-
-      <Footer showCta={false} />
-    </div>
   );
 }

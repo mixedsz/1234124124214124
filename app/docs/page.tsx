@@ -1,6 +1,4 @@
 import type { Metadata } from 'next';
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check } from 'lucide-react';
@@ -82,9 +80,6 @@ function StepperStep({ n, emoji, title, children }: { n: number; emoji: string; 
 
 export default function DocsIntroPage() {
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header />
-
       <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
         <DocsSidebar />
 
@@ -211,8 +206,5 @@ export default function DocsIntroPage() {
         </aside>
         </div>
       </div>
-
-      <Footer showCta={false} />
-    </div>
   );
 }

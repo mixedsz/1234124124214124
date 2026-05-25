@@ -1,5 +1,3 @@
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, Info, Zap, Check, ShoppingBag } from 'lucide-react';
@@ -93,9 +91,6 @@ const ON_THIS_PAGE = [
 
 export default function FlakeShopsDocsPage() {
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header />
-
       <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
         <DocsSidebar />
 
@@ -507,8 +502,5 @@ CREATE TABLE IF NOT EXISTS \`shop_daily_revenue\` (
           </aside>
         </div>
       </div>
-
-      <Footer showCta={false} />
-    </div>
   );
 }

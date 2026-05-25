@@ -1,5 +1,3 @@
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink } from 'lucide-react';
@@ -45,9 +43,6 @@ function BulletList({ items }: { items: React.ReactNode[] }) {
 
 export default function EscrowErrorsPage() {
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header />
-
       <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
         <DocsSidebar />
 
@@ -178,8 +173,5 @@ export default function EscrowErrorsPage() {
         </aside>
         </div>
       </div>
-
-      <Footer showCta={false} />
-    </div>
   );
 }

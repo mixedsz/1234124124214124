@@ -9,34 +9,50 @@ import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 export const revalidate = 60;
 
+async function fetchYouTubeRSS(channelId: string): Promise<{ videoId: string; title: string } | null> {
+  const rssRes = await fetch(
+    `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
+    { next: { revalidate: 3600 } }
+  );
+  if (!rssRes.ok) return null;
+  const xml = await rssRes.text();
+  const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
+  const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
+  if (!videoIdMatch) return null;
+  return {
+    videoId: videoIdMatch[1],
+    title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
+  };
+}
+
 async function getLatestYouTubeVideo(): Promise<{ videoId: string; title: string } | null> {
+  // Use hardcoded channel ID if set in env (most reliable — avoids scraping)
+  const envChannelId = process.env.YOUTUBE_CHANNEL_ID;
+  if (envChannelId) {
+    try { return await fetchYouTubeRSS(envChannelId); } catch {}
+  }
+
+  // Try scraping the channel page for the ID
   try {
     const channelRes = await fetch('https://www.youtube.com/@flakedevelopment', {
-      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+      },
       next: { revalidate: 3600 },
     });
-    if (!channelRes.ok) return null;
-    const html = await channelRes.text();
-    const idMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/);
-    if (!idMatch) return null;
+    if (channelRes.ok) {
+      const html = await channelRes.text();
+      const idMatch = html.match(/"channelId":"(UC[a-zA-Z0-9_-]{22})"/);
+      if (idMatch) {
+        const result = await fetchYouTubeRSS(idMatch[1]);
+        if (result) return result;
+      }
+    }
+  } catch {}
 
-    const rssRes = await fetch(
-      `https://www.youtube.com/feeds/videos.xml?channel_id=${idMatch[1]}`,
-      { next: { revalidate: 3600 } }
-    );
-    if (!rssRes.ok) return null;
-    const xml = await rssRes.text();
-
-    const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
-    const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
-    if (!videoIdMatch) return null;
-    return {
-      videoId: videoIdMatch[1],
-      title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
-    };
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 const REVIEWS = [
@@ -388,42 +404,44 @@ export default async function HomePage() {
                 return (
                   <div
                     key={i}
-                    className="w-[320px] lg:w-[360px] flex-shrink-0 flex flex-col bg-neutral-900 border border-neutral-800 rounded-2xl p-6"
+                    className="w-[300px] lg:w-[340px] flex-shrink-0 flex flex-col bg-[#1e1f22] border border-white/[0.06] rounded-2xl p-5 shadow-lg"
                   >
-                    {/* Avatar + username */}
-                    <div className="flex items-center gap-4 mb-6">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={name}
-                          className="w-14 h-14 rounded-full object-cover flex-shrink-0"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className={`w-14 h-14 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-xl ${avatarBg(name)}`}>
-                          {name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="text-white font-semibold text-base leading-tight">{name}</span>
-                    </div>
-
-                    {/* Stars – right-aligned */}
-                    <div className="flex gap-1 justify-end mb-4">
-                      {[1,2,3,4,5].map(s => (
-                        <Star key={s} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                      ))}
+                    {/* Header: avatar+name on left, stars on right */}
+                    <div className="flex items-center justify-between mb-4">
+                      {/* Avatar stacked above name */}
+                      <div className="flex flex-col items-center gap-1.5">
+                        {avatarSrc ? (
+                          <img
+                            src={avatarSrc}
+                            alt={name}
+                            className="w-11 h-11 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <div className={`w-11 h-11 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-base ring-2 ring-white/10 ${avatarBg(name)}`}>
+                            {name.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="text-white/90 font-semibold text-[11px] leading-tight max-w-[80px] text-center truncate">{name}</span>
+                      </div>
+                      {/* Stars */}
+                      <div className="flex gap-0.5">
+                        {[1,2,3,4,5].map(s => (
+                          <Star key={s} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
                     </div>
 
                     {/* Review text */}
-                    <p className="text-neutral-300 text-sm leading-relaxed line-clamp-5 flex-1">
+                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-5 flex-1 italic">
                       &ldquo;{review.text}&rdquo;
                     </p>
 
                     {/* Bottom row */}
-                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
+                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.06]">
                       <span className="text-neutral-600 text-xs">{createdAt ? fmtDate(createdAt) : ''}</span>
-                      <span className="px-3 py-1.5 rounded-full bg-emerald-950/60 border border-emerald-700/40 text-emerald-400 text-[10px] font-bold tracking-widest uppercase">
-                        VERIFIED PURCHASE
+                      <span className="px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/40 text-emerald-400 text-[10px] font-bold tracking-widest uppercase">
+                        VERIFIED
                       </span>
                     </div>
                   </div>
