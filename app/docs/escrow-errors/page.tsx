@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { DocsSidebar } from '@/components/docs-sidebar';
+import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import Link from 'next/link';
 import { useState } from 'react';
 import { ChevronRight, ChevronDown, AlertTriangle, Copy, Check, ExternalLink } from 'lucide-react';
@@ -125,6 +125,7 @@ export default function EscrowErrorsPage() {
 
         {/* Main content */}
         <main className="flex-1 min-w-0">
+          <DocsMobileNav />
           <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
 
             {/* Breadcrumb */}
