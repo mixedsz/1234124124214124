@@ -135,7 +135,7 @@ export default async function HomePage() {
               </h1>
               <div className="mt-8 flex flex-wrap items-center gap-4">
                 <Link
-                  href="/store"
+                  href="/scripts"
                   className="inline-flex items-center gap-2 px-7 py-4 rounded-xl bg-white text-black font-bold text-lg hover:bg-neutral-200 transition"
                 >
                   Browse Scripts
@@ -190,7 +190,7 @@ export default async function HomePage() {
                 </div>
                 <div className="mt-10 flex justify-center">
                   <Link
-                    href="/store"
+                    href="/scripts"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-semibold border border-blue-600/30 transition"
                   >
                     View All

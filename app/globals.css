@@ -135,13 +135,13 @@
 }
 
 .animate-marquee {
-  animation: marquee 35s linear infinite;
+  animation: marquee 250s linear infinite;
   display: flex;
   width: max-content;
 }
 
 .animate-marquee2 {
-  animation: marquee2 35s linear infinite;
+  animation: marquee2 250s linear infinite;
   display: flex;
   width: max-content;
 }
