@@ -50,18 +50,20 @@ const GT_LANG: Record<string, string> = {
 
 function applyTranslation(code: string) {
   if (code === 'en' || code === 'en-gb') {
-    // Strip any translate.goog proxy and return to the real site
-    const url = new URL(window.location.href);
-    if (url.hostname.endsWith('.translate.goog')) {
-      const realHost = url.hostname.replace('.translate.goog', '').replace(/-/g, '.');
-      window.location.href = `https://${realHost}${url.pathname}`;
-    }
+    document.cookie = 'googtrans=; path=/; max-age=0';
+    document.cookie = `googtrans=; domain=.${location.hostname}; path=/; max-age=0`;
+    window.location.reload();
     return;
   }
   const gtCode = GT_LANG[code] ?? code;
-  // Redirect through Google's URL-proxy translator — no DOM injection, no hover artifacts
-  const pageUrl = window.location.href;
-  window.location.href = `https://translate.google.com/translate?sl=en&tl=${gtCode}&u=${encodeURIComponent(pageUrl)}`;
+  const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+  if (select) {
+    select.value = gtCode;
+    select.dispatchEvent(new Event('change'));
+  } else {
+    document.cookie = `googtrans=/en/${gtCode}; path=/`;
+    window.location.reload();
+  }
 }
 
 export function Footer({ storeName = 'Flake Development', showCta = true }: FooterProps) {

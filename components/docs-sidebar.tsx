@@ -102,6 +102,30 @@ const NAV: NavGroup[] = [
           { label: 'Troubleshooting', id: 'troubleshooting' },
         ],
       },
+      {
+        title: 'Flake Bodybag',
+        href: '/docs/flake-bodybag',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Usage', id: 'usage' },
+          { label: 'Features', id: 'features' },
+          { label: 'Commands', id: 'commands' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
+      {
+        title: 'Flake Loading Screen',
+        href: '/docs/flake-loading',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Video & Music', id: 'videos' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
     ],
   },
   {

@@ -97,6 +97,24 @@ const SCRIPTS = [
     color: 'from-rose-600/20 to-rose-900/10',
     border: 'border-rose-700/30',
   },
+  {
+    emoji: '⚰️',
+    title: 'Flake Bodybag',
+    desc: 'Bodybag, burial, and character-kill system with CK backup and restoration support.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake-bodybag',
+    color: 'from-neutral-600/20 to-neutral-900/10',
+    border: 'border-neutral-700/30',
+  },
+  {
+    emoji: '🎬',
+    title: 'Flake Loading Screen',
+    desc: 'Modern FiveM loading screen with video playback, audio controls, staff showcase, and social links.',
+    tags: ['FiveM', 'HTML/JS'],
+    href: '/docs/flake-loading',
+    color: 'from-blue-600/20 to-blue-900/10',
+    border: 'border-blue-700/30',
+  },
 ];
 
 export default function DocsIntroPage() {

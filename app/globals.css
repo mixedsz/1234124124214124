@@ -176,10 +176,25 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Hide Google Translate banner shown when using the URL proxy translator */
-.goog-te-banner-frame,
-.skiptranslate > iframe { display: none !important; }
+/* Hide Google Translate toolbar */
+.goog-te-banner-frame, .goog-te-banner-frame.skiptranslate,
+iframe.goog-te-menu-frame, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO { display: none !important; }
 body { top: 0 !important; }
+.skiptranslate > iframe { display: none !important; }
+
+/* Hide GT hover popup */
+#goog-gt-tt, .goog-te-balloon-frame,
+.goog-tooltip, .goog-tooltip-text-bubble { display: none !important; }
+
+/* Kill text highlight — JS mouseover in layout.tsx handles inline override */
+.goog-text-highlight,
+font.goog-text-highlight,
+span.goog-text-highlight {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
 
 
 /* Status indicator */
