@@ -192,9 +192,14 @@ body { top: 0 !important; }
 .goog-tooltip-text-bubble { display: none !important; }
 
 /* Remove hover highlight on translated text spans */
-.goog-text-highlight {
-  background: none !important;
+.goog-text-highlight,
+font.goog-text-highlight,
+span.goog-text-highlight {
+  background: transparent !important;
+  background-color: transparent !important;
   box-shadow: none !important;
+  text-shadow: none !important;
+  outline: none !important;
 }
 
 /* Status indicator */
