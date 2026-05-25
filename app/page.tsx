@@ -308,10 +308,14 @@ export default async function HomePage() {
             <div className="animate-marquee flex gap-4 pl-4">
               {doubledReviews.map((review, i) => {
                 const name = review.author.startsWith('@') ? review.author.slice(1) : review.author;
-                const avatarSrc = (review as {avatar_url?: string; discord_id?: string}).avatar_url
-                  || ((review as {discord_id?: string}).discord_id && isSnowflake((review as {discord_id?: string}).discord_id!)
-                    ? `/api/discord-avatar?id=${(review as {discord_id?: string}).discord_id}`
-                    : null);
+                const discordId = (review as {discord_id?: string}).discord_id;
+                const storedUrl = (review as {avatar_url?: string}).avatar_url;
+                const avatarSrc = storedUrl
+                  || (discordId && isSnowflake(discordId)
+                    ? `/api/discord-avatar?id=${discordId}`
+                    : discordId
+                      ? `/api/discord-avatar?username=${encodeURIComponent(discordId)}`
+                      : null);
                 const createdAt = (review as {created_at?: string}).created_at;
                 return (
                   <div
