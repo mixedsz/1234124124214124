@@ -71,8 +71,8 @@ export function RecentPurchases() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-4 h-4 text-neutral-400" />
+            <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+              <CreditCard className="w-4 h-4 text-blue-400" />
             </div>
             <h2 className="text-2xl font-bold text-white">Recent Purchases</h2>
           </div>
