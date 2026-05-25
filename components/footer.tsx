@@ -285,20 +285,14 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
             </p>
             <div className="flex justify-center mt-6">
               <div className="inline-flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition">
-                {ownerAvatar ? (
-                  <img
-                    src={ownerAvatar}
-                    alt="flakedev"
-                    className="w-7 h-7 rounded-full flex-shrink-0 object-cover"
-                  />
-                ) : (
-                  <div className="w-7 h-7 rounded-full flex-shrink-0 bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-white text-[11px] font-bold select-none">
-                    F
-                  </div>
-                )}
+                <img
+                  src={ownerAvatar}
+                  alt="flakedev"
+                  className="w-7 h-7 rounded-lg flex-shrink-0 object-cover"
+                />
                 <div className="flex flex-col leading-none">
                   <span className="text-[9px] text-neutral-500 uppercase tracking-widest">Designed &amp; Built by</span>
-                  <span className="text-xs font-bold text-white mt-0.5 tracking-wide">FLAKE</span>
+                  <span className="text-xs font-bold text-white mt-0.5 tracking-wide">@flakedev</span>
                 </div>
               </div>
             </div>
