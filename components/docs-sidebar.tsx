@@ -6,7 +6,6 @@ import Link from 'next/link';
 import {
   BookOpen,
   Terminal,
-  Wrench,
   LifeBuoy,
   ChevronDown,
   ChevronRight,
@@ -43,15 +42,6 @@ const NAV: NavGroup[] = [
         sections: [
           { label: 'Browse Scripts', id: 'browse' },
           { label: 'Getting Started', id: 'getting-started' },
-        ],
-      },
-      {
-        title: 'FiveM Escrow Errors',
-        href: '/docs/escrow-errors',
-        sections: [
-          { label: 'Syntax error near <\\1>', id: 'syntax' },
-          { label: 'Failed to verify resource', id: 'verify' },
-          { label: 'You lack entitlement', id: 'entitlement' },
         ],
       },
     ],
@@ -176,20 +166,18 @@ const NAV: NavGroup[] = [
     ],
   },
   {
-    title: 'Configuration',
-    icon: <Wrench className="w-3.5 h-3.5 flex-shrink-0" />,
-    items: [
-      { title: 'Config Files', href: '/docs/config' },
-      { title: 'Frameworks', href: '/docs/frameworks' },
-      { title: 'Locales', href: '/docs/locales' },
-    ],
-  },
-  {
     title: 'Troubleshooting',
     icon: <LifeBuoy className="w-3.5 h-3.5 flex-shrink-0" />,
     items: [
-      { title: 'Common Issues', href: '/docs/common-issues' },
-      { title: 'Performance Tips', href: '/docs/performance' },
+      {
+        title: 'FiveM Escrow Errors',
+        href: '/docs/escrow-errors',
+        sections: [
+          { label: 'Syntax error near <\\1>', id: 'syntax' },
+          { label: 'Failed to verify resource', id: 'verify' },
+          { label: 'You lack entitlement', id: 'entitlement' },
+        ],
+      },
     ],
   },
 ];
@@ -298,7 +286,7 @@ export function DocsSidebar() {
 
   return (
     <div className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-neutral-800">
-      <aside className="flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4">
+      <aside className="flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4 docs-scrollbar">
         {/* Brand label */}
         <div className="mb-4 px-2">
           <p className="text-[10px] text-neutral-600 uppercase tracking-widest font-bold mb-0.5">Flake Development</p>

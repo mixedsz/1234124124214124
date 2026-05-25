@@ -164,9 +164,15 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
         new RegExp(`(<(?:p|div)[^>]*>)(?:<[^>]+>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/[^>]+>)*\\s*<br\\s*/?>\\s*`, 'gi'),
         '$1'
       );
-      // Pass 1c: bare inline heading (no block wrapper) e.g. <strong>Dependencies</strong><br>
+      // Pass 1c: entire bare-inline section — heading (inline-tagged or bare) + <br>-separated items
+      // Matches e.g. <strong>Dependencies</strong><br>- ox_lib<br>- wasabi_crutch...
+      const itemAlts = items.map(i => i.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
       stripped = stripped.replace(
-        new RegExp(`(?:<(?:strong|b|em|i|span)[^>]*>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/(?:strong|b|em|i|span)>)*\\s*<br\\s*/?>\\s*`, 'gi'),
+        new RegExp(
+          `(?:<(?:strong|b|em|i|span)[^>]*>)*\\s*\\[?${headEsc}\\]?:?\\s*(?:<\\/(?:strong|b|em|i|span)>)*` +
+          `(?:\\s*<br\\s*/?>\\s*(?:<(?:strong|b|em|i|span)[^>]*>)*[-*•]?\\s*(?:${itemAlts})\\s*(?:<\\/(?:strong|b|em|i|span)>)*)+`,
+          'gi'
+        ),
         ''
       );
 

@@ -1,4 +1,5 @@
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
+import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, Info, Check } from 'lucide-react';
 
@@ -67,7 +68,7 @@ const ON_THIS_PAGE = [
 
 export default function FlakeWearablesDocsPage() {
   return (
-    <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
+    <div className="flex flex-1 w-full">
       <DocsSidebar />
       <main className="flex-1 min-w-0">
         <DocsMobileNav />
@@ -294,17 +295,8 @@ export default function FlakeWearablesDocsPage() {
         </div>
       </main>
 
-      {/* On this page */}
-      <aside className="hidden xl:block w-56 flex-shrink-0 py-10 pr-4">
-        <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-4">On this page</p>
-        <ul className="space-y-2">
-          {ON_THIS_PAGE.map(item => (
-            <li key={item.href}>
-              <a href={item.href} className="text-xs text-neutral-500 hover:text-neutral-300 transition">{item.label}</a>
-            </li>
-          ))}
-        </ul>
-      </aside>
+      {/* Right sidebar */}
+      <DocsOnThisPage items={ON_THIS_PAGE} />
     </div>
   );
 }

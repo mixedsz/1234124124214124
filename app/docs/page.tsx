@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
+import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check, ArrowRight, Zap } from 'lucide-react';
 
@@ -155,7 +156,7 @@ const SCRIPTS = [
 
 export default function DocsIntroPage() {
   return (
-    <div className="flex flex-1 w-full max-w-[1400px] mx-auto">
+    <div className="flex flex-1 w-full">
       <DocsSidebar />
 
       <main className="flex-1 min-w-0">
@@ -321,24 +322,10 @@ export default function DocsIntroPage() {
       </main>
 
       {/* Right TOC sidebar */}
-      <div className="hidden xl:block w-52 flex-shrink-0 border-l border-neutral-800">
-        <aside className="sticky top-16 h-[calc(100vh-64px)] overflow-y-auto py-10 px-5">
-          <p className="text-xs text-neutral-600 uppercase tracking-widest font-semibold mb-4">On this page</p>
-          <nav className="space-y-1">
-            {[
-              { label: 'Browse Scripts', href: '#browse' },
-              { label: 'Check server artifacts', href: '#getting-started' },
-              { label: 'Downloading your script', href: '#getting-started' },
-              { label: 'Extracting the zip', href: '#getting-started' },
-              { label: 'Restart your server', href: '#getting-started' },
-            ].map(({ label, href }) => (
-              <a key={label} href={href} className="block text-xs text-neutral-500 hover:text-white py-1 transition">
-                {label}
-              </a>
-            ))}
-          </nav>
-        </aside>
-      </div>
+      <DocsOnThisPage items={[
+        { label: 'Browse Scripts', href: '#browse' },
+        { label: 'Getting Started', href: '#getting-started' },
+      ]} />
     </div>
   );
 }
