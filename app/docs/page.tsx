@@ -190,21 +190,6 @@ export default function DocsIntroPage() {
               </StepperStep>
             </div>
 
-            {/* Discord CTA */}
-            <div className="mt-4 pt-8 border-t border-neutral-800">
-              <p className="text-neutral-500 text-sm">
-                If you need more help, join our Discord:{' '}
-                <a
-                  href="https://discord.gg/flakedev"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-400 hover:text-blue-300 underline transition"
-                >
-                  discord.gg/flakedev
-                </a>
-              </p>
-            </div>
-
             {/* Footer nav */}
             <div className="flex items-center justify-end mt-10">
               <Link
@@ -219,7 +204,8 @@ export default function DocsIntroPage() {
         </main>
 
         {/* Right sidebar */}
-        <aside className="hidden xl:block w-52 flex-shrink-0 border-l border-neutral-800 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-10 px-5">
+        <div className="hidden xl:block w-52 flex-shrink-0 border-l border-neutral-800">
+        <aside className="sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-10 px-5">
           <p className="text-xs text-neutral-600 uppercase tracking-widest font-semibold mb-4">On this page</p>
           <nav className="space-y-1">
             {[
@@ -233,6 +219,7 @@ export default function DocsIntroPage() {
             ))}
           </nav>
         </aside>
+        </div>
       </div>
 
       <Footer />

@@ -112,7 +112,8 @@ export function DocsSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-neutral-800 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4">
+    <div className="hidden lg:block w-64 xl:w-72 flex-shrink-0 border-r border-neutral-800">
+    <aside className="flex flex-col sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4">
       <div className="mb-6 px-2">
         <p className="text-xs text-neutral-600 uppercase tracking-widest font-semibold mb-0.5">Flake Development</p>
         <p className="text-white font-bold text-base">Documentation</p>
@@ -145,6 +146,7 @@ export function DocsSidebar() {
         </Link>
       </div>
     </aside>
+    </div>
   );
 }
 

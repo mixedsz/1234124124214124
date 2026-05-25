@@ -510,7 +510,8 @@ export default function FlakeSmokingDocsPage() {
         </main>
 
         {/* Right sidebar */}
-        <aside className="hidden xl:block w-52 flex-shrink-0 border-l border-neutral-800 sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-10 px-5">
+        <div className="hidden xl:block w-52 flex-shrink-0 border-l border-neutral-800">
+        <aside className="sticky top-0 h-[calc(100vh-64px)] overflow-y-auto py-10 px-5">
           <p className="text-xs text-neutral-600 uppercase tracking-widest font-semibold mb-4">On this page</p>
           <nav className="space-y-1">
             {ON_THIS_PAGE.map(({ href, label }) => (
@@ -520,6 +521,7 @@ export default function FlakeSmokingDocsPage() {
             ))}
           </nav>
         </aside>
+        </div>
       </div>
 
       <Footer />
