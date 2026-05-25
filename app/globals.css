@@ -244,6 +244,31 @@ span.goog-text-highlight {
   margin-bottom: 0.5rem;
 }
 
+/* Global page scrollbar — must define ::-webkit-scrollbar first or button rules are ignored */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #333 transparent;
+}
+html::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+html::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+html::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+html::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
 /* Docs sidebar scrollbar */
 .docs-scrollbar {
   scrollbar-width: thin;
@@ -262,9 +287,8 @@ span.goog-text-highlight {
 .docs-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
-
-/* Hide scrollbar arrow buttons globally */
-::-webkit-scrollbar-button {
+.docs-scrollbar::-webkit-scrollbar-button {
+  display: none;
   height: 0;
   width: 0;
 }
