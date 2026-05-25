@@ -176,6 +176,15 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
+/* Hide Google Translate toolbar while keeping translation functionality */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-menu-frame,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO { display: none !important; }
+body { top: 0 !important; }
+.skiptranslate > iframe { display: none !important; }
+
 /* Prose styling for description markdown */
 .prose a {
   color: rgb(96, 165, 250);
