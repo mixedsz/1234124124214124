@@ -112,35 +112,68 @@ function getReqType(item: string): ReqType {
 
 function extractSection(raw: string, heading: string): { items: string[]; stripped: string } {
   const items: string[] = [];
+  const hClean = heading.replace(/\?$/, '');
+  const hLower = hClean.toLowerCase();
+  const hLowerSingular = hLower.endsWith('s') ? hLower.slice(0, -1) : hLower;
 
-  // HTML descriptions
   if (/<[a-z]/i.test(raw)) {
-    const headPat = new RegExp(
-      `<[^>]+>[^<]*${heading}[^<]*<\\/[^>]+>\\s*(<ul>[\\s\\S]*?<\\/ul>|(?:<p>(?!.*<ul)[\\s\\S]*?<\\/p>\\s*){1,15})`,
-      'i'
-    );
-    const hm = raw.match(headPat);
-    if (hm) {
-      const inner = hm[1];
-      const itemPat = /<(?:li|p)[^>]*>([\s\S]*?)<\/(?:li|p)>/gi;
-      let im: RegExpExecArray | null;
-      while ((im = itemPat.exec(inner)) !== null) {
-        const text = im[1].replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').trim();
-        if (text && text.toLowerCase() !== heading.toLowerCase()) items.push(text);
+    // Convert HTML to plain text for reliable line-based parsing
+    const plain = raw
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/(?:p|div|li|ul|ol|h[1-6])>\s*/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&nbsp;/g, ' ');
+
+    const lines = plain.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    let headIdx = -1;
+    for (let i = 0; i < lines.length; i++) {
+      const lineText = lines[i].replace(/:$/, '').trim().toLowerCase();
+      if (lineText === hLower || lineText === hLowerSingular) { headIdx = i; break; }
+    }
+
+    if (headIdx >= 0) {
+      for (let i = headIdx + 1; i < lines.length; i++) {
+        const l = lines[i];
+        // Stop at next section heading (Capital letter, ends with colon, short)
+        if (/^[A-Z][^:]{0,40}:\s*$/.test(l)) break;
+        const clean = l.replace(/^[-*•]\s*/, '').trim();
+        if (clean.length > 0) items.push(clean);
+        if (items.length >= 12) break;
       }
-      if (items.length > 0) return { items, stripped: raw.replace(hm[0], '').trim() };
+    }
+
+    if (items.length > 0) {
+      const headEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      let stripped = raw;
+      // Remove heading block — handles <p><strong>heading</strong></p> and plain <p>heading</p>
+      stripped = stripped.replace(
+        new RegExp(`<(p|div|h[1-6])[^>]*>(?:<[^>]+>)*\\s*${headEsc}:?\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
+        ''
+      );
+      for (const item of items) {
+        const itemEsc = item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        stripped = stripped.replace(
+          new RegExp(`<(p|li|div)[^>]*>(?:<[^>]+>)*\\s*[-*•]?\\s*${itemEsc}\\s*(?:<\\/[^>]+>)*\\s*<\\/\\1>\\s*`, 'gi'),
+          ''
+        );
+      }
+      // Remove empty list containers left behind
+      stripped = stripped.replace(/<(?:ul|ol)[^>]*>\s*<\/(?:ul|ol)>/gi, '');
+      return { items, stripped: stripped.trim() };
     }
   }
 
-  // Plain text / markdown
+  // Plain text / markdown fallback
+  const hEsc = hClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const textPat = new RegExp(
-    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?${heading}:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?)+?)(?=\\n{2,}|\\n[ \\t]*(?:#{1,3}|\\*{1,2})[^*]|$)`,
+    `(?:^|\\n)[ \\t]*(?:#{1,3}[ \\t]*|\\*{1,2})?${hEsc}:?\\*{0,2}[ \\t]*\\n((?:[ \\t]*[-*•]?[ \\t]*[^\\n]+\\n?){1,15})`,
     'i'
   );
   const tm = raw.match(textPat);
   if (tm?.[1]) {
     for (const line of tm[1].split('\n')) {
       const clean = line.replace(/^[ \t]*[-*•][ \t]*/, '').replace(/\*{1,2}/g, '').trim();
+      if (/^[A-Z][^:]{0,40}:\s*$/.test(clean)) break;
       if (clean.length > 1) items.push(clean);
     }
     if (items.length > 0) return { items, stripped: raw.replace(tm[0], '\n').trim() };
