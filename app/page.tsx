@@ -9,30 +9,51 @@ import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'luci
 export const revalidate = 60;
 
 const REVIEWS = [
-  {
-    text: "I want to express my deep appreciation for Flake Development. They are always respectful and responsive, and I truly admire the hard work they put into these scripts. They're simply amazing – the best I've ever come across. Much love to Trey and the team!",
-    author: "@xtreme_rp",
-  },
-  {
-    text: "I had far more issues than just implementing the script. Flake went way beyond and helped me not only add the script but made sure ALL aspects of my server were working correctly! Amazing support and amazing scripts, what more could you ask for?",
-    author: "@nocturnaldev",
-  },
-  {
-    text: "I am truly impressed with Flake's scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations. Would definitely buy again!",
-    author: "@vanguard_scripts",
-  },
-  {
-    text: "Hands down the best FiveM scripts I've used. Trey's attention to detail is incredible and the support response time is unmatched. Every update brings something new and they listen to the community. 10/10 would recommend to any server owner.",
-    author: "@txrp_owner",
-  },
-  {
-    text: "Been using Flake Development scripts for over a year now. The quality is consistently high and the free updates policy is something no other creator does. My players absolutely love the immersion these scripts bring.",
-    author: "@paradox_rp",
-  },
-  {
-    text: "The documentation is thorough and the scripts work out of the box. Had a small config question and Trey answered within minutes. This is how every FiveM resource should be sold and supported.",
-    author: "@elitescripts",
-  },
+  { text: "good and fast services im talking everything yu need highly recommend ‼️🔥", author: "@ImJustTeejayyll" },
+  { text: "I've been buying scripts from Flake since I first started my server, and every single one has been straight 🔥. Flake recently presented an opportunity for the GW-inspired base, and me and my partner jumped on it right away. Between the open-source scripts and the custom ones he's built personally, the quality and attention to detail speak for themselves. I've seen the hours he puts in to perfect his work — dude's dedicated. Flake is a one-stop shop for anything you need to elevate your FiveM server. Can't recommend him enough. 💯", author: "@WAR" },
+  { text: "flake is solid. all scripts i have installed in my server seamless and clean even when i was just starting they were straight to the point. 10/10", author: "@⭒" },
+  { text: "10/10 good and fast🐐", author: "@Aj" },
+  { text: "10/10 Got me right", author: "@TextRead" },
+  { text: "10/10 🔥 🔥", author: "@Loso143" },
+  { text: "10/10 fire ass scripts", author: "@LoyalFamKash" },
+  { text: "10/10 Got me right", author: "@HDJONTV" },
+  { text: "Fast service as always", author: "@H2" },
+  { text: "Flake is more than quick service, gives you reassurance every minute in the ticket. He doesn't just take your money and go offline — once you send money he sends you the product. 10/10, fuck that 10000/10", author: "@noface." },
+  { text: "1000/10 Service 💯💯💯 fast customer service and goes above and beyond to make sure you get what you need help with. Def gonna continue shopping here!!", author: "@SlapzThaDon" },
+  { text: "100000000/10... was frustrated getting a script config but Flake made sure the mission was complete ✅ before closing the ticket 💯 will be returning for more scripts fashooo", author: "@MrWicsTV" },
+  { text: "That grizzly world base so fye, Flake did his thing with every script 💯, no waiting no gimmicks. If you're looking to get it don't hesitate. Money well spent 💯‼️ ⭐️⭐️⭐️⭐️ 5 star service wtf is the yelp page", author: "@Jaqyn" },
+  { text: "Best fivem Base on the market and the scripts work better than the originals ⭐ ⭐ ⭐ ⭐ ⭐ 10stars all around no cap. Everything is drag and drop", author: "@AlonzoHarris" },
+  { text: "10/10 fast support 💯", author: "@Fancy" },
+  { text: "10/10 got to me fast", author: "@JUNECBFW" },
+  { text: "1000/10 thank you so much for my custom teleport! i love it 😊", author: "@L.A.Y.L.A" },
+  { text: "MY DUDE HAS THE BESTTTT CROSSHAIR IVE EVER USED IN A CITY", author: "@breezyhimself" },
+  { text: "10/10 SERVICE QUICK AND FAST GONE GET YOU RIGHT BEST OUT", author: "@Yungestsmacca" },
+  { text: "shout out to Flake manee", author: "@Josiah" },
+  { text: "this mf move fast as hell ngl, best customer service!! 10/10 highly recommend!!", author: "@Vxtone" },
+  { text: "W scripts 10/10 🤙🏼", author: "@Aron" },
+  { text: "Quicc response and good service.", author: "@ARS3LL" },
+  { text: "If you got Flake you need no one else. Quick, fast, and very efficient, 10/10.", author: "@KING" },
+  { text: "10/10 good services highly recommend don't miss out 🔥", author: "@H" },
+  { text: "Came back in got me right very professional 🔥", author: "@H" },
+  { text: "Flake 100%. Fast with the response and the service.", author: "@Unknown" },
+  { text: "Fire cooking script get yours no regrets 🔥🔥🔥 10/10 must recommend", author: "@H" },
+  { text: "Flake 100%. Fast with the response get me right everytime", author: "@LoyalFamKash" },
+  { text: "Appreciate the quick responds and helping me out, if you had a rate system ill rate it 100%... Keep up the good work", author: "@MvpSquad" },
+  { text: "Plug Script is nice! Thanx bro I appreciate the quick process!", author: "@H2" },
+  { text: "Another fire script! Physical therapy! no issues! Appreciate it!", author: "@H2" },
+  { text: "Blackmarket script is 💯! 3 scripts for 50% is a crazy deal, Goodlooking", author: "@H2" },
+  { text: "Just installed busttop in our server. Another W!!!", author: "@H2" },
+  { text: "the best 1000/100000 he never fails me", author: "@Kenzo14" },
+  { text: "he js too teed 100000%", author: "@cdotalt" },
+  { text: "Best Service Hands Down 💯", author: "@SMILEY" },
+  { text: "10/10 best service 💗", author: "@L.A.Y.L.A" },
+  { text: "just brought another script got 5 scripts all together from bro best service without question 💯🤝🏾", author: "@SMILEY" },
+  { text: "Fastest Service I've ever had getting scripts. I will be back!!", author: "@buckwi1d730" },
+  { text: "solid store fast an reliable! very helpful 100/100", author: "@⭒" },
+  { text: "Let s goooo! Flake 💯 Fast and taught me some valuable info", author: "@H2" },
+  { text: "trust worthy and honest service reliable fast and quick responding, always willing to help with little questions.", author: "@mdosha" },
+  { text: "10/10 best service i will be getting more scripts", author: "@HDJONTV" },
+  { text: "10/10 💯", author: "@Hitman" },
 ];
 
 const FEATURES = [
@@ -87,11 +108,11 @@ export default async function HomePage() {
       seen.add(key);
       return true;
     })
-    .slice(0, 20)
+    .slice(0, 50)
     .map(r => ({ text: r.content, author: `@${r.username}` }));
   const displayReviews = mappedApiReviews.length >= 6
     ? mappedApiReviews
-    : [...mappedApiReviews, ...REVIEWS].slice(0, Math.max(6, mappedApiReviews.length));
+    : [...mappedApiReviews, ...REVIEWS].slice(0, Math.max(REVIEWS.length, mappedApiReviews.length));
 
   // Double the reviews for seamless infinite scroll
   const doubledReviews = [...displayReviews, ...displayReviews];
