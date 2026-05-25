@@ -1,6 +1,7 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { ProductCard } from '@/components/product-card';
+import { RecentPurchases } from '@/components/recent-purchases';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
@@ -177,6 +178,8 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        <RecentPurchases />
 
         {/* Best Sellers Section */}
         <section className="py-16 bg-neutral-900 border-t border-neutral-800">
