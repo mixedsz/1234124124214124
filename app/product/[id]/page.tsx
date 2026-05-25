@@ -83,12 +83,19 @@ function buildMediaItems(pkg: TebexPackage): string[] {
 // ── Requirements extraction ────────────────────────────────────────────────────
 
 const KNOWN_DEP_URLS: Record<string, string> = {
-  oxmysql:       'https://github.com/overextended/oxmysql/releases/latest',
-  ox_lib:        'https://github.com/overextended/ox_lib/releases/latest',
-  ox_inventory:  'https://github.com/overextended/ox_inventory/releases/latest',
-  ox_target:     'https://github.com/overextended/ox_target/releases/latest',
-  ox_doorlock:   'https://github.com/overextended/ox_doorlock/releases/latest',
-  oxlib:         'https://github.com/overextended/ox_lib/releases/latest',
+  oxmysql:              'https://github.com/overextended/oxmysql/releases/latest',
+  ox_lib:               'https://github.com/overextended/ox_lib/releases/latest',
+  ox_inventory:         'https://github.com/overextended/ox_inventory/releases/latest',
+  ox_target:            'https://github.com/overextended/ox_target/releases/latest',
+  ox_doorlock:          'https://github.com/overextended/ox_doorlock/releases/latest',
+  oxlib:                'https://github.com/overextended/ox_lib/releases/latest',
+  wasabi_ambulance:     'https://www.wasabiscripts.com/product/7242186',
+  wasabi_crutch:        'https://www.wasabiscripts.com/product/5453692',
+  ak47_ambulancejob:    'https://menanak47.tebex.io/package/5884442',
+  ak47_qbambulancejob:  'https://menanak47.tebex.io/package/5893947',
+  ak47_crutch:          'https://menanak47.tebex.io/package/6419367',
+  ak47_qbcrutch:        'https://menanak47.tebex.io/package/6419368',
+  esx_ambulancejob:     'https://github.com/esx-framework/ESX-Legacy-Addons/tree/main/%5Besx_addons%5D/esx_ambulancejob',
 };
 
 function getDepUrl(item: string): string | null {
@@ -304,6 +311,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     loadPackage();
   }, [params]);
 
+  useEffect(() => {
+    if (pkg?.name) {
+      document.title = `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`;
+      return () => { document.title = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts'; };
+    }
+  }, [pkg?.name]);
+
   // Variables that are NOT discord (those get the OAuth button, not a text input)
   const requiredVariables: TebexPackageVariable[] = (pkg?.variables ?? []).filter(
     (v: TebexPackageVariable) =>
@@ -461,11 +475,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   // discount field = dollar amount off (not percentage)
   const salePrice = hasDiscount ? Math.max(0, pkg.base_price - pkg.discount) : pkg.total_price;
 
-  // Strip Requirements / Dependencies sections before rendering description
+  // Strip Requirements / Dependencies / Compatible sections before rendering description
   const req1 = extractSection(pkg.description || '', 'Requirements?');
   const req2 = extractSection(req1.stripped, 'Dependencies');
+  const compat1 = extractSection(req2.stripped, 'Compatible with');
+  const compat2 = extractSection(compat1.stripped, 'Compatibles');
+  const compat3 = extractSection(compat2.stripped, 'Compatible');
   const requirementItems = [...req1.items, ...req2.items];
-  const parsedDescription = parseDescription(req2.stripped);
+  const compatibleItems = [...compat1.items, ...compat2.items, ...compat3.items];
+  const parsedDescription = parseDescription(compat3.stripped);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -486,9 +504,9 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
           <span className="text-neutral-500 truncate max-w-[200px] sm:max-w-xs">{pkg.name}</span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-16 items-start">
           {/* Media carousel */}
-          <div>
+          <div className="md:sticky md:top-20 self-start">
             {(() => {
               const mediaItems = buildMediaItems(pkg);
               const cur = mediaItems[activeMedia] ?? '';
@@ -626,7 +644,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-blue-400 text-sm font-medium mb-2">{pkg.category?.name}</p>
-                
+
                 {/* Framework Badges - Light variant style like Mantine */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span className="px-2.5 py-1 bg-red-500/15 text-red-400 text-xs font-semibold rounded">QBCore</span>
@@ -644,7 +662,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             {/* Price */}
-            <div className="mb-8 pb-8 border-b border-neutral-800">
+            <div className="mb-4 pb-4 border-b border-neutral-800">
               <div className="flex items-baseline gap-3">
                 <span className="text-4xl font-black text-white">
                   {salePrice === 0 ? 'Free' : formatPrice(salePrice)}
@@ -656,87 +674,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 )}
               </div>
               <p className="text-neutral-500 text-sm mt-1">Tax included</p>
-            </div>
-
-            {/* Trust badges */}
-            <div className="flex flex-col gap-2 mb-6 text-sm text-neutral-400">
-              <div className="flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
-                  <path d="M9 12l2 2l4 -4"/>
-                </svg>
-                <span>7 day money-back guarantee</span>
-                <sup className="text-blue-400 font-normal text-[10px] flex items-center gap-0.5 cursor-pointer">
-                  <Link href="/refunds" className="hover:text-blue-300">Subject to T&Cs</Link>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
-                  </svg>
-                </sup>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/>
-                  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/>
-                  <path d="M8 11v-4a4 4 0 1 1 8 0v4"/>
-                </svg>
-                <span>Protected by Cfx.re asset escrow</span>
-              </div>
-            </div>
-
-            {/* Requirements card */}
-            {requirementItems.length > 0 && (
-              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
-                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Requirements</p>
-                <div className="space-y-2">
-                  {requirementItems.map((item, i) => {
-                    const type = getReqType(item);
-                    const url = getDepUrl(item);
-                    const label = item.replace(/https?:\/\/[^\s)>\]]+/g, '').replace(/[()[\]]/g, '').trim();
-                    return (
-                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
-                        {type === 'framework' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 flex-shrink-0">
-                            <path d="M14 4h6v6h-6z"/><path d="M4 14h6v6h-6z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
-                          </svg>
-                        )}
-                        {type === 'onesync' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400 flex-shrink-0">
-                            <path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/>
-                          </svg>
-                        )}
-                        {type === 'server' && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 flex-shrink-0">
-                            <path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/>
-                          </svg>
-                        )}
-                        {(type === 'dependency' || type === 'default') && (
-                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 flex-shrink-0">
-                            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>
-                          </svg>
-                        )}
-                        {url ? (
-                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
-                            {label}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
-                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
-                            </svg>
-                          </a>
-                        ) : (
-                          <span>{label}</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Description with proper markdown rendering */}
-            <div className="mb-8 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-              <div
-                className="text-neutral-400 leading-relaxed text-sm prose prose-invert prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: parsedDescription }}
-              />
             </div>
 
             {/* Login required notice */}
@@ -767,15 +704,13 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             {added && (
               <div className="mb-4 bg-green-900/20 border border-green-800 rounded-xl p-4 text-green-300 text-sm flex gap-2">
                 <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                Added to cart successfully!{' '}
-                <Link href="/cart" className="underline hover:text-green-200">View Cart →</Link>
+                Added to cart successfully!
               </div>
             )}
             {giftAdded && (
               <div className="mb-4 bg-green-900/20 border border-green-800 rounded-xl p-4 text-green-300 text-sm flex gap-2">
                 <Gift className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                Gift added to cart!{' '}
-                <Link href="/cart" className="underline hover:text-green-200">View Cart →</Link>
+                Gift added to cart!
               </div>
             )}
 
@@ -885,23 +820,128 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 {adding ? 'Adding to Cart...' : isAuthenticated ? 'Add to Cart' : 'Login to Purchase'}
               </button>
 
-              <div className="flex gap-3">
-                <Link
-                  href="/cart"
-                  className="flex-1 flex items-center justify-center border border-neutral-700 hover:border-neutral-600 text-neutral-300 hover:text-white font-medium py-3 rounded-xl transition"
+              {!pkg.disable_gifting && (
+                <button
+                  onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); } else { setShowGiftModal(true); } }}
+                  className="w-full flex items-center justify-center gap-2 border border-neutral-700 hover:border-blue-500/50 bg-blue-600/5 hover:bg-blue-600/15 text-neutral-400 hover:text-blue-300 font-bold py-4 rounded-xl transition"
                 >
-                  View Cart
-                </Link>
-                {!pkg.disable_gifting && (
-                  <button
-                    onClick={() => { if (!isAuthenticated) { setShowLoginModal(true); } else { setShowGiftModal(true); } }}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl border border-neutral-700 hover:border-blue-500/50 bg-blue-600/5 hover:bg-blue-600/15 text-neutral-400 hover:text-blue-300 font-medium transition text-sm"
-                  >
-                    <Gift className="w-4 h-4" />
-                    Gift
-                  </button>
-                )}
+                  <Gift className="w-4 h-4" />
+                  Gift
+                </button>
+              )}
+            </div>
+
+            <div className="my-6 border-t border-neutral-800" />
+
+            {/* Trust badges */}
+            <div className="flex flex-col gap-2 mb-6 text-sm text-neutral-400">
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/>
+                  <path d="M9 12l2 2l4 -4"/>
+                </svg>
+                <span>7 day money-back guarantee</span>
+                <sup className="text-blue-400 font-normal text-[10px] flex items-center gap-0.5 cursor-pointer">
+                  <Link href="/refunds" className="hover:text-blue-300">Subject to T&Cs</Link>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                  </svg>
+                </sup>
               </div>
+              <div className="flex items-center gap-1.5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6z"/>
+                  <path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/>
+                  <path d="M8 11v-4a4 4 0 1 1 8 0v4"/>
+                </svg>
+                <span>Protected by Cfx.re asset escrow</span>
+              </div>
+            </div>
+
+            {/* Requirements card */}
+            {requirementItems.length > 0 && (
+              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
+                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Requirements</p>
+                <div className="space-y-2">
+                  {requirementItems.map((item, i) => {
+                    const type = getReqType(item);
+                    const url = getDepUrl(item);
+                    const label = item.replace(/https?:\/\/[^\s)>\]]+/g, '').replace(/[()[\]]/g, '').trim();
+                    return (
+                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
+                        {type === 'framework' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400 flex-shrink-0">
+                            <path d="M14 4h6v6h-6z"/><path d="M4 14h6v6h-6z"/><path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/><path d="M7 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"/>
+                          </svg>
+                        )}
+                        {type === 'onesync' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400 flex-shrink-0">
+                            <path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828"/>
+                          </svg>
+                        )}
+                        {type === 'server' && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-400 flex-shrink-0">
+                            <path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.87l-8.106 -13.536a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/>
+                          </svg>
+                        )}
+                        {(type === 'dependency' || type === 'default') && (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neutral-400 flex-shrink-0">
+                            <path d="M5 4h4l3 3h7a2 2 0 0 1 2 2v8a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-11a2 2 0 0 1 2 -2"/>
+                          </svg>
+                        )}
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
+                            {label}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
+                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Compatible With card */}
+            {compatibleItems.length > 0 && (
+              <div className="mb-5 border border-neutral-700/60 rounded-xl p-4 bg-neutral-800/30">
+                <p className="uppercase tracking-wide text-neutral-500 text-xs font-bold mb-3">Compatible With</p>
+                <div className="space-y-2">
+                  {compatibleItems.map((item, i) => {
+                    const url = getDepUrl(item);
+                    const label = item.replace(/https?:\/\/[^\s)>\]]+/g, '').replace(/[()[\]]/g, '').trim();
+                    return (
+                      <div key={i} className="flex items-center gap-2 text-sm text-neutral-300">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-400 flex-shrink-0">
+                          <path d="M12 3a9 9 0 1 0 0 18A9 9 0 0 0 12 3z"/><path d="M9 12l2 2l4-4"/>
+                        </svg>
+                        {url ? (
+                          <a href={url} target="_blank" rel="noopener noreferrer" className="underline hover:text-white transition flex items-center gap-0.5">
+                            {label}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 -ml-0.5">
+                              <path d="M17 7l-10 10"/><path d="M8 7l9 0l0 9"/>
+                            </svg>
+                          </a>
+                        ) : (
+                          <span>{label}</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Description with proper markdown rendering */}
+            <div className="mb-8">
+              <div
+                className="text-neutral-400 leading-relaxed text-sm prose prose-invert prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: parsedDescription }}
+              />
             </div>
           </div>
         </div>
