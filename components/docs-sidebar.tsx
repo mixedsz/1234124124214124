@@ -41,7 +41,7 @@ const NAV: NavSection[] = [
     icon: <Terminal className="w-4 h-4 flex-shrink-0" />,
     defaultOpen: true,
     items: [
-      { title: 'Flake Smoking', href: '/docs/scripts/smoking' },
+      { title: 'Flake Smoking & Vaping', href: '/docs/scripts/smoking' },
     ],
   },
   {

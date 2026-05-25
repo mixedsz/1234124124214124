@@ -171,7 +171,6 @@ const ON_THIS_PAGE = [
   { href: '#configuration',  label: 'Configuration' },
   { href: '#usage',          label: 'Usage & Controls' },
   { href: '#items',          label: 'Items' },
-  { href: '#events',         label: 'Events' },
   { href: '#troubleshooting',label: 'Troubleshooting' },
 ];
 
@@ -198,7 +197,7 @@ export default function FlakeSmokingDocsPage() {
               <ChevronRight className="w-3 h-3" />
               <Link href="/docs/scripts/smoking" className="hover:text-neutral-400 transition">Scripts</Link>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-neutral-400">Flake Smoking</span>
+              <span className="text-neutral-400">Flake Smoking & Vaping</span>
             </div>
 
             {/* Hero */}
@@ -208,7 +207,7 @@ export default function FlakeSmokingDocsPage() {
                 <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center flex-shrink-0">
                   <Zap className="w-5 h-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold text-white">Flake Smoking</h1>
+                <h1 className="text-3xl font-bold text-white">Flake Smoking & Vaping</h1>
               </div>
               <p className="text-neutral-400 text-sm leading-relaxed mb-4 max-w-xl">
                 A premium smoking and vaping script for FiveM. Built for ESX and QB-Core with dual inventory support, realistic particle effects, joint rolling, and a fully configurable item ecosystem.
@@ -308,8 +307,6 @@ export default function FlakeSmokingDocsPage() {
                 Restart your server and players can begin using smokable items immediately. No database setup is required.
               </Callout>
 
-              <SectionH3>File Structure</SectionH3>
-              <FileTree />
             </section>
 
             <hr className="border-neutral-800 my-10" />
@@ -474,55 +471,6 @@ export default function FlakeSmokingDocsPage() {
                   )}
                 </div>
               ))}
-            </section>
-
-            <hr className="border-neutral-800 my-10" />
-
-            {/* ── Events ──────────────────────────────────────────────── */}
-            <section id="events">
-              <SectionH2 id="events">Events</SectionH2>
-              <p className="text-neutral-400 text-sm leading-relaxed mb-4">
-                You can hook into or trigger these events from other resources to extend behavior.
-              </p>
-
-              <SectionH3>Client Events</SectionH3>
-              <DocTable
-                headers={['Event', 'Args', 'Description']}
-                rows={[
-                  [<Inline key="e">flake_smoking:client:Smoke</Inline>,          'itemName, size, meta1, meta2, prop, type, duration', 'Starts smoking session'],
-                  [<Inline key="e">flake_smoking:client:Receiver</Inline>,        'itemName, size, meta1, meta2, prop, type, duration', 'Starts session after receiving item'],
-                  [<Inline key="e">flake_smoking:client:StartPropSmoke</Inline>,  'netId, itemType', 'Starts prop particle loop'],
-                  [<Inline key="e">flake_smoking:client:StopPropSmoke</Inline>,   'netId', 'Stops prop particle loop'],
-                  [<Inline key="e">flake_smoking:client:StartMouthSmoke</Inline>, 'netId, itemType', 'Starts mouth exhale particles'],
-                  [<Inline key="e">flake_smoking:client:StopMouthSmoke</Inline>,  'netId', 'Stops mouth exhale particles'],
-                  [<Inline key="e">flake_smoking:client:VapeJuiceUsed</Inline>,   'success, juiceName', 'Feedback after attempting refill'],
-                  [<Inline key="e">flake_smoking:client:triggerstress</Inline>,   'amount', 'Hook for stress systems'],
-                  [<Inline key="e">WeedToBlunt</Inline>,                          'rollConfig table', 'Plays rolling animation + progress bar'],
-                ]}
-              />
-
-              <SectionH3>Server Events</SectionH3>
-              <DocTable
-                headers={['Event', 'Args', 'Description']}
-                rows={[
-                  [<Inline key="e">flake_smoking:server:RemoveItem</Inline>,      'itemName', 'Removes 1 of the item from source'],
-                  [<Inline key="e">flake_smoking:server:AddItem</Inline>,         'itemName', 'Adds 1 of the item to source'],
-                  [<Inline key="e">flake_smoking:server:StartPropSmoke</Inline>,  'netId, itemType', 'Broadcasts prop particle start to all clients'],
-                  [<Inline key="e">flake_smoking:server:StopPropSmoke</Inline>,   'netId', 'Broadcasts prop particle stop'],
-                  [<Inline key="e">flake_smoking:server:StartMouthSmoke</Inline>, 'netId, itemType', 'Broadcasts mouth particle start'],
-                  [<Inline key="e">flake_smoking:server:StopMouthSmoke</Inline>,  'netId', 'Broadcasts mouth particle stop'],
-                  [<Inline key="e">flake_smoking:server:Receiver</Inline>,        'targetId, itemName, size, meta1, meta2, prop, type, duration', 'Relays item to target player'],
-                  [<Inline key="e">flake_smoking:server:UseVapeJuice</Inline>,    'juiceItem', 'Consumes juice and confirms refill'],
-                ]}
-              />
-
-              <SectionH3>Callbacks</SectionH3>
-              <DocTable
-                headers={['Callback', 'Direction', 'Returns']}
-                rows={[
-                  [<Inline key="c">flake_smoking:server:GetVapeJuicesInInventory</Inline>, 'Client → Server', 'Array of juice items with Label and Count'],
-                ]}
-              />
             </section>
 
             <hr className="border-neutral-800 my-10" />
