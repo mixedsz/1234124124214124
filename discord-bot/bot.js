@@ -106,19 +106,35 @@ function buildReviewModal() {
   return modal;
 }
 
-// ── Fetch all messages from a channel (paginates until exhausted) ─────────────
+// ── Fetch all messages via Discord REST (bypasses gateway intent restrictions) ─
 
-async function fetchAllMessages(channel) {
+function discordAvatarURL(author) {
+  if (author.avatar) {
+    return `https://cdn.discordapp.com/avatars/${author.id}/${author.avatar}.png?size=128`;
+  }
+  return `https://cdn.discordapp.com/embed/avatars/${Number(BigInt(author.id) % 5n)}.png`;
+}
+
+async function fetchAllMessagesREST(channelId) {
   const all = [];
   let before;
+  const token = process.env.DISCORD_BOT_TOKEN;
+
   while (true) {
-    const opts = { limit: 100 };
-    if (before) opts.before = before;
-    const batch = await channel.messages.fetch(opts);
-    if (batch.size === 0) break;
-    all.push(...batch.values());
-    before = batch.last().id;
-    await sleep(600); // respect Discord rate limits
+    let url = `https://discord.com/api/v10/channels/${channelId}/messages?limit=100`;
+    if (before) url += `&before=${before}`;
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bot ${token}` },
+    }).catch(() => null);
+
+    if (!res?.ok) break;
+    const batch = await res.json().catch(() => []);
+    if (!Array.isArray(batch) || batch.length === 0) break;
+
+    all.push(...batch);
+    before = batch[batch.length - 1].id;
+    await sleep(600);
   }
   return all;
 }
@@ -128,7 +144,8 @@ async function fetchAllMessages(channel) {
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.MessageContent,
+    // MessageContent privileged intent intentionally omitted — message content
+    // is read via direct REST API calls which are not subject to gateway intents
   ],
 });
 
@@ -382,7 +399,7 @@ async function handleRestore(interaction) {
 
   let allMessages;
   try {
-    allMessages = await fetchAllMessages(channel);
+    allMessages = await fetchAllMessagesREST(channel.id);
   } catch (err) {
     console.error('Error fetching messages:', err);
     return interaction.editReply({ content: '❌ Failed to fetch messages. Make sure I have **Read Message History** in that channel.' });
@@ -390,8 +407,8 @@ async function handleRestore(interaction) {
 
   // Keep only non-bot, non-empty messages; sort chronologically
   const reviewMessages = allMessages
-    .filter(m => !m.author.bot && m.content.trim().length > 0)
-    .sort((a, b) => a.createdTimestamp - b.createdTimestamp);
+    .filter(m => !m.author?.bot && m.content && m.content.trim().length > 0)
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   if (reviewMessages.length === 0) {
     return interaction.editReply({ content: '⚠️ No eligible messages found in that channel (empty or bot-only).' });
@@ -413,18 +430,19 @@ async function handleRestore(interaction) {
   let failed   = 0;
 
   for (let i = 0; i < reviewMessages.length; i++) {
-    const msg  = reviewMessages[i];
-    const user = msg.author;
+    const msg    = reviewMessages[i];
+    const author = msg.author;
+    const avatarUrl = discordAvatarURL(author);
 
     const payload = {
       id:                `restored-${msg.id}`,
-      discord_id:        user.id,
-      username:          user.username,
-      avatar_url:        user.displayAvatarURL({ extension: 'png', size: 128, forceStatic: false }),
+      discord_id:        author.id,
+      username:          author.username,
+      avatar_url:        avatarUrl,
       rating:            5,
       content:           msg.content.trim().slice(0, 1000),
       verified_purchase: false,
-      created_at:        msg.createdAt.toISOString(),
+      created_at:        msg.timestamp,
     };
 
     try {
@@ -439,10 +457,10 @@ async function handleRestore(interaction) {
       } else if (res.ok) {
         const data = await res.json().catch(() => ({}));
         imported++;
-        // Post result embed to results channel
         if (resultsChannel?.isTextBased()) {
+          const userLike = { username: author.username, displayAvatarURL: () => avatarUrl };
           await resultsChannel.send({
-            embeds: [buildResultEmbed(user, 5, '⭐⭐⭐⭐⭐', msg.content.slice(0, 300), data.review?.id)],
+            embeds: [buildResultEmbed(userLike, 5, '⭐⭐⭐⭐⭐', msg.content.slice(0, 300), data.review?.id)],
           }).catch(() => {});
           await sleep(100);
         }
@@ -453,7 +471,7 @@ async function handleRestore(interaction) {
       failed++;
     }
 
-    await sleep(150); // throttle to avoid overwhelming the API
+    await sleep(150);
 
     // Progress update every 10 messages
     if ((i + 1) % 10 === 0 || i === reviewMessages.length - 1) {
