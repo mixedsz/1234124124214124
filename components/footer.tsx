@@ -48,24 +48,20 @@ const GT_LANG: Record<string, string> = {
   'zh-cn': 'zh-CN', 'zh-tw': 'zh-TW', 'ja': 'ja', 'ko': 'ko',
 };
 
-function applyGoogleTranslate(code: string) {
+function applyTranslation(code: string) {
   if (code === 'en' || code === 'en-gb') {
-    // Clear translation cookie and reload to restore English
-    document.cookie = 'googtrans=; path=/; max-age=0';
-    document.cookie = `googtrans=; domain=.${location.hostname}; path=/; max-age=0`;
-    window.location.reload();
+    // Strip any translate.goog proxy and return to the real site
+    const url = new URL(window.location.href);
+    if (url.hostname.endsWith('.translate.goog')) {
+      const realHost = url.hostname.replace('.translate.goog', '').replace(/-/g, '.');
+      window.location.href = `https://${realHost}${url.pathname}`;
+    }
     return;
   }
   const gtCode = GT_LANG[code] ?? code;
-  const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-  if (select) {
-    select.value = gtCode;
-    select.dispatchEvent(new Event('change'));
-  } else {
-    // Widget not ready — set cookie and reload as fallback
-    document.cookie = `googtrans=/en/${gtCode}; path=/`;
-    window.location.reload();
-  }
+  // Redirect through Google's URL-proxy translator — no DOM injection, no hover artifacts
+  const pageUrl = window.location.href;
+  window.location.href = `https://translate.google.com/translate?sl=en&tl=${gtCode}&u=${encodeURIComponent(pageUrl)}`;
 }
 
 export function Footer({ storeName = 'Flake Development', showCta = true }: FooterProps) {
@@ -86,7 +82,7 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
     setSelectedLanguage(code);
     localStorage.setItem('tebex_language', code);
     setLangOpen(false);
-    applyGoogleTranslate(code);
+    applyTranslation(code);
   };
 
   useEffect(() => {

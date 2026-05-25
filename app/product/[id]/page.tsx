@@ -564,9 +564,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                           <button
                             key={i}
                             onClick={() => setActiveMedia(i)}
-                            className={`flex-shrink-0 w-16 h-11 rounded-lg overflow-hidden border-2 transition ${i === activeMedia ? 'border-blue-500' : 'border-neutral-700 hover:border-neutral-500'}`}
+                            className={`relative flex-shrink-0 w-16 h-11 rounded-lg overflow-hidden border-2 transition ${i === activeMedia ? 'border-blue-500' : 'border-neutral-700 hover:border-neutral-500'}`}
                           >
                             <img src={thumb} alt="" className="w-full h-full object-cover" />
+                            {tid && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <div className="w-5 h-5 rounded-full bg-white/90 flex items-center justify-center">
+                                  <svg className="w-2.5 h-2.5 text-black ml-0.5" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                </div>
+                              </div>
+                            )}
                           </button>
                         );
                       })}
