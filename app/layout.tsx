@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://flakedev.com'),
   title: {
     default: META_TITLE,
-    template: '%s | Flake Development',
+    template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
   },
   description: META_DESC,
   keywords: ['FiveM scripts', 'QBCore scripts', 'ESX scripts', 'Qbox scripts', 'FiveM server', 'premium FiveM', 'Flake Development'],

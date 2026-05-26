@@ -9,24 +9,15 @@ export async function generateMetadata(
   const pkg = await getPackage(Number(id)).catch(() => null);
   if (!pkg) return { title: 'Product' };
 
-  const description = pkg.description
-    ?.replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 160);
-
   return {
     title: pkg.name,
-    description,
     openGraph: {
-      title: pkg.name,
-      description,
+      title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
       images: pkg.image ? [{ url: pkg.image, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
-      title: pkg.name,
-      description,
+      title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
       images: pkg.image ? [pkg.image] : undefined,
     },
   };
