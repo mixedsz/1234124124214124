@@ -1,5 +1,5 @@
 import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
+import { TebexLegalFooter } from '@/components/tebex-legal-footer';
 import Link from 'next/link';
 import { CheckCircle, Download, Home, ShoppingBag, Headphones } from 'lucide-react';
 
@@ -10,7 +10,7 @@ const CFX_ASSETS_URL =
 
 export default function CheckoutCompletePage() {
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header />
 
       <main className="flex-1 flex items-center justify-center px-4 py-20">
@@ -45,7 +45,7 @@ export default function CheckoutCompletePage() {
           </p>
 
           {/* What's Next card */}
-          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-7 mb-8 text-left">
+          <div className="bg-neutral-800 border border-neutral-700 rounded-2xl p-7 mb-8 text-left">
             <h2 className="text-base font-semibold text-white mb-5 text-center">What happens next?</h2>
             <ul className="space-y-4">
               <li className="flex items-start gap-3">
@@ -54,7 +54,7 @@ export default function CheckoutCompletePage() {
                 </span>
                 <div>
                   <p className="text-white text-sm font-medium">Scripts delivered instantly</p>
-                  <p className="text-neutral-500 text-xs mt-0.5">
+                  <p className="text-neutral-400 text-xs mt-0.5">
                     Your scripts have been granted to your CFX.re account and are ready to download.
                   </p>
                 </div>
@@ -65,7 +65,7 @@ export default function CheckoutCompletePage() {
                 </span>
                 <div>
                   <p className="text-white text-sm font-medium">Check your email</p>
-                  <p className="text-neutral-500 text-xs mt-0.5">
+                  <p className="text-neutral-400 text-xs mt-0.5">
                     A receipt and order confirmation has been sent to the email on your account.
                   </p>
                 </div>
@@ -76,7 +76,7 @@ export default function CheckoutCompletePage() {
                 </span>
                 <div>
                   <p className="text-white text-sm font-medium">Need help setting up?</p>
-                  <p className="text-neutral-500 text-xs mt-0.5">
+                  <p className="text-neutral-400 text-xs mt-0.5">
                     Visit our{' '}
                     <Link href="/docs" className="text-blue-400 hover:underline">documentation</Link>
                     {' '}or{' '}
@@ -91,14 +91,14 @@ export default function CheckoutCompletePage() {
           <div className="flex gap-3 justify-center flex-wrap">
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold rounded-xl transition text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-neutral-700 hover:bg-neutral-600 text-white font-semibold rounded-xl transition text-sm"
             >
               <Home className="w-4 h-4" />
               Back to Home
             </Link>
             <Link
               href="/scripts"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-700 hover:border-neutral-500 text-neutral-300 hover:text-white font-semibold rounded-xl transition text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-neutral-600 hover:border-neutral-400 text-neutral-300 hover:text-white font-semibold rounded-xl transition text-sm"
             >
               Continue Shopping
             </Link>
@@ -113,7 +113,7 @@ export default function CheckoutCompletePage() {
         </div>
       </main>
 
-      <Footer storeName="Flake Development" showCta={false} />
+      <TebexLegalFooter />
     </div>
   );
 }
