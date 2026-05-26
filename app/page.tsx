@@ -7,31 +7,9 @@ import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
+import { ScriptShowcase } from '@/components/script-showcase';
+
 export const revalidate = 60;
-
-async function fetchYouTubeRSS(channelId: string): Promise<{ videoId: string; title: string } | null> {
-  try {
-    const rssRes = await fetch(
-      `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-      { cache: 'no-store', signal: AbortSignal.timeout(4000) }
-    );
-    if (!rssRes.ok) return null;
-    const xml = await rssRes.text();
-    const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
-    const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
-    if (!videoIdMatch) return null;
-    return {
-      videoId: videoIdMatch[1],
-      title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
-    };
-  } catch {
-    return null;
-  }
-}
-
-async function getLatestYouTubeVideo(): Promise<{ videoId: string; title: string } | null> {
-  return fetchYouTubeRSS('UChl49qE7X_bOhdZmO6Hv4EA');
-}
 
 const FEATURES = [
   {
@@ -68,10 +46,9 @@ function fmtDate(s: string) {
 function isSnowflake(id: string) { return /^\d{17,19}$/.test(id); }
 
 export default async function HomePage() {
-  const [webstore, categories, latestVideo] = await Promise.all([
+  const [webstore, categories] = await Promise.all([
     getWebstore(),
     getCategories(),
-    getLatestYouTubeVideo().catch(() => null),
   ]);
 
   const storeName = webstore?.name || 'Flake Development';
@@ -157,37 +134,7 @@ export default async function HomePage() {
 
               {/* Right: Script Showcase video card */}
               <div className="hidden lg:block">
-                <div className="bg-neutral-800/40 rounded-2xl overflow-hidden border border-neutral-700/60 shadow-2xl">
-                  {/* Card header */}
-                  <div className="flex items-center justify-between px-4 py-3 bg-neutral-800/80 border-b border-neutral-700/60">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded bg-red-600/20 flex items-center justify-center flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="text-red-400">
-                          <path d="M6 4l15 8l-15 8z"/>
-                        </svg>
-                      </div>
-                      <span className="text-white text-[11px] font-bold tracking-wider uppercase">Script Showcase</span>
-                    </div>
-                    <span className="px-2 py-0.5 bg-red-600 text-white text-[10px] font-bold rounded tracking-widest uppercase">LIVE DEMO</span>
-                  </div>
-                  {/* Video */}
-                  <div className="aspect-video">
-                    <iframe
-                      src={latestVideo
-                        ? `https://www.youtube.com/embed/${latestVideo.videoId}`
-                        : 'https://www.youtube.com/embed/Zolwhtx1VAg'}
-                      title={latestVideo?.title || 'Flake Development Script Showcase'}
-                      className="w-full h-full"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      referrerPolicy="strict-origin-when-cross-origin"
-                      allowFullScreen
-                    />
-                  </div>
-                  {/* Caption */}
-                  <div className="px-4 py-3 text-center">
-                    <p className="text-neutral-400 text-xs italic">See our premium scripts in action</p>
-                  </div>
-                </div>
+                <ScriptShowcase />
               </div>
             </div>
           </div>
