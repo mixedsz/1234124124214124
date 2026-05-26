@@ -220,6 +220,21 @@ client.once(Events.ClientReady, async () => {
       .addStringOption(opt =>
         opt.setName('url').setDescription('YouTube video URL or video ID').setRequired(true),
       ),
+
+    new SlashCommandBuilder()
+      .setName('addserver')
+      .setDescription('[Admin] Add or remove a server from the "Used by top FiveM servers" section')
+      .setDefaultMemberPermissions(8)
+      .addStringOption(opt =>
+        opt.setName('serverid').setDescription('CFX.re server ID (6-char code, e.g. l7o9o4)').setRequired(true),
+      )
+      .addStringOption(opt =>
+        opt.setName('action').setDescription('add (default) or remove').setRequired(false)
+          .addChoices(
+            { name: 'Add server',    value: 'add'    },
+            { name: 'Remove server', value: 'remove' },
+          ),
+      ),
   ].map(cmd => cmd.toJSON());
 
   try {
@@ -245,6 +260,7 @@ client.on(Events.InteractionCreate, async interaction => {
       if (interaction.commandName === 'deletereview') return handleDeleteReview(interaction);
       if (interaction.commandName === 'purgereviews') return handlePurgeReviews(interaction);
       if (interaction.commandName === 'updatevideo')  return handleUpdateVideo(interaction);
+      if (interaction.commandName === 'addserver')    return handleAddServer(interaction);
     }
     if (interaction.isButton())      { if (interaction.customId === 'leave_review') return handleLeaveReviewButton(interaction); }
     if (interaction.isModalSubmit()) { if (interaction.customId === 'review_modal') return handleReviewModal(interaction); }
@@ -548,6 +564,97 @@ async function handleUpdateVideo(interaction) {
         .setDescription('The website showcase video has been updated.')
         .addFields({ name: 'Video ID', value: data.videoId, inline: true })
         .setThumbnail(`https://i.ytimg.com/vi/${data.videoId}/hqdefault.jpg`)
+        .setTimestamp(),
+    ],
+  });
+}
+
+// ── /addserver ────────────────────────────────────────────────────────────────
+
+async function handleAddServer(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const serverId = interaction.options.getString('serverid', true).trim().toLowerCase();
+  const action   = interaction.options.getString('action') ?? 'add';
+
+  if (!WEBSITE_URL) return interaction.editReply({ content: '❌ WEBSITE_URL is not configured.' });
+
+  const secret = process.env.BLOB_WEBHOOK_PUBLIC_KEY;
+  if (!secret) return interaction.editReply({ content: '❌ BLOB_WEBHOOK_PUBLIC_KEY is not configured.' });
+
+  // Verify server exists on cfx.re before adding
+  if (action === 'add') {
+    const cfxRes = await fetch(
+      `https://servers-frontend.fivem.net/api/servers/single/${serverId}`,
+      { signal: AbortSignal.timeout(6000) },
+    ).catch(() => null);
+
+    if (!cfxRes?.ok) {
+      return interaction.editReply({
+        content: `❌ Could not find server \`${serverId}\` on CFX.re. Double-check the ID.`,
+      });
+    }
+
+    const cfxData = await cfxRes.json().catch(() => null);
+    const data    = cfxData?.Data;
+    const name    = (data?.projectName || data?.hostname || 'Unknown')
+      .replace(/\^[0-9]/g, '').replace(/[^\x20-\x7E]/g, '').trim()
+      .split('|')[0].trim();
+    const players = data?.clients ?? 0;
+    const max     = data?.sv_maxclients ?? 0;
+    const iv      = data?.iconVersion;
+    const icon    = iv != null ? `https://frontend.cfx-services.net/api/servers/icon/${serverId}/${iv}.png` : null;
+
+    // Call website admin endpoint
+    const res = await fetch(`${WEBSITE_URL}/api/admin/servers`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
+      body:    JSON.stringify({ id: serverId, action: 'add' }),
+    }).catch(() => null);
+
+    const resData = await res?.json().catch(() => ({}));
+    if (!res?.ok) {
+      return interaction.editReply({ content: `❌ ${resData?.error || `HTTP ${res?.status}`}` });
+    }
+
+    const embed = new EmbedBuilder()
+      .setColor(resData.added ? 0x22c55e : 0xf59e0b)
+      .setTitle(resData.added ? '✅ Server Added' : '⚠️ Already Listed')
+      .setDescription(resData.added
+        ? `**${name}** is now featured in the "Used by top FiveM servers" section.`
+        : `**${name}** is already in the featured servers list.`)
+      .addFields(
+        { name: 'Server ID', value: `\`${serverId}\``,           inline: true },
+        { name: 'Players',   value: `${players} / ${max}`,        inline: true },
+        { name: 'Total listed', value: String(resData.ids?.length ?? '?'), inline: true },
+      )
+      .setTimestamp();
+
+    if (icon) embed.setThumbnail(icon);
+    return interaction.editReply({ embeds: [embed] });
+  }
+
+  // Remove action
+  const res = await fetch(`${WEBSITE_URL}/api/admin/servers`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
+    body:    JSON.stringify({ id: serverId, action: 'remove' }),
+  }).catch(() => null);
+
+  const resData = await res?.json().catch(() => ({}));
+  if (!res?.ok) {
+    return interaction.editReply({ content: `❌ ${resData?.error || `HTTP ${res?.status}`}` });
+  }
+
+  return interaction.editReply({
+    embeds: [
+      new EmbedBuilder()
+        .setColor(resData.removed ? 0xef4444 : 0xf59e0b)
+        .setTitle(resData.removed ? '🗑️ Server Removed' : '⚠️ Not Found')
+        .setDescription(resData.removed
+          ? `Server \`${serverId}\` has been removed from the featured list.`
+          : `Server \`${serverId}\` was not in the featured list.`)
+        .addFields({ name: 'Total listed', value: String(resData.ids?.length ?? '?'), inline: true })
         .setTimestamp(),
     ],
   });
