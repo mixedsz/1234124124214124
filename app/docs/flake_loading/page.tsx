@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Loading Screen – Custom FiveM Loading Screen' };
+export const metadata: Metadata = { title: 'Flake Loading Screen' };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';

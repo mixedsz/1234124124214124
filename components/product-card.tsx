@@ -38,7 +38,7 @@ export function ProductCard({ package_ }: ProductCardProps) {
 
         {/* Sale Badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded">
+          <div className="absolute top-3 right-3 px-2.5 py-1 bg-blue-600 text-white text-xs font-bold rounded-md shadow shadow-blue-500/40">
             SALE
           </div>
         )}

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Addiction Creator – FiveM Drug & Addiction Script' };
+export const metadata: Metadata = { title: 'Flake Addiction' };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';

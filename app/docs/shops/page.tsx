@@ -6,7 +6,7 @@ import { CodeBlock } from '@/components/docs-code-block';
 
 
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Shops – Custom Shop Script for FiveM' };
+export const metadata: Metadata = { title: 'Flake Shops' };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Inline({ children }: { children: React.ReactNode }) {

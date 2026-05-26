@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Cfx.re Escrow Errors Guide – FiveM Script Troubleshooting' };
+export const metadata: Metadata = { title: 'Escrow Errors' };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';

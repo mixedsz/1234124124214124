@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Wearables – FiveM Clothing & Wearables Script' };
+export const metadata: Metadata = { title: 'Flake Wearables' };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';
