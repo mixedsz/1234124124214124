@@ -1,11 +1,15 @@
+'use client';
+
 import Link from 'next/link';
-import { TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexPackage } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 
 interface ProductCardProps {
   package_: TebexPackage;
 }
 
 export function ProductCard({ package_ }: ProductCardProps) {
+  const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
   const discountedPrice = package_.total_price;

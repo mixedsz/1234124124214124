@@ -12,7 +12,7 @@ interface BasketContextType {
   username: string | null;
   isAuthenticated: boolean;
   itemCount: number;
-  addItem: (packageId: number, quantity?: number) => Promise<TebexBasket | undefined>;
+  addItem: (packageId: number, quantity?: number, variableData?: Record<string, string>) => Promise<TebexBasket | undefined>;
   removeItem: (packageId: number) => Promise<TebexBasket | null | undefined>;
   refreshBasket: () => Promise<TebexBasket | null>;
   getBasketIdent: () => string | null;
@@ -90,20 +90,43 @@ export function BasketProvider({ children }: { children: ReactNode }) {
     initBasket();
   }, []);
 
-  const addItem = async (packageId: number, quantity: number = 1) => {
+  const addItem = async (packageId: number, quantity: number = 1, variableData?: Record<string, string>) => {
     if (!basket) throw new Error('Basket not initialized');
+
+    const attemptAdd = async (vars?: Record<string, string>) => {
+      await addToBasket(basket.ident, packageId, quantity, vars);
+      const fresh = await getBasket(basket.ident);
+      if (fresh) {
+        setBasket(fresh);
+        return fresh;
+      }
+      return null;
+    };
 
     try {
       setAdding(true);
-      const updated = await addToBasket(basket.ident, packageId, quantity);
-      if (updated) {
-        setBasket(updated);
-        return updated;
+
+      // First attempt without username_id (works for most package types).
+      try {
+        return await attemptAdd(variableData);
+      } catch (firstErr) {
+        const detail = (
+          (firstErr as Error & { tebexDetail?: { body?: { detail?: string } } })
+            .tebexDetail?.body?.detail ?? (firstErr instanceof Error ? firstErr.message : '')
+        ).toLowerCase();
+
+        // "One of the options provided is invalid" on game server command packages
+        // means username_id is required. Discord is handled via Tebex ident (server-side).
+        if (detail.includes('options provided is invalid') && basket.username_id) {
+          console.log('[BasketProvider] Retrying with username_id for game server command package');
+          return await attemptAdd({ ...variableData, username_id: String(basket.username_id) });
+        }
+
+        throw firstErr;
       }
-      return null;
     } catch (err) {
       console.error('[BasketProvider] Error adding item:', err);
-      throw err; // Pass through the actual error from Tebex
+      throw err;
     } finally {
       setAdding(false);
     }
@@ -114,11 +137,14 @@ export function BasketProvider({ children }: { children: ReactNode }) {
 
     try {
       setLoading(true);
-      const updated = await removeFromBasket(basket.ident, packageId);
-      if (updated) {
-        setBasket(updated);
+      await removeFromBasket(basket.ident, packageId);
+      // Re-fetch via GET to preserve auth state
+      const fresh = await getBasket(basket.ident);
+      if (fresh) {
+        setBasket(fresh);
+        return fresh;
       }
-      return updated;
+      return null;
     } catch (err) {
       console.error('[BasketProvider] Error removing item:', err);
       setError(err instanceof Error ? err : new Error('Failed to remove item'));
@@ -166,7 +192,7 @@ export function useBasket() {
       username: null,
       isAuthenticated: false,
       itemCount: 0,
-      addItem: async () => { throw new Error('Basket not initialized'); },
+      addItem: async (_id: number, _qty?: number, _vars?: Record<string, string>) => { throw new Error('Basket not initialized'); },
       removeItem: async () => { throw new Error('Basket not initialized'); },
       refreshBasket: async () => null,
       getBasketIdent: () => null,

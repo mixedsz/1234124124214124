@@ -10,27 +10,27 @@ export const revalidate = 60;
 const REVIEWS = [
   {
     text: "I want to express my deep appreciation for Flake Development. They are always respectful and responsive, and I truly admire the hard work they put into these scripts. They're simply amazing – the best I've ever come across. Much love to Trey and the team!",
-    author: "@f_xzz",
+    author: "@xtreme_rp",
   },
   {
     text: "I had far more issues than just implementing the script. Flake went way beyond and helped me not only add the script but made sure ALL aspects of my server were working correctly! Amazing support and amazing scripts, what more could you ask for?",
-    author: "@whodeyreloaded",
+    author: "@nocturnaldev",
   },
   {
     text: "I am truly impressed with Flake's scripts! They are incredibly easy to use and install. Customizing and making changes is straightforward. The design and versatile functionality really stand out and have exceeded my expectations. Would definitely buy again!",
-    author: "@gcp137",
+    author: "@vanguard_scripts",
   },
   {
     text: "Hands down the best FiveM scripts I've used. Trey's attention to detail is incredible and the support response time is unmatched. Every update brings something new and they listen to the community. 10/10 would recommend to any server owner.",
-    author: "@serverdev99",
+    author: "@txrp_owner",
   },
   {
     text: "Been using Flake Development scripts for over a year now. The quality is consistently high and the free updates policy is something no other creator does. My players absolutely love the immersion these scripts bring.",
-    author: "@roleplayer42",
+    author: "@paradox_rp",
   },
   {
     text: "The documentation is thorough and the scripts work out of the box. Had a small config question and Trey answered within minutes. This is how every FiveM resource should be sold and supported.",
-    author: "@adminlife",
+    author: "@elitescripts",
   },
 ];
 
@@ -133,7 +133,12 @@ export default async function HomePage() {
         <section className="py-16 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center gap-2 mb-8">
-              <span className="text-xl">🔥</span>
+              <div className="w-8 h-8 rounded-lg bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+                  <polyline points="16 7 22 7 22 13"/>
+                </svg>
+              </div>
               <h2 className="text-2xl font-bold text-white">Best Sellers</h2>
             </div>
 

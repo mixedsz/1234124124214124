@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 44" fill="none" role="img" aria-label="We accept Mastercard, Visa, JCB, American Express">
+  <defs>
+    <clipPath id="mc-overlap">
+      <circle cx="37" cy="22" r="12"/>
+    </clipPath>
+  </defs>
+
+  <!-- Mastercard -->
+  <rect x="0" y="2" width="60" height="40" rx="5" fill="white"/>
+  <circle cx="21" cy="22" r="12" fill="#EB001B"/>
+  <circle cx="37" cy="22" r="12" fill="#F79E1B"/>
+  <circle cx="21" cy="22" r="12" fill="#FF5F00" clip-path="url(#mc-overlap)"/>
+
+  <!-- Visa -->
+  <rect x="68" y="2" width="60" height="40" rx="5" fill="#1A1F71"/>
+  <text x="98" y="29" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="900" fill="white" text-anchor="middle">VISA</text>
+
+  <!-- JCB -->
+  <rect x="136" y="2" width="60" height="40" rx="5" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+  <rect x="139" y="5" width="14" height="32" rx="3" fill="#003087"/>
+  <rect x="155" y="5" width="14" height="32" rx="3" fill="#CC0000"/>
+  <rect x="171" y="5" width="14" height="32" rx="3" fill="#009F6B"/>
+  <text x="146" y="27" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">J</text>
+  <text x="162" y="27" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">C</text>
+  <text x="178" y="27" font-family="Arial,Helvetica,sans-serif" font-size="12" font-weight="bold" fill="white" text-anchor="middle">B</text>
+
+  <!-- American Express -->
+  <rect x="204" y="2" width="76" height="40" rx="5" fill="#2557D6"/>
+  <text x="242" y="19" font-family="Arial,Helvetica,sans-serif" font-size="8.5" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="0.8">AMERICAN</text>
+  <text x="242" y="31" font-family="Arial,Helvetica,sans-serif" font-size="8.5" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="1.2">EXPRESS</text>
+</svg>

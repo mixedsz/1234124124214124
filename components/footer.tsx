@@ -1,11 +1,39 @@
+'use client';
+
 import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
+import { useCurrency } from '@/contexts/currency-context';
+import { useBasket } from '@/contexts/basket-context';
 
 interface FooterProps {
   storeName?: string;
 }
 
+const currencies = [
+  { code: 'USD', flag: '🇺🇸', label: 'US Dollar' },
+  { code: 'GBP', flag: '🇬🇧', label: 'British Pound' },
+  { code: 'EUR', flag: '🇪🇺', label: 'Euro' },
+  { code: 'AUD', flag: '🇦🇺', label: 'Australian Dollar' },
+  { code: 'CAD', flag: '🇨🇦', label: 'Canadian Dollar' },
+  { code: 'PLN', flag: '🇵🇱', label: 'Polish Złoty' },
+];
+
 export function Footer({ storeName = 'Flake Development' }: FooterProps) {
+  const { currency: selectedCurrency, setCurrency } = useCurrency();
+  const { username } = useBasket();
+  const [currencyOpen, setCurrencyOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setCurrencyOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   return (
     <footer className="bg-neutral-900 border-t border-neutral-800">
       {/* Support CTA Section */}
@@ -40,15 +68,51 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <Image src="/fd-logo.jpg" alt="Flake Development" width={36} height={36} className="rounded-lg" />
+              <div className="mb-3 overflow-hidden" style={{height: '46px', width: '220px'}}>
+                <img
+                  src="/fd-wordmark.png"
+                  alt="Flake Development"
+                  style={{
+                    width: '461px',
+                    height: '307px',
+                    maxWidth: 'none',
+                    marginLeft: '-113px',
+                    marginTop: '-119px',
+                  }}
+                />
               </div>
               <p className="text-sm text-neutral-400 mb-4">
                 The most popular scripts for your FiveM server.
               </p>
-              <div className="flex items-center gap-2 text-sm text-neutral-400">
+
+              {/* Currency dropdown */}
+              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={dropdownRef}>
                 <span>Currency:</span>
-                <span className="px-2 py-1 bg-neutral-800 rounded text-white text-xs">USD</span>
+                <button
+                  onClick={() => setCurrencyOpen(o => !o)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-lg text-white text-sm font-bold transition"
+                >
+                  <span className="text-base leading-none">{currencies.find(c => c.code === selectedCurrency)?.flag}</span>
+                  <span>{selectedCurrency}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                    <path d="M6 9l6 6l6 -6"/>
+                  </svg>
+                </button>
+                {currencyOpen && (
+                  <div className="absolute bottom-full mb-1 left-0 bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl py-1 z-50 w-48">
+                    {currencies.map(c => (
+                      <button
+                        key={c.code}
+                        onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-700 transition text-left ${selectedCurrency === c.code ? 'text-blue-400' : 'text-neutral-300'}`}
+                      >
+                        <span>{c.flag}</span>
+                        <span className="font-medium">{c.code}</span>
+                        <span className="text-neutral-500 text-xs ml-auto">{c.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -116,13 +180,18 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
                   </a>
                 </li>
                 <li>
-                  <a href="https://cfx.re/" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
+                  <a
+                    href={username ? `https://forum.cfx.re/u/${username}` : 'https://cfx.re/'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-sm text-neutral-400 hover:text-white transition"
+                  >
                     Cfx.re Profile
                   </a>
                 </li>
                 <li>
-                  <a href="https://github.com/" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
-                    GitHub
+                  <a href="https://www.youtube.com/@flakedevelopment/videos" target="_blank" rel="noopener noreferrer" className="text-sm text-neutral-400 hover:text-white transition">
+                    YouTube
                   </a>
                 </li>
               </ul>
@@ -148,6 +217,10 @@ export function Footer({ storeName = 'Flake Development' }: FooterProps) {
 
           {/* Bottom */}
           <div className="mt-12 pt-8 border-t border-neutral-800">
+            <div className="flex justify-center items-center gap-2 mb-4">
+              <span className="text-neutral-600 text-xs">Powered by</span>
+              <img src="/tebex-logo.svg" alt="Tebex" width="56" height="16" className="opacity-30 mt-[-1px]" />
+            </div>
             <p className="text-xs text-neutral-500 text-center">
               Copyright © 2026 Flake Development. Not affiliated with or endorsed by Rockstar North, Take-Two Interactive or other rights holders. FiveM® is a copyright and registered trademark of Take-Two Interactive Software, Inc.
             </p>

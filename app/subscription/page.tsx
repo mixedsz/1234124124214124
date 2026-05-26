@@ -1,7 +1,8 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { TebexCategory, TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexCategory, TebexPackage } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 import { Footer } from '@/components/footer';
 import { Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -21,6 +22,7 @@ export default function SubscriptionPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
   const { itemCount } = useBasket();
+  const { formatPrice } = useCurrency();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -144,7 +146,7 @@ export default function SubscriptionPage() {
                   {/* Price - DO NOT divide by 100, Tebex returns actual price */}
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-white">
-                      {formatPrice(sub.total_price, sub.currency)}
+                      {formatPrice(sub.total_price)}
                     </span>
                     <p className="text-neutral-400 text-sm mt-2">
                       {sub.name.toLowerCase().includes('month') ? 'per month' : 'per period'}
