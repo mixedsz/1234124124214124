@@ -212,6 +212,14 @@ client.once(Events.ClientReady, async () => {
       .addStringOption(opt =>
         opt.setName('username').setDescription('Discord username whose reviews should be deleted').setRequired(true),
       ),
+
+    new SlashCommandBuilder()
+      .setName('updatevideo')
+      .setDescription('[Admin] Set the showcase video on the website')
+      .setDefaultMemberPermissions(8)
+      .addStringOption(opt =>
+        opt.setName('url').setDescription('YouTube video URL or video ID').setRequired(true),
+      ),
   ].map(cmd => cmd.toJSON());
 
   try {
@@ -236,6 +244,7 @@ client.on(Events.InteractionCreate, async interaction => {
       if (interaction.commandName === 'restore')      return handleRestore(interaction);
       if (interaction.commandName === 'deletereview') return handleDeleteReview(interaction);
       if (interaction.commandName === 'purgereviews') return handlePurgeReviews(interaction);
+      if (interaction.commandName === 'updatevideo')  return handleUpdateVideo(interaction);
     }
     if (interaction.isButton())      { if (interaction.customId === 'leave_review') return handleLeaveReviewButton(interaction); }
     if (interaction.isModalSubmit()) { if (interaction.customId === 'review_modal') return handleReviewModal(interaction); }
@@ -504,6 +513,43 @@ async function handlePurgeReviews(interaction) {
   const data = await res.json().catch(() => ({}));
   await interaction.editReply({
     content: `✅ Deleted **${data.deleted ?? 0}** reviews from username \`${username}\`.`,
+  });
+}
+
+// ── /updatevideo ──────────────────────────────────────────────────────────────
+
+async function handleUpdateVideo(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const url = interaction.options.getString('url', true);
+
+  if (!WEBSITE_URL) return interaction.editReply({ content: '❌ WEBSITE_URL is not configured.' });
+
+  const secret = process.env.BLOB_WEBHOOK_PUBLIC_KEY;
+  if (!secret) return interaction.editReply({ content: '❌ BLOB_WEBHOOK_PUBLIC_KEY is not configured.' });
+
+  const res = await fetch(`${WEBSITE_URL}/api/showcase-video`, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${secret}` },
+    body:    JSON.stringify({ videoUrl: url }),
+  }).catch(() => null);
+
+  const data = await res?.json().catch(() => ({}));
+
+  if (!res?.ok) {
+    return interaction.editReply({ content: `❌ ${data?.error || `HTTP ${res?.status}`}` });
+  }
+
+  await interaction.editReply({
+    embeds: [
+      new EmbedBuilder()
+        .setColor(EMBED_COLOR)
+        .setTitle('✅ Showcase Video Updated')
+        .setDescription('The website showcase video has been updated.')
+        .addFields({ name: 'Video ID', value: data.videoId, inline: true })
+        .setThumbnail(`https://i.ytimg.com/vi/${data.videoId}/hqdefault.jpg`)
+        .setTimestamp(),
+    ],
   });
 }
 
