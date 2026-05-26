@@ -10,19 +10,23 @@ import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'luci
 export const revalidate = 60;
 
 async function fetchYouTubeRSS(channelId: string): Promise<{ videoId: string; title: string } | null> {
-  const rssRes = await fetch(
-    `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-    { next: { revalidate: 3600 } }
-  );
-  if (!rssRes.ok) return null;
-  const xml = await rssRes.text();
-  const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
-  const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
-  if (!videoIdMatch) return null;
-  return {
-    videoId: videoIdMatch[1],
-    title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
-  };
+  try {
+    const rssRes = await fetch(
+      `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
+      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(4000) }
+    );
+    if (!rssRes.ok) return null;
+    const xml = await rssRes.text();
+    const videoIdMatch = xml.match(/<yt:videoId>([\w-]{11})<\/yt:videoId>/);
+    const titleMatch = xml.match(/<entry>[\s\S]*?<title>([^<]+)<\/title>/);
+    if (!videoIdMatch) return null;
+    return {
+      videoId: videoIdMatch[1],
+      title: titleMatch ? titleMatch[1].replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>') : '',
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function getLatestYouTubeVideo(): Promise<{ videoId: string; title: string } | null> {
@@ -171,7 +175,7 @@ export default async function HomePage() {
                     <iframe
                       src={latestVideo
                         ? `https://www.youtube.com/embed/${latestVideo.videoId}`
-                        : 'https://www.youtube.com/embed/nU5cgB1Waro?si=9dh37UpGBy6P6cQf'}
+                        : 'https://www.youtube.com/embed/Zolwhtx1VAg'}
                       title={latestVideo?.title || 'Flake Development Script Showcase'}
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
