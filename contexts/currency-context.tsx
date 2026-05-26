@@ -2,14 +2,21 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
-// Approximate rates relative to USD — actual price shown at Tebex checkout
 const RATES: Record<string, number> = {
   USD: 1,
-  GBP: 0.79,
   EUR: 0.92,
-  AUD: 1.53,
+  GBP: 0.79,
   CAD: 1.36,
+  AUD: 1.53,
+  NZD: 1.63,
+  CHF: 0.89,
+  SEK: 10.4,
+  NOK: 10.8,
+  DKK: 6.9,
   PLN: 3.95,
+  BRL: 5.05,
+  MXN: 17.2,
+  JPY: 150,
 };
 
 interface CurrencyContextType {

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { useCurrency } from '@/contexts/currency-context';
 import { useBasket } from '@/contexts/basket-context';
 import { Globe } from 'lucide-react';
 import { TebexLegalFooter } from '@/components/tebex-legal-footer';
@@ -11,15 +10,6 @@ interface FooterProps {
   storeName?: string;
   showCta?: boolean;
 }
-
-const currencies = [
-  { code: 'USD', flag: '🇺🇸', label: 'US Dollar' },
-  { code: 'GBP', flag: '🇬🇧', label: 'British Pound' },
-  { code: 'EUR', flag: '🇪🇺', label: 'Euro' },
-  { code: 'AUD', flag: '🇦🇺', label: 'Australian Dollar' },
-  { code: 'CAD', flag: '🇨🇦', label: 'Canadian Dollar' },
-  { code: 'PLN', flag: '🇵🇱', label: 'Polish Złoty' },
-];
 
 const LANGUAGES = [
   { code: 'en',    flag: '🇺🇸', label: 'English (US)' },
@@ -67,13 +57,10 @@ function applyTranslation(code: string) {
 }
 
 export function Footer({ storeName = 'Flake Development', showCta = true }: FooterProps) {
-  const { currency: selectedCurrency, setCurrency } = useCurrency();
   const { username } = useBasket();
-  const [currencyOpen, setCurrencyOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [ownerAvatar] = useState('https://cdn.discordapp.com/avatars/498945637539381252/9c2021803d4c9d6a007f91e31d3d6bfb.webp?size=128');
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
 
 
@@ -91,9 +78,6 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setCurrencyOpen(false);
-      }
       if (langDropdownRef.current && !langDropdownRef.current.contains(event.target as Node)) {
         setLangOpen(false);
       }
@@ -154,36 +138,6 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
               <p className="text-sm text-neutral-400 mb-4">
                 The most popular scripts for your FiveM server.
               </p>
-
-              {/* Currency dropdown */}
-              <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={dropdownRef} translate="no">
-                <span>Currency:</span>
-                <button
-                  onClick={() => setCurrencyOpen(o => !o)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-lg text-white text-sm font-bold transition"
-                >
-                  <span className="text-base leading-none">{currencies.find(c => c.code === selectedCurrency)?.flag}</span>
-                  <span>{selectedCurrency}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
-                    <path d="M6 9l6 6l6 -6"/>
-                  </svg>
-                </button>
-                {currencyOpen && (
-                  <div className="absolute bottom-full mb-1 left-0 bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl py-1 z-50 w-48">
-                    {currencies.map(c => (
-                      <button
-                        key={c.code}
-                        onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
-                        className={`w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-neutral-700 transition text-left ${selectedCurrency === c.code ? 'text-blue-400' : 'text-neutral-300'}`}
-                      >
-                        <span>{c.flag}</span>
-                        <span className="font-medium">{c.code}</span>
-                        <span className="text-neutral-500 text-xs ml-auto">{c.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
 
               {/* Language dropdown */}
               <div className="flex items-center gap-2 text-sm text-neutral-500 mt-2 relative" ref={langDropdownRef} translate="no">

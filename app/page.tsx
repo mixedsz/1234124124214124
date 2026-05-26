@@ -8,6 +8,7 @@ import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 import { ScriptShowcase } from '@/components/script-showcase';
+import { FeaturedServers } from '@/components/featured-servers';
 
 export const revalidate = 60;
 
@@ -324,20 +325,14 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Trusted By Section */}
+        {/* Used by top servers */}
         <section className="py-16 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-3">Trusted by the best</h2>
-            <p className="text-neutral-500 mb-12">
-              {"We're partnered with some of the biggest names in the FiveM community."}
+            <h2 className="text-3xl font-bold text-white mb-3">Used by top FiveM servers</h2>
+            <p className="text-neutral-500 mb-10">
+              Some of the biggest names in the FiveM community are running our scripts.
             </p>
-            <div className="flex flex-wrap gap-12 items-center justify-center opacity-40">
-              {['QBCore', 'Qbox', 'ESX', 'OCRP', 'LB-Phone'].map((partner) => (
-                <span key={partner} className="text-white text-xl font-bold tracking-wider">
-                  {partner}
-                </span>
-              ))}
-            </div>
+            <FeaturedServers />
           </div>
         </section>
       </main>

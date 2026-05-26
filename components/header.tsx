@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
 import { Menu, X, ShoppingCart, ChevronDown, LogOut, User, Loader2, Package } from 'lucide-react';
 import { useBasket } from '@/contexts/basket-context';
+import { useCurrency } from '@/contexts/currency-context';
 import { createBasket, getAuthUrl } from '@/lib/tebex';
 
 const BASKET_KEY = 'tebex_basket_ident';
@@ -23,14 +24,36 @@ const DiscordIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+const CURRENCIES = [
+  { code: 'USD', flag: '🇺🇸', label: 'US Dollar' },
+  { code: 'EUR', flag: '🇪🇺', label: 'Euro' },
+  { code: 'GBP', flag: '🇬🇧', label: 'British Pound' },
+  { code: 'CAD', flag: '🇨🇦', label: 'Canadian Dollar' },
+  { code: 'AUD', flag: '🇦🇺', label: 'Australian Dollar' },
+  { code: 'NZD', flag: '🇳🇿', label: 'NZ Dollar' },
+  { code: 'CHF', flag: '🇨🇭', label: 'Swiss Franc' },
+  { code: 'SEK', flag: '🇸🇪', label: 'Swedish Krona' },
+  { code: 'NOK', flag: '🇳🇴', label: 'Norwegian Krone' },
+  { code: 'DKK', flag: '🇩🇰', label: 'Danish Krone' },
+  { code: 'PLN', flag: '🇵🇱', label: 'Polish Złoty' },
+  { code: 'BRL', flag: '🇧🇷', label: 'Brazilian Real' },
+  { code: 'MXN', flag: '🇲🇽', label: 'Mexican Peso' },
+  { code: 'JPY', flag: '🇯🇵', label: 'Japanese Yen' },
+];
+
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [currencyOpen, setCurrencyOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const currencyRef = useRef<HTMLDivElement>(null);
 
   const { itemCount, isAuthenticated, username, loading } = useBasket();
+  const { currency, setCurrency } = useCurrency();
+
+  const activeCurrency = CURRENCIES.find(c => c.code === currency) ?? CURRENCIES[0];
 
   // Avatar with localStorage caching — no flicker on navigation
   useEffect(() => {
@@ -51,6 +74,9 @@ export function Header() {
     function handleClickOutside(event: MouseEvent) {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
+      }
+      if (currencyRef.current && !currencyRef.current.contains(event.target as Node)) {
+        setCurrencyOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
@@ -116,7 +142,47 @@ export function Header() {
           </nav>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+
+            {/* Currency selector */}
+            <div className="relative hidden sm:block" ref={currencyRef} translate="no">
+              <button
+                onClick={() => setCurrencyOpen(o => !o)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-neutral-300 hover:text-white hover:bg-neutral-800 transition text-sm"
+                title="Select currency"
+              >
+                <span className="text-base leading-none">{activeCurrency.flag}</span>
+                <span className="font-medium text-xs">{activeCurrency.code}</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${currencyOpen ? 'rotate-180' : ''}`} />
+              </button>
+              {currencyOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-neutral-800 border border-neutral-700 rounded-xl shadow-xl py-1 z-50 max-h-72 overflow-y-auto scrollbar-hide">
+                  {CURRENCIES.map(c => (
+                    <button
+                      key={c.code}
+                      onClick={() => { setCurrency(c.code); setCurrencyOpen(false); }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-neutral-700 transition text-left ${currency === c.code ? 'text-blue-400' : 'text-neutral-300'}`}
+                    >
+                      <span className="text-base leading-none">{c.flag}</span>
+                      <span className="font-semibold">{c.code}</span>
+                      <span className="text-neutral-500 text-xs ml-auto">{c.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Discord */}
+            <a
+              href="https://discord.gg/flakedev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:flex p-2 text-neutral-400 hover:text-[#5865F2] transition"
+              title="Join our Discord"
+            >
+              <DiscordIcon className="w-5 h-5" />
+            </a>
+
             {/* Cart */}
             <Link href="/cart" className="relative p-2 text-neutral-300 hover:text-white transition">
               <ShoppingCart className="w-5 h-5" />
@@ -147,7 +213,6 @@ export function Header() {
                   <ChevronDown className={`w-4 h-4 transition-transform ${profileOpen ? 'rotate-180' : ''}`} />
                 </button>
 
-                {/* Dropdown Menu */}
                 {profileOpen && (
                   <div className="absolute right-0 mt-2 w-64 rounded-xl bg-neutral-800 border border-neutral-700 shadow-xl overflow-hidden">
                     <div className="py-2">
@@ -158,7 +223,6 @@ export function Header() {
                         <Package className="w-4 h-4" />
                         Manage Orders &amp; Subscriptions
                       </button>
-
                       <a
                         href="https://discord.gg/flakedev"
                         target="_blank"
@@ -169,7 +233,6 @@ export function Header() {
                         <DiscordIcon className="w-4 h-4" />
                         Connect with Discord
                       </a>
-
                       <div className="my-2 border-t border-neutral-700" />
                       <button
                         onClick={handleLogout}
@@ -218,6 +281,23 @@ export function Header() {
               <Link href="/scripts" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Scripts</Link>
               <Link href="/docs" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Docs</Link>
               <Link href="/support" className="text-sm font-medium text-neutral-300 hover:text-white transition" onClick={() => setMobileMenuOpen(false)}>Support</Link>
+
+              {/* Mobile currency */}
+              <div className="pt-2 border-t border-neutral-800" translate="no">
+                <p className="text-xs text-neutral-500 mb-2">Currency</p>
+                <div className="flex flex-wrap gap-2">
+                  {CURRENCIES.map(c => (
+                    <button
+                      key={c.code}
+                      onClick={() => { setCurrency(c.code); setMobileMenuOpen(false); }}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition ${currency === c.code ? 'bg-blue-600 text-white' : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'}`}
+                    >
+                      <span>{c.flag}</span>
+                      <span>{c.code}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               {/* Mobile Profile/Login */}
               {showProfile ? (
