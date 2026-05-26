@@ -1,15 +1,7 @@
 import { NextResponse } from 'next/server';
+import { getServerIds } from '@/lib/server-list';
 
-export const revalidate = 300;
-
-// Hardcoded featured servers — edit this list to add/remove servers
-const FEATURED_SERVER_IDS = [
-  'l7o9o4',  // District 10
-  'ql64g9',
-  'javxzp',
-  'yjbqg5',
-  '7b9kqrb',
-];
+export const dynamic = 'force-dynamic';
 
 function stripColors(str: string): string {
   return str.replace(/\^[0-9]/g, '').replace(/[^\x20-\x7E]/g, '').trim();
@@ -55,12 +47,13 @@ async function fetchSingle(id: string): Promise<CfxData | null> {
 }
 
 export async function GET() {
-  const results = await Promise.allSettled(FEATURED_SERVER_IDS.map(fetchSingle));
+  const ids = await getServerIds();
+  const results = await Promise.allSettled(ids.map(fetchSingle));
 
   const servers: ServerEntry[] = [];
   results.forEach((result, i) => {
     if (result.status === 'fulfilled' && result.value) {
-      servers.push(makeEntry(FEATURED_SERVER_IDS[i], result.value));
+      servers.push(makeEntry(ids[i], result.value));
     }
   });
 
