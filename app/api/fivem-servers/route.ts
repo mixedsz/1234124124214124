@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerIds } from '@/lib/server-list';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // Cache at Vercel edge for 5 minutes
 
 function stripColors(str: string): string {
   return str.replace(/\^[0-9]/g, '').replace(/[^\x20-\x7E]/g, '').trim();
@@ -57,7 +57,5 @@ export async function GET() {
     }
   });
 
-  return NextResponse.json(servers, {
-    headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
-  });
+  return NextResponse.json(servers);
 }

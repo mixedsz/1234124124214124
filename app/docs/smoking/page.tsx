@@ -1,12 +1,11 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Flake Smoking & Vaping – FiveM Smoke Script' };
+
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, Info, Zap, Check } from 'lucide-react';
 import { CodeBlock } from '@/components/docs-code-block';
-
-
-import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Smoking & Vaping – FiveM Smoke Script' };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Inline({ children }: { children: React.ReactNode }) {

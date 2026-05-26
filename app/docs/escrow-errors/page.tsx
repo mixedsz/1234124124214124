@@ -1,12 +1,11 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Cfx.re Escrow Errors Guide – FiveM Script Troubleshooting' };
+
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink } from 'lucide-react';
 import { CodeBlock, LogBlock, AccordionItem } from '@/components/docs-code-block';
-
-
-import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Cfx.re Escrow Errors Guide – FiveM Script Troubleshooting' };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Callout({ children }: { children: React.ReactNode }) {
