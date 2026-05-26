@@ -26,7 +26,7 @@ export default function SubscriptionPage() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    document.title = 'Flake Subscriptions | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+    document.title = 'Subscriptions | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
   }, []);
 
   useEffect(() => {
