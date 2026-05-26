@@ -4,7 +4,11 @@ export const revalidate = 300;
 
 // Hardcoded featured servers — edit this list to add/remove servers
 const FEATURED_SERVER_IDS = [
-  'l7o9o4', // District 10
+  'l7o9o4',  // District 10
+  'ql64g9',
+  'javxzp',
+  'yjbqg5',
+  '7b9kqrb',
 ];
 
 function stripColors(str: string): string {
