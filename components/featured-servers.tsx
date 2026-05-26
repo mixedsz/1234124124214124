@@ -9,7 +9,10 @@ interface Server {
   players: number;
   maxPlayers: number;
   icon: string | null;
-  url: string;
+}
+
+function cleanName(name: string): string {
+  return name.split('|')[0].trim() || name;
 }
 
 export function FeaturedServers() {
@@ -26,44 +29,50 @@ export function FeaturedServers() {
 
   if (!loading && servers.length === 0) return null;
 
+  const items = loading
+    ? Array.from({ length: 5 }).map((_, i) => ({ skeleton: true, i }))
+    : servers;
+
   return (
-    <div className="flex flex-wrap gap-4 justify-center">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-w-4xl mx-auto">
       {loading
-        ? Array.from({ length: 1 }).map((_, i) => (
-            <div key={i} className="w-64 h-20 bg-neutral-800 rounded-xl animate-pulse" />
+        ? Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-[72px] bg-neutral-800/60 rounded-xl animate-pulse" />
           ))
         : servers.map(server => (
             <a
               key={server.id}
-              href={server.url}
+              href={`https://cfx.re/join/${server.id}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-5 py-4 bg-neutral-800/60 hover:bg-neutral-700/80 border border-neutral-700/50 hover:border-neutral-600 rounded-xl transition-all group min-w-[220px]"
+              className="flex items-center gap-3 px-4 py-3.5 bg-neutral-800/60 hover:bg-neutral-700/80 border border-neutral-700/50 hover:border-neutral-600 rounded-xl transition-all"
             >
               {server.icon ? (
                 <img
                   src={server.icon}
-                  alt={server.name}
-                  className="w-12 h-12 rounded-lg object-cover flex-shrink-0 ring-1 ring-white/10"
+                  alt={cleanName(server.name)}
+                  className="w-11 h-11 rounded-lg object-cover flex-shrink-0 ring-1 ring-white/10"
                 />
               ) : (
-                <div className="w-12 h-12 rounded-lg bg-neutral-700 flex items-center justify-center flex-shrink-0">
-                  <span className="text-neutral-300 text-sm font-bold">
-                    {server.name.slice(0, 2).toUpperCase()}
+                <div className="w-11 h-11 rounded-lg bg-neutral-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-neutral-300 text-xs font-bold">
+                    {cleanName(server.name).slice(0, 2).toUpperCase()}
                   </span>
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">{server.name}</p>
-                <div className="flex items-center gap-1.5 text-neutral-400 text-xs mt-0.5">
-                  <Users className="w-3 h-3 flex-shrink-0" />
-                  <span>{server.players.toLocaleString()} / {server.maxPlayers.toLocaleString()}</span>
-                </div>
-              </div>
-              <div className="flex flex-col items-end gap-1 flex-shrink-0">
-                <div className="flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-                  <span className="text-green-400 text-[10px] font-bold tracking-wide uppercase">Live</span>
+                <p className="text-white font-semibold text-sm leading-tight truncate">
+                  {cleanName(server.name)}
+                </p>
+                <div className="flex items-center gap-1.5 mt-1">
+                  <Users className="w-3 h-3 text-neutral-500 flex-shrink-0" />
+                  <span className="text-neutral-400 text-xs">
+                    {server.players.toLocaleString()} / {server.maxPlayers.toLocaleString()}
+                  </span>
+                  <span className="ml-auto flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-green-400 text-[10px] font-bold uppercase tracking-wide">Live</span>
+                  </span>
                 </div>
               </div>
             </a>

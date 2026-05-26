@@ -29,7 +29,6 @@ interface ServerEntry {
   players: number;
   maxPlayers: number;
   icon: string | null;
-  url: string;
 }
 
 function makeEntry(id: string, data: CfxData): ServerEntry {
@@ -40,7 +39,6 @@ function makeEntry(id: string, data: CfxData): ServerEntry {
     players:    data.clients       ?? 0,
     maxPlayers: data.sv_maxclients ?? 0,
     icon: iv != null ? `https://frontend.cfx-services.net/api/servers/icon/${id}/${iv}.png` : null,
-    url: `https://5metrics.dev/server/${id}`,
   };
 }
 
