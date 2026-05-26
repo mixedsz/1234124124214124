@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
 const META_DESC = 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.';
-const META_IMAGE = '/fd-logo.jpg';
+const META_IMAGE = '/fd-logo-clean.svg';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://flakedev.com'),
