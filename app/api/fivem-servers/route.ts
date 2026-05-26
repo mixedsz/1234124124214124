@@ -1,13 +1,11 @@
 import { NextResponse } from 'next/server';
-import { readRegistry } from '@/lib/metrics';
 
 export const revalidate = 300;
 
-const PINNED_SERVER_ID = 'l7o9o4'; // District 10 — always first
-
-function isFlakeResource(name: string): boolean {
-  return name.startsWith('flake_') || name.startsWith('flake-');
-}
+// Hardcoded featured servers — edit this list to add/remove servers
+const FEATURED_SERVER_IDS = [
+  'l7o9o4', // District 10
+];
 
 function stripColors(str: string): string {
   return str.replace(/\^[0-9]/g, '').replace(/[^\x20-\x7E]/g, '').trim();
@@ -18,7 +16,6 @@ interface CfxData {
   projectName?: string;
   clients?: number;
   sv_maxclients?: number;
-  resources?: string[];
   iconVersion?: number;
 }
 
@@ -56,71 +53,16 @@ async function fetchSingle(id: string): Promise<CfxData | null> {
 }
 
 export async function GET() {
-  // 1. Always fetch the pinned server first
-  const pinnedData = await fetchSingle(PINNED_SERVER_ID);
-  const pinned = pinnedData ? makeEntry(PINNED_SERVER_ID, pinnedData) : null;
+  const results = await Promise.allSettled(FEATURED_SERVER_IDS.map(fetchSingle));
 
-  // 2. Read from metrics registry (servers that have phoned home)
-  const registry = await readRegistry();
-  const now = Date.now();
-  const maxAge = 7 * 24 * 60 * 60 * 1000;
+  const servers: ServerEntry[] = [];
+  results.forEach((result, i) => {
+    if (result.status === 'fulfilled' && result.value) {
+      servers.push(makeEntry(FEATURED_SERVER_IDS[i], result.value));
+    }
+  });
 
-  const flakeServers: ServerEntry[] = [];
-
-  // Servers with a cfx.re ID — fetch live data
-  const withCfxId = Object.values(registry).filter(s =>
-    now - s.lastSeen < maxAge &&
-    s.cfxId &&
-    s.cfxId !== PINNED_SERVER_ID &&
-    s.resources.some(isFlakeResource),
-  );
-
-  if (withCfxId.length > 0) {
-    const liveData = await Promise.allSettled(
-      withCfxId.map(s => fetchSingle(s.cfxId!)),
-    );
-    liveData.forEach((result, i) => {
-      const server = withCfxId[i];
-      if (result.status === 'fulfilled' && result.value) {
-        flakeServers.push(makeEntry(server.cfxId!, result.value));
-      } else {
-        flakeServers.push({
-          id: server.cfxId!,
-          name: server.name,
-          players: server.players,
-          maxPlayers: server.maxPlayers,
-          icon: null,
-          url: `https://5metrics.dev/server/${server.cfxId}`,
-        });
-      }
-    });
-  }
-
-  // Servers without a cfx.re ID — use cached ping data
-  const withoutCfxId = Object.values(registry).filter(s =>
-    now - s.lastSeen < maxAge &&
-    !s.cfxId &&
-    s.cfxId !== PINNED_SERVER_ID &&
-    s.resources.some(isFlakeResource),
-  );
-  for (const server of withoutCfxId.slice(0, 3)) {
-    flakeServers.push({
-      id: server.id,
-      name: server.name,
-      players: server.players,
-      maxPlayers: server.maxPlayers,
-      icon: null,
-      url: '#',
-    });
-  }
-
-  flakeServers.sort((a, b) => b.players - a.players);
-
-  const result: ServerEntry[] = [];
-  if (pinned) result.push(pinned);
-  result.push(...flakeServers.slice(0, 3));
-
-  return NextResponse.json(result, {
+  return NextResponse.json(servers, {
     headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
   });
 }
