@@ -93,6 +93,18 @@ export default function RootLayout({
         `}} />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            name: 'Flake Development',
+            url: 'https://flakedev.com',
+            logo: 'https://flakedev.com/fd-logo.jpg',
+            description: 'Premium FiveM scripts compatible with QBCore, Qbox & ESX. Instant delivery via Cfx.re escrow.',
+            sameAs: ['https://www.youtube.com/@flakedevelopment'],
+          }) }}
+        />
         <div id="google_translate_element" style={{ position: 'fixed', top: 0, left: '-9999px', height: 0, overflow: 'hidden' }} />
         <Providers>
           {children}

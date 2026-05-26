@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { readShowcaseVideo } from '@/lib/showcase-video';
 
 const CHANNEL_ID = 'UChl49qE7X_bOhdZmO6Hv4EA';
 const UPLOADS_PLAYLIST = 'UU' + CHANNEL_ID.slice(2);
@@ -7,7 +8,7 @@ export async function GET() {
   const apiKey = process.env.YOUTUBE_API_KEY;
 
   try {
-    // Primary: YouTube Data API v3 (requires YOUTUBE_API_KEY env var)
+    // 1. YouTube Data API v3
     if (apiKey) {
       const res = await fetch(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${UPLOADS_PLAYLIST}&maxResults=1&key=${apiKey}`,
@@ -25,7 +26,7 @@ export async function GET() {
       }
     }
 
-    // Secondary: YouTube RSS feed
+    // 2. YouTube RSS feed
     const rss = await fetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`,
       { signal: AbortSignal.timeout(4000) }
@@ -47,8 +48,12 @@ export async function GET() {
       }
     }
   } catch {
-    // fall through
+    // fall through to blob fallback
   }
+
+  // 3. Manually-set video from Discord bot /updatevideo command
+  const stored = await readShowcaseVideo();
+  if (stored?.videoId) return NextResponse.json(stored);
 
   return NextResponse.json(null);
 }
