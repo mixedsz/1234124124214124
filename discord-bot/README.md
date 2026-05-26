@@ -1,6 +1,6 @@
-# Flake Development Reviews Bot
+# Flake Development Discord Bot
 
-Discord bot that lets users submit reviews to the store website via `/review`.
+Discord bot for submitting reviews and managing the website showcase video.
 
 ## Setup
 
@@ -10,13 +10,16 @@ Discord bot that lets users submit reviews to the store website via `/review`.
    npm install
    ```
 
-2. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Fill in all values in .env
+2. **Configure environment** — create a `.env` file (or set these on your host):
+   ```
+   DISCORD_BOT_TOKEN=your_bot_token
+   DISCORD_CLIENT_ID=your_application_id
+   DISCORD_GUILD_ID=your_server_id
+   WEBSITE_URL=https://flakedev.com
+   BLOB_WEBHOOK_PUBLIC_KEY=same_value_as_in_vercel
    ```
 
-3. **Register slash commands** (run once, or whenever you change commands)
+3. **Register slash commands** (run once, or whenever you add/change commands)
    ```bash
    node register-commands.js
    ```
@@ -26,22 +29,24 @@ Discord bot that lets users submit reviews to the store website via `/review`.
    node bot.js
    ```
 
-## Vercel Setup
+   Commands also auto-register on every startup, so restarting the bot is enough after code changes.
 
-Add these two environment variables in your Vercel dashboard:
+## Environment Variables
 
-| Variable | Value |
+| Variable | Where to get it |
 |---|---|
-| `REVIEWS_BOT_TOKEN` | A long random string (generate with `openssl rand -hex 32`) |
-
-The same `REVIEWS_BOT_TOKEN` value goes in the bot's `.env` file.
+| `DISCORD_BOT_TOKEN` | Discord Developer Portal → Bot → Token |
+| `DISCORD_CLIENT_ID` | Discord Developer Portal → General Information → Application ID |
+| `DISCORD_GUILD_ID` | Right-click your Discord server → Copy Server ID (Developer Mode must be on) |
+| `WEBSITE_URL` | `https://flakedev.com` |
+| `BLOB_WEBHOOK_PUBLIC_KEY` | Same value set in Vercel env vars |
 
 ## Discord Developer Portal Setup
 
 1. Go to https://discord.com/developers/applications
-2. Create a new application
-3. Go to **Bot** tab → click **Add Bot**
-4. Copy the bot token → put in `.env` as `DISCORD_BOT_TOKEN`
+2. Create (or select) your application
+3. Go to **Bot** tab → copy the bot token → set as `DISCORD_BOT_TOKEN`
+4. Copy the **Application ID** from General Information → set as `DISCORD_CLIENT_ID`
 5. Under **OAuth2 → URL Generator**, select scopes: `bot` + `applications.commands`
 6. Select permissions: **Send Messages**, **Embed Links**, **Use Slash Commands**
 7. Use the generated URL to invite the bot to your server
@@ -51,4 +56,6 @@ The same `REVIEWS_BOT_TOKEN` value goes in the bot's `.env` file.
 | Command | Description | Who can use |
 |---|---|---|
 | `/review` | Submit a review (rating 1-5 + text + optional product name) | Everyone |
+| `/setup` | Set the review embed channel and results channel | Administrators only |
 | `/deletereview` | Delete a review by ID | Administrators only |
+| `/updatevideo` | Set the website showcase video (YouTube URL or video ID) | Administrators only |
