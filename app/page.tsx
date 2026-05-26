@@ -13,7 +13,7 @@ async function fetchYouTubeRSS(channelId: string): Promise<{ videoId: string; ti
   try {
     const rssRes = await fetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`,
-      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(4000) }
+      { cache: 'no-store', signal: AbortSignal.timeout(4000) }
     );
     if (!rssRes.ok) return null;
     const xml = await rssRes.text();
