@@ -7,7 +7,7 @@ import './globals.css'
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
 const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
-const META_DESC = 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.';
+const META_DESC = 'Premium FiveM scripts trusted by Grizzley World, District 10, and hundreds of top servers. QBCore, Qbox & ESX compatible. Body bags, addiction systems, loading screens, black markets & more — instant Cfx.re delivery, free updates forever.';
 const META_IMAGE = '/fd-logo-clean.svg';
 
 export const metadata: Metadata = {
@@ -17,7 +17,16 @@ export const metadata: Metadata = {
     template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
   },
   description: META_DESC,
-  keywords: ['FiveM scripts', 'QBCore scripts', 'ESX scripts', 'Qbox scripts', 'FiveM server', 'premium FiveM', 'Flake Development'],
+  keywords: [
+    'FiveM scripts', 'FiveM RP scripts', 'FiveM roleplay scripts', 'FiveM resources',
+    'QBCore scripts', 'QBCore resources', 'ESX scripts', 'ESX resources', 'Qbox scripts',
+    'premium FiveM scripts', 'Flake Development', 'flakedev',
+    'Grizzley World scripts', 'District 10 scripts', 'FiveM server scripts',
+    'cfx.re scripts', 'tebex FiveM', 'FiveM body bag script', 'FiveM addiction script',
+    'FiveM loading screen', 'FiveM drug script', 'FiveM smoking script',
+    'FiveM black market', 'FiveM shop script', 'FiveM wearables',
+    'buy FiveM scripts', 'best FiveM scripts',
+  ],
   authors: [{ name: 'Flake Development', url: 'https://flakedev.com' }],
   creator: 'Flake Development',
   publisher: 'Flake Development',
@@ -102,6 +111,11 @@ export default function RootLayout({
               name: 'Flake Development',
               alternateName: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
               url: 'https://flakedev.com',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: { '@type': 'EntryPoint', urlTemplate: 'https://flakedev.com/scripts?search={search_term_string}' },
+                'query-input': 'required name=search_term_string',
+              },
             },
             {
               '@context': 'https://schema.org',

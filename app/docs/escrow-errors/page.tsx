@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink } from 'lucide-react';
 import { CodeBlock, LogBlock, AccordionItem } from '@/components/docs-code-block';
 
+
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Cfx.re Escrow Errors Guide – FiveM Script Troubleshooting' };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Callout({ children }: { children: React.ReactNode }) {

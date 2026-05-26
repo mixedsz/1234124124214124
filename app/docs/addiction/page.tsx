@@ -4,6 +4,9 @@ import Link from 'next/link';
 import { ChevronRight, AlertTriangle, Info, Zap, Check, Activity } from 'lucide-react';
 import { CodeBlock } from '@/components/docs-code-block';
 
+
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Flake Addiction Creator – FiveM Drug & Addiction Script' };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Inline({ children }: { children: React.ReactNode }) {

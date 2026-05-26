@@ -1,3 +1,6 @@
+import type { Metadata } from 'next';
+export const metadata: Metadata = { title: 'Flake One Hand Weapon – FiveM Script' };
+
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
