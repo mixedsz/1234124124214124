@@ -1,14 +1,19 @@
+'use client';
+
 import Link from 'next/link';
-import { TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexPackage } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 
 interface ProductCardProps {
   package_: TebexPackage;
 }
 
 export function ProductCard({ package_ }: ProductCardProps) {
+  const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
-  const discountedPrice = package_.total_price;
+  // discount = dollar amount off (Tebex Headless API absolute value, not percentage)
+  const discountedPrice = hasDiscount ? Math.max(0, package_.base_price - package_.discount) : package_.total_price;
 
   return (
     <Link
@@ -21,6 +26,8 @@ export function ProductCard({ package_ }: ProductCardProps) {
           <img
             src={package_.image}
             alt={package_.name}
+            loading="lazy"
+            decoding="async"
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -31,7 +38,7 @@ export function ProductCard({ package_ }: ProductCardProps) {
 
         {/* Sale Badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded">
+          <div className="absolute top-3 right-3 px-2.5 py-1 bg-blue-600 text-white text-xs font-bold rounded-md shadow shadow-blue-500/40">
             SALE
           </div>
         )}
@@ -75,13 +82,13 @@ export function ProductCard({ package_ }: ProductCardProps) {
             </>
           ) : (
             <span className="text-lg font-bold text-white">
-              {package_.total_price === 0 ? 'Free' : formatPrice(package_.total_price, package_.currency)}
+              {discountedPrice === 0 ? 'Free' : formatPrice(discountedPrice, package_.currency)}
             </span>
           )}
         </div>
 
         <p className="mt-1 text-xs text-neutral-500">
-          {package_.total_price > 0 ? 'Tax Included' : ''}
+          {discountedPrice > 0 ? 'Tax Included' : ''}
         </p>
       </div>
     </Link>

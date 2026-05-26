@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 60">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="65" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#55CCFF"/>
+      <stop offset="50%" stop-color="#1A50FF"/>
+      <stop offset="100%" stop-color="#0010BB"/>
+    </linearGradient>
+    <filter id="sh" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000A88" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+  <text x="2" y="54"
+    font-family="Impact,'Arial Narrow',Arial,sans-serif"
+    font-size="56"
+    font-weight="900"
+    fill="url(#g)"
+    stroke="white"
+    stroke-width="2.5"
+    stroke-linejoin="round"
+    paint-order="stroke fill"
+    filter="url(#sh)">FD</text>
+</svg>

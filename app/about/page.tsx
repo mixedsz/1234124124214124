@@ -1,9 +1,14 @@
+import type { Metadata } from 'next'
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getWebstore } from '@/lib/tebex';
 import Link from 'next/link';
 import { Users, Award, Code, Heart } from 'lucide-react';
 
+
+export const metadata: Metadata = {
+  title: 'About | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+}
 export default async function AboutPage() {
   const webstore = await getWebstore();
   const storeName = webstore?.name || 'Our Store';
@@ -109,7 +114,7 @@ export default async function AboutPage() {
             </p>
             <div className="flex flex-wrap gap-4 justify-center">
               <Link
-                href="/store"
+                href="/scripts"
                 className="px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
               >
                 Browse Scripts

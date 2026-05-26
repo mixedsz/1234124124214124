@@ -7,8 +7,11 @@ import { Footer } from '@/components/footer';
 import { useBasket } from '@/contexts/basket-context';
 import { ExternalLink, Package, ShoppingBag, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 export default function OrdersPage() {
+  useEffect(() => { document.title = 'Orders | Flake Development | QBCore, Qbox & ESX FiveM Scripts'; }, []);
+
   const { isAuthenticated, username, basket } = useBasket();
 
   return (
@@ -17,7 +20,7 @@ export default function OrdersPage() {
 
       <main className="flex-1 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 w-full">
         <Link
-          href="/store"
+          href="/scripts"
           className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8 transition"
         >
           <ArrowLeft className="w-4 h-4" />
@@ -96,7 +99,7 @@ export default function OrdersPage() {
                 Having issues with your orders or need assistance? Join our Discord for support.
               </p>
               <a
-                href="https://discord.gg/flakedevelopment"
+                href="https://discord.gg/flakedev"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5865F2] hover:bg-[#4752C4] text-white rounded-lg transition font-medium"

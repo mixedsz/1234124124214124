@@ -22,7 +22,7 @@ export default async function CategoryPage({ params }: { params: { id: string } 
         {error ? (
           <>
             <Link
-              href="/store"
+              href="/scripts"
               className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -39,7 +39,7 @@ export default async function CategoryPage({ params }: { params: { id: string } 
         ) : category ? (
           <>
             <Link
-              href="/store"
+              href="/scripts"
               className="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-8"
             >
               <ArrowLeft className="w-4 h-4" />

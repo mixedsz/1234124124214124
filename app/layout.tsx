@@ -1,36 +1,67 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import { Providers } from '@/components/providers'
+import Script from 'next/script'
 import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
+const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+const META_DESC = 'Premium FiveM scripts trusted by Grizzley World, District 10, and hundreds of top servers. QBCore, Qbox & ESX compatible. Body bags, addiction systems, loading screens, black markets & more — instant Cfx.re delivery, free updates forever.';
+const OG_DESC = 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.';
+const META_IMAGE = '/fd-logo-clean.svg';
+
 export const metadata: Metadata = {
-  title: 'Flake Development - Premium FiveM Scripts',
-  description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
-  generator: 'v0.app',
+  metadataBase: new URL('https://flakedev.com'),
+  title: {
+    default: META_TITLE,
+    template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+  },
+  description: META_DESC,
+  keywords: [
+    'FiveM scripts', 'FiveM RP scripts', 'FiveM roleplay scripts', 'FiveM resources',
+    'QBCore scripts', 'QBCore resources', 'ESX scripts', 'ESX resources', 'Qbox scripts',
+    'premium FiveM scripts', 'Flake Development', 'flakedev',
+    'Grizzley World scripts', 'District 10 scripts', 'FiveM server scripts',
+    'cfx.re scripts', 'tebex FiveM', 'FiveM body bag script', 'FiveM addiction script',
+    'FiveM loading screen', 'FiveM drug script', 'FiveM smoking script',
+    'FiveM black market', 'FiveM shop script', 'FiveM wearables',
+    'buy FiveM scripts', 'best FiveM scripts',
+  ],
+  authors: [{ name: 'Flake Development', url: 'https://flakedev.com' }],
+  creator: 'Flake Development',
+  publisher: 'Flake Development',
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/fd-logo-clean.svg', type: 'image/svg+xml' },
+      { url: '/fd-favicon.png', type: 'image/png' },
     ],
-    apple: '/apple-icon.png',
+    apple: '/fd-favicon.png',
+  },
+  // Open Graph — used by Discord, Facebook, LinkedIn, Slack, iMessage
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: 'https://flakedev.com',
+    siteName: 'Flake Development',
+    title: META_TITLE,
+    description: OG_DESC,
+    images: [{ url: META_IMAGE, width: 512, height: 512, alt: 'Flake Development logo' }],
+  },
+  // Twitter / X card
+  twitter: {
+    card: 'summary',
+    site: '@flakedevelopment',
+    creator: '@flakedevelopment',
+    title: META_TITLE,
+    description: OG_DESC,
+    images: [{ url: META_IMAGE, alt: 'Flake Development logo' }],
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: '#3b82f6',
 }
 
 export default function RootLayout({
@@ -41,16 +72,68 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-black">
       <head>
-        <script
-          src="https://checkout.tebex.io/v1/tebex.js"
-          async
-        ></script>
+        <script src="https://js.tebex.io/v/1.js" defer></script>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var titleEl = document.querySelector('title');
+            var origTitle = titleEl ? titleEl.textContent : '';
+            var restoring = false;
+            if (titleEl) {
+              titleEl.setAttribute('translate', 'no');
+              new MutationObserver(function() {
+                if (restoring) return;
+                if (document.title !== origTitle) {
+                  restoring = true;
+                  document.title = origTitle;
+                  restoring = false;
+                }
+              }).observe(titleEl, { childList: true, characterData: true, subtree: true });
+            }
+            // Capture-phase intercept: fires before GT's own element-level listeners.
+            // Stops GT from ever adding the hover highlight to translated <font> elements.
+            document.addEventListener('mouseover', function(e) {
+              if (e.target && e.target.tagName === 'FONT') {
+                e.stopImmediatePropagation();
+              }
+            }, true);
+          })();
+          window.googleTranslateElementInit = function() {
+            new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+          };
+        `}} />
       </head>
       <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'WebSite',
+              name: 'Flake Development',
+              alternateName: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+              url: 'https://flakedev.com',
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: { '@type': 'EntryPoint', urlTemplate: 'https://flakedev.com/scripts?search={search_term_string}' },
+                'query-input': 'required name=search_term_string',
+              },
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Flake Development',
+              url: 'https://flakedev.com',
+              logo: 'https://flakedev.com/fd-logo-clean.svg',
+              description: 'Premium FiveM scripts compatible with QBCore, Qbox & ESX. Instant delivery via Cfx.re escrow.',
+              sameAs: ['https://www.youtube.com/@flakedevelopment', 'https://discord.gg/flakedev'],
+            },
+          ]) }}
+        />
+        <div id="google_translate_element" style={{ position: 'fixed', top: 0, left: '-9999px', height: 0, overflow: 'hidden' }} />
         <Providers>
           {children}
         </Providers>
-        {process.env.NODE_ENV === 'production' && <Analytics />}
+        <Script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" strategy="afterInteractive" />
       </body>
     </html>
   )

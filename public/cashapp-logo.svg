@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 36" role="img" aria-label="Cash App">
+  <!-- Dark background -->
+  <rect width="130" height="36" rx="8" fill="#1A1A1A"/>
+  <!-- Green $ icon pill -->
+  <rect x="6" y="4" width="28" height="28" rx="6" fill="#00D632"/>
+  <text x="20" y="24" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="900" fill="white" text-anchor="middle">$</text>
+  <!-- Cash App wordmark -->
+  <text x="84" y="23" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" fill="white" text-anchor="middle">Cash App</text>
+</svg>
