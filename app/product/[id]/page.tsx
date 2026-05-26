@@ -11,13 +11,16 @@ export async function generateMetadata(
 
   return {
     title: pkg.name,
+    description: null,
     openGraph: {
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
+      description: null,
       images: pkg.image ? [{ url: pkg.image, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: 'summary_large_image',
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
+      description: null,
       images: pkg.image ? [pkg.image] : undefined,
     },
   };
