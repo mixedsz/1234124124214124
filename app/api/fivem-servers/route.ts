@@ -20,12 +20,16 @@ async function fetchServer(id: string, displayName: string, url: string) {
     if (!res.ok) return null;
     const json = await res.json();
     const data = json?.Data ?? json;
+    const iconVersion: number | undefined = data?.iconVersion;
+    const iconUrl = iconVersion != null
+      ? `https://frontend.cfx-services.net/api/servers/icon/${id}/${iconVersion}.png`
+      : null;
     return {
       id,
       name: displayName || stripColorCodes(data?.projectName || data?.hostname || 'Unknown'),
       players:    data?.clients        ?? 0,
       maxPlayers: data?.sv_maxclients  ?? 0,
-      icon:       data?.icon ? `data:image/png;base64,${data.icon}` : null,
+      icon:       iconUrl,
       url,
     };
   } catch {
