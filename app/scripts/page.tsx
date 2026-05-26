@@ -20,7 +20,7 @@ function StoreContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    document.title = 'Scripts | Flake Scripts | QBCore, Qbox & ESX FiveM Scripts';
+    document.title = 'Scripts | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
   }, []);
 
   // Check for login success
