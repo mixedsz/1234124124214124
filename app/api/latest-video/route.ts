@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
 
-const FALLBACK = { videoId: 'Zolwhtx1VAg', title: 'Flake Development Script Showcase' };
 const CHANNEL_ID = 'UChl49qE7X_bOhdZmO6Hv4EA';
-// YouTube uploads playlist = channel ID with UC → UU
 const UPLOADS_PLAYLIST = 'UU' + CHANNEL_ID.slice(2);
 
 export async function GET() {
   const apiKey = process.env.YOUTUBE_API_KEY;
 
   try {
+    // Primary: YouTube Data API v3 (requires YOUTUBE_API_KEY env var)
     if (apiKey) {
-      // YouTube Data API v3 — reliable, not IP-blocked
       const res = await fetch(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${UPLOADS_PLAYLIST}&maxResults=1&key=${apiKey}`,
         { signal: AbortSignal.timeout(5000) }
@@ -27,7 +25,7 @@ export async function GET() {
       }
     }
 
-    // Fallback: try YouTube RSS (may be blocked on some Vercel regions)
+    // Secondary: YouTube RSS feed
     const rss = await fetch(
       `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`,
       { signal: AbortSignal.timeout(4000) }
@@ -49,8 +47,8 @@ export async function GET() {
       }
     }
   } catch {
-    // fall through to hardcoded fallback
+    // fall through
   }
 
-  return NextResponse.json(FALLBACK);
+  return NextResponse.json(null);
 }

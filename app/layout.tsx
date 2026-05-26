@@ -6,13 +6,22 @@ import './globals.css'
 
 const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 
+const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+const META_DESC = 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.';
+const META_IMAGE = '/fd-logo.jpg';
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://flakedev.com'),
   title: {
-    default: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
-    template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+    default: META_TITLE,
+    template: '%s | Flake Development',
   },
-  description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
+  description: META_DESC,
+  keywords: ['FiveM scripts', 'QBCore scripts', 'ESX scripts', 'Qbox scripts', 'FiveM server', 'premium FiveM', 'Flake Development'],
+  authors: [{ name: 'Flake Development', url: 'https://flakedev.com' }],
+  creator: 'Flake Development',
+  publisher: 'Flake Development',
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
   icons: {
     icon: [
       { url: '/fd-logo-clean.svg', type: 'image/svg+xml' },
@@ -20,15 +29,24 @@ export const metadata: Metadata = {
     ],
     apple: '/fd-favicon.png',
   },
+  // Open Graph — used by Discord, Facebook, LinkedIn, Slack, iMessage
   openGraph: {
-    title: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
-    description: 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.',
-    images: [{ url: '/fd-logo.jpg', width: 512, height: 512 }],
     type: 'website',
+    locale: 'en_US',
+    url: 'https://flakedev.com',
+    siteName: 'Flake Development',
+    title: META_TITLE,
+    description: META_DESC,
+    images: [{ url: META_IMAGE, width: 512, height: 512, alt: 'Flake Development logo' }],
   },
+  // Twitter / X card
   twitter: {
     card: 'summary',
-    images: ['/fd-logo.jpg'],
+    site: '@flakedevelopment',
+    creator: '@flakedevelopment',
+    title: META_TITLE,
+    description: META_DESC,
+    images: [{ url: META_IMAGE, alt: 'Flake Development logo' }],
   },
 }
 
