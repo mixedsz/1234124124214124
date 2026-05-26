@@ -4,17 +4,8 @@ export const revalidate = 300;
 
 const PINNED_SERVER_ID = 'l7o9o4'; // District 10 — always first
 
-const FLAKE_RESOURCES = new Set([
-  'flake_loading', 'flake-blackmarkets', 'flake_drugselling',
-  'flake_bodybag', 'flake-plugs', 'flake_wanted', 'flake-aiems', 'flake_shops',
-]);
-
 function isFlakeResource(name: string): boolean {
-  return (
-    FLAKE_RESOURCES.has(name) ||
-    name.startsWith('flake_') ||
-    name.startsWith('flake-')
-  );
+  return name.startsWith('flake_') || name.startsWith('flake-');
 }
 
 function stripColors(str: string): string {
@@ -51,11 +42,12 @@ function makeEntry(id: string, data: CfxData): ServerEntry {
   };
 }
 
+// Single-server endpoint always returns full data including resources[]
 async function fetchSingle(id: string): Promise<CfxData | null> {
   try {
     const r = await fetch(
       `https://servers-frontend.fivem.net/api/servers/single/${id}`,
-      { signal: AbortSignal.timeout(6000) },
+      { signal: AbortSignal.timeout(5000) },
     );
     if (!r.ok) return null;
     const j = await r.json();
@@ -63,110 +55,88 @@ async function fetchSingle(id: string): Promise<CfxData | null> {
   } catch { return null; }
 }
 
-// Returns a map of serverId → CfxData from the bulk server list.
-// Resources may or may not be populated depending on what CFX includes.
-async function fetchBulkList(): Promise<Map<string, CfxData>> {
-  const map = new Map<string, CfxData>();
-  try {
-    const r = await fetch(
-      'https://servers-frontend.fivem.net/api/servers/?gameName=gta5',
-      { signal: AbortSignal.timeout(15000) },
-    );
-    if (!r.ok) return map;
-    const raw = await r.json();
+// Fetch a list of top server IDs (sorted by players) from CFX.re.
+// Tries multiple endpoint variations to handle unknown response shape.
+async function fetchTopServerIds(limit: number): Promise<string[]> {
+  const urls = [
+    `https://servers-frontend.fivem.net/api/servers/?gameName=gta5`,
+    `https://servers-frontend.fivem.net/api/servers/`,
+  ];
 
-    // Possible shapes:
-    // A: { servers: [[id, {Data, EndPoint}], ...], total: N }
-    // B: { [id]: {Data, EndPoint} }
-    // C: [[id, {Data, EndPoint}], ...]
+  for (const url of urls) {
+    try {
+      const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) continue;
+      const raw = await r.json();
 
-    const entries: [string, { Data?: CfxData }][] = [];
+      // Extract [id, clientCount] pairs from whatever shape comes back
+      const pairs: [string, number][] = [];
 
-    if (Array.isArray(raw?.servers)) {
-      // Shape A
-      for (const item of raw.servers) {
-        if (Array.isArray(item) && item.length >= 2) entries.push(item as [string, { Data?: CfxData }]);
+      // Shape A: { servers: [[id, {Data}], ...] }
+      if (Array.isArray(raw?.servers)) {
+        for (const item of raw.servers) {
+          if (Array.isArray(item) && item.length >= 2) {
+            const [id, entry] = item as [string, { Data?: CfxData }];
+            pairs.push([id, entry?.Data?.clients ?? 0]);
+          }
+        }
       }
-    } else if (Array.isArray(raw)) {
-      // Shape C
-      for (const item of raw) {
-        if (Array.isArray(item) && item.length >= 2) entries.push(item as [string, { Data?: CfxData }]);
+      // Shape B: [[id, {Data}], ...]
+      else if (Array.isArray(raw)) {
+        for (const item of raw) {
+          if (Array.isArray(item) && item.length >= 2) {
+            const [id, entry] = item as [string, { Data?: CfxData }];
+            pairs.push([id, entry?.Data?.clients ?? 0]);
+          }
+        }
       }
-    } else if (raw && typeof raw === 'object') {
-      // Shape B — only if keys look like server IDs (not "servers"/"total")
-      for (const [k, v] of Object.entries(raw as Record<string, { Data?: CfxData }>)) {
-        if (k !== 'servers' && k !== 'total' && v?.Data) entries.push([k, v]);
+      // Shape C: { [id]: { Data, EndPoint } } — skip "servers"/"total" keys
+      else if (raw && typeof raw === 'object') {
+        for (const [k, v] of Object.entries(raw as Record<string, { Data?: CfxData }>)) {
+          if (k === 'servers' || k === 'total') continue;
+          pairs.push([k, v?.Data?.clients ?? 0]);
+        }
       }
-    }
 
-    for (const [id, entry] of entries) {
-      if (entry?.Data) map.set(id, entry.Data);
-    }
-  } catch { /* return empty map */ }
-  return map;
-}
-
-// Check the top-N busy servers individually when bulk list lacks resources.
-async function findFlakeServersViaIndividualFetch(
-  bulkMap: Map<string, CfxData>,
-  limit = 40,
-): Promise<ServerEntry[]> {
-  // Sort by player count and take top N server IDs (excluding pinned)
-  const topIds = [...bulkMap.entries()]
-    .filter(([id]) => id !== PINNED_SERVER_ID)
-    .sort((a, b) => (b[1].clients ?? 0) - (a[1].clients ?? 0))
-    .slice(0, limit)
-    .map(([id]) => id);
-
-  const results = await Promise.allSettled(topIds.map(fetchSingle));
-  const flake: ServerEntry[] = [];
-
-  results.forEach((r, i) => {
-    if (r.status !== 'fulfilled' || !r.value) return;
-    const data = r.value;
-    const resources: string[] = data.resources ?? [];
-    if (resources.some(isFlakeResource)) {
-      flake.push(makeEntry(topIds[i], data));
-    }
-  });
-
-  return flake.sort((a, b) => b.players - a.players);
+      if (pairs.length > 0) {
+        return pairs
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, limit)
+          .map(([id]) => id);
+      }
+    } catch { /* try next url */ }
+  }
+  return [];
 }
 
 export async function GET() {
-  // 1. Always fetch District 10 (pinned)
+  // 1. Always fetch the pinned server directly
   const pinnedData = await fetchSingle(PINNED_SERVER_ID);
   const pinned = pinnedData ? makeEntry(PINNED_SERVER_ID, pinnedData) : null;
 
-  // 2. Fetch bulk list
-  const bulkMap = await fetchBulkList();
+  // 2. Get top 100 server IDs from the bulk list
+  const topIds = await fetchTopServerIds(100);
 
-  let otherFlake: ServerEntry[] = [];
+  // 3. Fetch each individual server to get its resources[]
+  //    (single endpoint is the only reliable source of resources)
+  const toCheck = topIds.filter(id => id !== PINNED_SERVER_ID);
+  const checks = await Promise.allSettled(toCheck.map(fetchSingle));
 
-  if (bulkMap.size > 0) {
-    // Check if bulk list includes resources
-    const sampleHasResources = [...bulkMap.values()]
-      .slice(0, 20)
-      .some(d => Array.isArray(d.resources) && d.resources.length > 0);
-
-    if (sampleHasResources) {
-      // Resources are in bulk — filter directly
-      for (const [id, data] of bulkMap) {
-        if (id === PINNED_SERVER_ID) continue;
-        if ((data.resources ?? []).some(isFlakeResource)) {
-          otherFlake.push(makeEntry(id, data));
-        }
-      }
-      otherFlake.sort((a, b) => b.players - a.players);
-    } else {
-      // Resources NOT in bulk — check top servers individually
-      otherFlake = await findFlakeServersViaIndividualFetch(bulkMap);
+  const flakeServers: ServerEntry[] = [];
+  checks.forEach((result, i) => {
+    if (result.status !== 'fulfilled' || !result.value) return;
+    const data = result.value;
+    const resources: string[] = data.resources ?? [];
+    if (resources.some(isFlakeResource)) {
+      flakeServers.push(makeEntry(toCheck[i], data));
     }
-  }
+  });
+
+  flakeServers.sort((a, b) => b.players - a.players);
 
   const result: ServerEntry[] = [];
   if (pinned) result.push(pinned);
-  result.push(...otherFlake.filter(s => s.id !== PINNED_SERVER_ID).slice(0, 3));
+  result.push(...flakeServers.slice(0, 3));
 
   return NextResponse.json(result, {
     headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' },
