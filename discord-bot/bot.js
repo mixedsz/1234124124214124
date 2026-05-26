@@ -174,6 +174,13 @@ client.once(Events.ClientReady, async () => {
       .setDescription('[Admin] Delete a review by ID')
       .setDefaultMemberPermissions(8)
       .addStringOption(opt => opt.setName('id').setDescription('Review ID to delete').setRequired(true)),
+    new SlashCommandBuilder()
+      .setName('updatevideo')
+      .setDescription('[Admin] Set the showcase video on the website')
+      .setDefaultMemberPermissions(8)
+      .addStringOption(opt =>
+        opt.setName('url').setDescription('YouTube video URL or video ID').setRequired(true)
+      ),
   ].map(cmd => cmd.toJSON());
 
   try {
@@ -197,6 +204,7 @@ client.on(Events.InteractionCreate, async interaction => {
       if (interaction.commandName === 'setup')        return handleSetup(interaction);
       if (interaction.commandName === 'review')       return handleReviewCommand(interaction);
       if (interaction.commandName === 'deletereview') return handleDeleteReview(interaction);
+      if (interaction.commandName === 'updatevideo')  return handleUpdateVideo(interaction);
     }
 
     // ── Button ──────────────────────────────────────────────────────────────
@@ -449,6 +457,57 @@ async function handleDeleteReview(interaction) {
     await interaction.editReply({ content: `✅ Review \`${id}\` deleted successfully.` });
   } catch (err) {
     console.error('Error deleting review:', err);
+    await interaction.editReply({ content: '❌ Network error — could not reach the store API.' });
+  }
+}
+
+// ── /updatevideo ──────────────────────────────────────────────────────────────
+
+async function handleUpdateVideo(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const url = interaction.options.getString('url', true);
+
+  if (!WEBSITE_URL) {
+    return interaction.editReply({ content: '❌ WEBSITE_URL is not configured.' });
+  }
+
+  const secret = process.env.BLOB_WEBHOOK_PUBLIC_KEY;
+  if (!secret) {
+    return interaction.editReply({ content: '❌ BLOB_WEBHOOK_PUBLIC_KEY is not configured.' });
+  }
+
+  try {
+    const res = await fetch(`${WEBSITE_URL}/api/showcase-video`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${secret}`,
+      },
+      body: JSON.stringify({ videoUrl: url }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      return interaction.editReply({
+        content: `❌ ${data.error || `Failed to update video (HTTP ${res.status})`}`,
+      });
+    }
+
+    await interaction.editReply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(EMBED_COLOR)
+          .setTitle('✅ Showcase Video Updated')
+          .setDescription(`The website showcase video has been updated.`)
+          .addFields({ name: 'Video ID', value: data.videoId, inline: true })
+          .setThumbnail(`https://i.ytimg.com/vi/${data.videoId}/hqdefault.jpg`)
+          .setTimestamp(),
+      ],
+    });
+  } catch (err) {
+    console.error('Error updating showcase video:', err);
     await interaction.editReply({ content: '❌ Network error — could not reach the store API.' });
   }
 }

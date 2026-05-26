@@ -67,6 +67,18 @@ const commands = [
         .setDescription('Review ID to delete')
         .setRequired(true)
     ),
+
+  // ── /updatevideo ─────────────────────────────────────────────────────────────
+  new SlashCommandBuilder()
+    .setName('updatevideo')
+    .setDescription('[Admin] Set the showcase video on the website')
+    .setDefaultMemberPermissions(8) // Administrator only
+    .addStringOption(opt =>
+      opt
+        .setName('url')
+        .setDescription('YouTube video URL or video ID')
+        .setRequired(true)
+    ),
 ].map(cmd => cmd.toJSON());
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_BOT_TOKEN);
