@@ -256,7 +256,6 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
 
 export default function ProductClientPage({ params, initialPackage }: { params: Promise<{ id: string }>; initialPackage?: TebexPackage | null }) {
   const [pkg, setPkg] = useState<TebexPackage | null>(initialPackage ?? null);
-  const [loading, setLoading] = useState(!initialPackage);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -391,7 +390,6 @@ export default function ProductClientPage({ params, initialPackage }: { params: 
 
     const loadPackage = async () => {
       try {
-        setLoading(true);
         const resolvedParams = await params;
         const data = await getPackage(Number(resolvedParams.id));
         setPkg(data);
@@ -407,8 +405,6 @@ export default function ProductClientPage({ params, initialPackage }: { params: 
       } catch (err) {
         console.error('[ProductPage] Error:', err);
         setError('Failed to load product');
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -554,18 +550,7 @@ export default function ProductClientPage({ params, initialPackage }: { params: 
     setTimeout(() => handleAddToCartRef.current(), 100);
   }, [pendingAutoAdd, needsDiscord, discordLinked, pkg]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neutral-900 flex flex-col">
-        <Header />
-        <div className="flex items-center justify-center flex-1">
-          <div className="text-neutral-400">Loading product...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!pkg && !loading) {
+  if (!pkg) {
     return (
       <div className="min-h-screen bg-neutral-900 flex flex-col">
         <Header />
