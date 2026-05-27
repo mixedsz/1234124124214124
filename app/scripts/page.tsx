@@ -33,8 +33,20 @@ function StoreContent() {
       setFiveMToast(true);
       // Refresh basket to get authenticated state
       refreshBasket();
-      // Force re-render of product cards to reload images
-      setRefreshKey(prev => prev + 1);
+      // Force re-fetch of categories to ensure fresh data
+      setLoading(true);
+      fetch('/api/categories')
+        .then(r => r.json())
+        .then(cats => {
+          const filteredCats = cats.filter((cat: TebexCategory) => 
+            !cat.name.toLowerCase().includes('subscription') && 
+            !cat.name.toLowerCase().includes('recurring')
+          );
+          setCategories(filteredCats);
+          setRefreshKey(prev => prev + 1);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
       // Auto-hide message after 5 seconds
       setTimeout(() => setFiveMToast(false), 5000);
     }

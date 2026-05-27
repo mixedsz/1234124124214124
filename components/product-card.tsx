@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { TebexPackage } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
+import { useState, useEffect, useRef } from 'react';
 
 interface ProductCardProps {
   package_: TebexPackage;
@@ -15,6 +16,52 @@ export function ProductCard({ package_, priority = false }: ProductCardProps) {
   const originalPrice = package_.base_price;
   // discount = dollar amount off (Tebex Headless API absolute value, not percentage)
   const discountedPrice = hasDiscount ? Math.max(0, package_.base_price - package_.discount) : package_.total_price;
+  
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  // Force image load check on mount and when visibility changes
+  useEffect(() => {
+    if (!package_.image || imageLoaded || imageError) return;
+    
+    const img = imgRef.current;
+    if (!img) return;
+
+    // If image is already complete (cached), mark as loaded
+    if (img.complete && img.naturalHeight > 0) {
+      setImageLoaded(true);
+      return;
+    }
+
+    // Use IntersectionObserver as backup to force load when visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && img.src) {
+            // Force reload if not loaded
+            if (!img.complete || img.naturalHeight === 0) {
+              const src = img.src;
+              img.src = '';
+              img.src = src;
+            }
+          }
+        });
+      },
+      { rootMargin: '50px', threshold: 0.1 }
+    );
+
+    observer.observe(img);
+    return () => observer.disconnect();
+  }, [package_.image, imageLoaded, imageError]);
+
+  const handleImageLoad = () => {
+    setImageLoaded(true);
+  };
+
+  const handleImageError = () => {
+    setImageError(true);
+  };
 
   return (
     <Link
@@ -23,20 +70,29 @@ export function ProductCard({ package_, priority = false }: ProductCardProps) {
     >
       {/* Image - use object-contain to show full image */}
       <div className="relative aspect-video bg-neutral-800 overflow-hidden">
-        {package_.image ? (
-          <img
-            src={package_.image}
-            alt={package_.name}
-            loading={priority ? 'eager' : 'lazy'}
-            decoding="async"
-            fetchPriority={priority ? 'high' : 'auto'}
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-          />
+        {package_.image && !imageError ? (
+          <>
+            {/* Loading placeholder */}
+            {!imageLoaded && (
+              <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+            )}
+            <img
+              ref={imgRef}
+              src={package_.image}
+              alt={package_.name}
+              loading={priority ? 'eager' : 'lazy'}
+              decoding="async"
+              fetchPriority={priority ? 'high' : 'auto'}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+              className={`w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            />
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
             <span className="text-4xl font-bold text-blue-500/50">{package_.name.charAt(0)}</span>
           </div>
-        )}
+        )}}
 
         {/* Sale Badge */}
         {hasDiscount && (
