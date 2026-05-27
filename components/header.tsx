@@ -185,15 +185,15 @@ export function Header() {
 
   return (
     <header 
-      className={`sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800 transition-transform duration-300 ease-in-out overflow-hidden ${
+      className={`sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800 transition-transform duration-300 ease-in-out ${
         headerVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/fd-square.png" alt="Flake Development" className="w-9 h-9 sm:w-11 sm:h-11" />
+            <img src="/fd-square.png" alt="Flake Development" className="w-11 h-11" />
           </Link>
 
           {/* Desktop Navigation */}

@@ -236,10 +236,10 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col overflow-x-hidden w-full max-w-full">
+    <div className="min-h-screen bg-neutral-900 flex flex-col" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       <Header />
 
-      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-end mb-8">
           <h1 className="text-3xl sm:text-[40px] font-bold text-white leading-none">Cart</h1>
           <p className="text-neutral-600 font-medium text-sm">{(basket?.packages || []).length} package{(basket?.packages || []).length !== 1 ? 's' : ''}</p>
