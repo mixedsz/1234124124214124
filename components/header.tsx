@@ -193,7 +193,7 @@ export function Header() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <img src="/fd-square.png" alt="Flake Development" width={44} height={44} className="w-11 h-11" />
+            <img src="/fd-square.png" alt="Flake Development" className="w-9 h-9 sm:w-11 sm:h-11" />
           </Link>
 
           {/* Desktop Navigation */}
