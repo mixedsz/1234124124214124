@@ -49,7 +49,7 @@ export function Header() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
+  const lastScrollY = useRef(0);
   const [discordHover, setDiscordHover] = useState(false);
   const [discordMembers, setDiscordMembers] = useState<number | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -76,30 +76,30 @@ export function Header() {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      const scrollThreshold = 10; // Minimum scroll before hiding
+      const scrollThreshold = 5; // Reduced threshold for more responsive detection
       
       // Always show header at the top of the page
       if (currentScrollY < 50) {
         setHeaderVisible(true);
-        setLastScrollY(currentScrollY);
+        lastScrollY.current = currentScrollY;
         return;
       }
       
       // Determine scroll direction
-      if (currentScrollY > lastScrollY + scrollThreshold) {
+      if (currentScrollY > lastScrollY.current + scrollThreshold) {
         // Scrolling down - hide header
         setHeaderVisible(false);
-      } else if (currentScrollY < lastScrollY - scrollThreshold) {
+        lastScrollY.current = currentScrollY;
+      } else if (currentScrollY < lastScrollY.current - scrollThreshold) {
         // Scrolling up - show header
         setHeaderVisible(true);
+        lastScrollY.current = currentScrollY;
       }
-      
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, []);
 
   // Fetch Discord member count
   useEffect(() => {
