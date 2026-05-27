@@ -359,7 +359,7 @@ export default function CartPage() {
             )}
 
             {/* Subscribe & Save section */}
-            <div className="mt-10 lg:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+            <div className="mt-10 lg:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 w-full overflow-hidden">
               {/* FD+ badge graphic */}
               <div className="flex-shrink-0 w-[80px] sm:w-[90px] lg:w-[120px] h-[55px] sm:h-[60px] lg:h-[80px] rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
                 <div className="text-center">
@@ -368,9 +368,9 @@ export default function CartPage() {
                 </div>
               </div>
               {/* Text + CTA */}
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg sm:text-xl font-extrabold text-white mb-2">Subscribe &amp; Save with Flake+</h2>
-                <p className="text-sm text-neutral-500 mb-4">
+              <div className="min-w-0 w-full sm:flex-1 overflow-hidden">
+                <h2 className="text-lg sm:text-xl font-extrabold text-white mb-2 break-words">Subscribe &amp; Save with Flake+</h2>
+                <p className="text-sm text-neutral-500 mb-4 break-words">
                   Get our entire collection, including new scripts on release day, for one low monthly price.{' '}
                   <strong className="text-white">Save up to 85%</strong> when compared to the usual upfront cost; with no price increases while you remain subscribed.
                 </p>
@@ -388,10 +388,10 @@ export default function CartPage() {
           </div>
 
           {/* Right sidebar */}
-          <div className="lg:col-span-1">
-            <div className="space-y-4 sticky top-24">
+          <div className="lg:col-span-1 w-full overflow-hidden">
+            <div className="space-y-4 lg:sticky lg:top-24">
               {/* Apply Coupon card */}
-              <div className="bg-neutral-900/80 rounded-2xl border border-neutral-800 p-5">
+              <div className="bg-neutral-900/80 rounded-2xl border border-neutral-800 p-4 sm:p-5 overflow-hidden">
                 <div className="flex items-center gap-2 mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
                     <path d="M15 5l0 2"/><path d="M15 11l0 2"/><path d="M15 17l0 2"/><path d="M5 5h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-3a2 2 0 0 0 0 -4v-3a2 2 0 0 1 2 -2"/>
@@ -399,13 +399,13 @@ export default function CartPage() {
                   <h3 className="font-semibold text-white">Apply Coupon</h3>
                 </div>
                 <form onSubmit={handleApplyCoupon}>
-                  <div className="flex h-9">
+                  <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-0">
                     {/* Custom dropdown for coupon type */}
-                    <div className="relative w-[100px] sm:w-[120px] flex-shrink-0">
+                    <div className="relative w-full sm:w-[120px] flex-shrink-0 h-9">
                       <button
                         type="button"
                         onClick={() => setCouponTypeOpen(!couponTypeOpen)}
-                        className="w-full h-full flex items-center justify-between gap-1 bg-neutral-800 border border-neutral-700 border-r-0 rounded-l-lg px-3 text-white text-xs focus:outline-none hover:bg-neutral-750 transition"
+                        className="w-full h-full flex items-center justify-between gap-1 bg-neutral-800 border border-neutral-700 sm:border-r-0 rounded-lg sm:rounded-r-none px-3 text-white text-xs focus:outline-none hover:bg-neutral-750 transition"
                       >
                         <span>{couponType === 'coupon' ? 'Coupon' : 'Creator Code'}</span>
                         <svg 
@@ -445,20 +445,22 @@ export default function CartPage() {
                         </>
                       )}
                     </div>
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      placeholder="Enter code"
-                      className="flex-1 bg-neutral-800 border border-neutral-700 px-3 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-blue-500 min-w-0"
-                    />
-                    <button
-                      type="submit"
-                      className="px-3 bg-blue-600/20 hover:bg-blue-600/35 border border-neutral-700 border-l-0 rounded-r-lg text-blue-400 text-xs font-semibold transition flex-shrink-0 flex items-center gap-1"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
-                      Apply
-                    </button>
+                    <div className="flex flex-1 min-w-0 h-9">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value)}
+                        placeholder="Enter code"
+                        className="flex-1 bg-neutral-800 border border-neutral-700 sm:border-r-0 rounded-l-lg sm:rounded-none px-3 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-blue-500 min-w-0"
+                      />
+                      <button
+                        type="submit"
+                        className="px-3 bg-blue-600/20 hover:bg-blue-600/35 border border-neutral-700 rounded-r-lg text-blue-400 text-xs font-semibold transition flex-shrink-0 flex items-center gap-1"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
+                        <span className="hidden sm:inline">Apply</span>
+                      </button>
+                    </div>
                   </div>
                   {couponError && <p className="text-red-400 text-xs mt-2">{couponError}</p>}
                   {couponSuccess && <p className="text-green-400 text-xs mt-2">{couponSuccess}</p>}
@@ -466,7 +468,7 @@ export default function CartPage() {
               </div>
 
               {/* Gift Card card */}
-              <div className="bg-neutral-900/80 rounded-2xl border border-neutral-800 p-5">
+              <div className="bg-neutral-900/80 rounded-2xl border border-neutral-800 p-4 sm:p-5 overflow-hidden">
                 <div className="flex items-center gap-2 mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-400">
                     <path d="M3 8m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z"/><path d="M12 8l0 13"/><path d="M19 12v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0 -5a4.8 8 0 0 1 4.5 5a4.8 8 0 0 1 4.5 -5a2.5 2.5 0 0 1 0 5"/>
@@ -480,14 +482,14 @@ export default function CartPage() {
                       value={giftCardCode}
                       onChange={(e) => setGiftCardCode(e.target.value)}
                       placeholder="XXXX XXXX XXXX XXXX"
-                      className="flex-1 bg-neutral-800 border border-neutral-700 rounded-l-lg px-3 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-blue-500 min-w-0 tracking-widest"
+                      className="flex-1 bg-neutral-800 border border-neutral-700 rounded-l-lg px-3 text-white text-sm placeholder-neutral-500 focus:outline-none focus:border-blue-500 min-w-0"
                     />
                     <button
                       type="submit"
                       className="px-3 bg-blue-600/20 hover:bg-blue-600/35 border border-neutral-700 border-l-0 rounded-r-lg text-blue-400 text-xs font-semibold transition flex-shrink-0 flex items-center gap-1"
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5l10 -10"/></svg>
-                      Apply
+                      <span className="hidden sm:inline">Apply</span>
                     </button>
                   </div>
                   {giftCardError && <p className="text-red-400 text-xs mt-2">{giftCardError}</p>}
