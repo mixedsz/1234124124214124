@@ -25,14 +25,15 @@ function StoreContent() {
 
   // Check for login success - show FiveM toast
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
+    const hasSuccess = searchParams.get('success') === 'true' || searchParams.has('success');
+    if (hasSuccess) {
+      // Clean up URL immediately
+      window.history.replaceState({}, '', '/scripts');
       setFiveMToast(true);
       // Refresh basket to get authenticated state
       refreshBasket();
       // Auto-hide message after 5 seconds
       setTimeout(() => setFiveMToast(false), 5000);
-      // Clean up URL
-      window.history.replaceState({}, '', '/scripts');
     }
   }, [searchParams, refreshBasket]);
 
@@ -72,12 +73,14 @@ function StoreContent() {
       {/* FiveM Connected Toast */}
       {fiveMToast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
-          <img 
-            src="/fivem-logo.png" 
-            alt="FiveM" 
-            className="w-7 h-7 object-contain flex-shrink-0"
-            style={{ mixBlendMode: 'lighten' }}
-          />
+          <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="5,45 9,34 21,22 15,45"/>
+            <polygon points="25,18 33,45 43,45 32,12"/>
+            <polygon points="16.059,14.164 20,3 28,3"/>
+            <polygon points="10.731,29.002 23,17 23,15 11.58,26.667"/>
+            <polygon points="15.142,16.429 13,22 29.724,5.725 28.818,3.178"/>
+            <polygon points="23.932,14.055 24.377,15.626 30.941,9.178 30.385,7.702"/>
+          </svg>
           <div>
             <p className="text-white font-semibold text-sm">FiveM Connected!</p>
             <p className="text-orange-300 text-xs mt-0.5">{username ? `Logged in as ${username}` : 'Authentication successful'}</p>

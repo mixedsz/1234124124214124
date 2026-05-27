@@ -109,7 +109,8 @@ export function Header() {
         ident = b.ident;
         localStorage.setItem(BASKET_KEY, ident);
       }
-      const returnUrl = `${window.location.origin}/scripts?success=true`;
+      // Use /scripts without query params - Tebex will add its own success indicator
+      const returnUrl = `${window.location.origin}/scripts`;
       const authUrl = await getAuthUrl(ident, returnUrl);
       if (!authUrl) throw new Error('Could not get auth URL');
       window.location.replace(authUrl);

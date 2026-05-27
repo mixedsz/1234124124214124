@@ -69,9 +69,9 @@ export const metadata: Metadata = {
     description: OG_DESC,
     images: [{ url: META_IMAGE, width: 800, height: 800, alt: 'Flake Development - Premium FiveM Scripts' }],
   },
-  // Twitter / X card
+  // Twitter / X card - 'summary' gives small thumbnail on right in Discord
   twitter: {
-    card: 'summary_large_image',
+    card: 'summary',
     site: '@flakedevelopment',
     creator: '@flakedevelopment',
     title: META_TITLE,
