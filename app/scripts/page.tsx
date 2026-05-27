@@ -73,9 +73,9 @@ function StoreContent() {
 
   return (
     <>
-      {/* FiveM Connected Toast */}
+      {/* FiveM Connected Toast - top right slide in */}
       {fiveMToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-slide-in-right">
           <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
             <polygon points="5,45 9,34 21,22 15,45"/>
             <polygon points="25,18 33,45 43,45 32,12"/>
