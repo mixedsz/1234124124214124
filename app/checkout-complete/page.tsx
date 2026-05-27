@@ -1,14 +1,37 @@
+'use client';
+
 import { Header } from '@/components/header';
 import { TebexLegalFooter } from '@/components/tebex-legal-footer';
 import Link from 'next/link';
 import { CheckCircle, Download, Home, ShoppingBag, Headphones } from 'lucide-react';
-
-export const metadata = { title: 'Order Complete' };
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 const CFX_ASSETS_URL =
   'https://portal.cfx.re/assets/granted-assets?page=1&sort=asset.updated_at&direction=asc&search=flake';
 
 export default function CheckoutCompletePage() {
+  const router = useRouter();
+  const [countdown, setCountdown] = useState(10);
+
+  useEffect(() => {
+    document.title = 'Order Complete | Flake Development';
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          router.push('/');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [router]);
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
       <Header />
@@ -105,6 +128,10 @@ export default function CheckoutCompletePage() {
           </div>
 
           <p className="text-neutral-600 text-xs mt-8">
+            Redirecting to home in {countdown} seconds...
+          </p>
+
+          <p className="text-neutral-600 text-xs mt-2">
             Need support?{' '}
             <a href="mailto:flakedev@gmail.com" className="text-neutral-500 hover:text-neutral-300 transition">
               flakedev@gmail.com

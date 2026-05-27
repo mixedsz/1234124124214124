@@ -99,5 +99,5 @@ function isNewProduct(createdAt: string): boolean {
   const created = new Date(createdAt);
   const now = new Date();
   const daysDiff = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-  return daysDiff <= 30;
+  return daysDiff <= 7;
 }

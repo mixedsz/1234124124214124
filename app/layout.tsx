@@ -248,6 +248,14 @@ export default function RootLayout({
                     text: 'Yes, Flake Development offers several free scripts alongside our premium collection. Check our scripts page to see all available free resources.',
                   },
                 },
+                {
+                  '@type': 'Question',
+                  name: 'Can I buy an unencrypted version of the scripts?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Yes! We offer fully unencrypted (source available) versions of our scripts for purchase. Contact us through Discord or email to inquire about unencrypted versions and pricing.',
+                  },
+                },
               ],
             },
             {

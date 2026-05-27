@@ -41,7 +41,7 @@ const faqs: Array<{ q: string; a: React.ReactNode }> = [
   },
   {
     q: 'Can I buy an unencrypted version?',
-    a: 'We do not offer any fully source available versions of our scripts. All our scripts by default come included with a source available bridge that contains all framework-related events and un-encrypted function files which include many various functions that can be customized or edited to your liking.',
+    a: 'Yes! We offer fully unencrypted (source available) versions of our scripts for purchase. Contact us through Discord or email to inquire about unencrypted versions and pricing. All our scripts also come included with a source available bridge containing all framework-related events and various customizable functions by default.',
   },
   {
     q: 'What frameworks are compatible?',
