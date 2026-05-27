@@ -17,12 +17,17 @@ function StoreContent() {
   const [error, setError] = useState<string | null>(null);
   const [fiveMToast, setFiveMToast] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const { refreshBasket, username } = useBasket();
+  const { refreshBasket, username, isAuthenticated } = useBasket();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     document.title = 'Scripts | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
   }, []);
+
+  // Force refresh when auth state changes (login/logout)
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [isAuthenticated]);
 
   // Check for login success - show FiveM toast
   useEffect(() => {
@@ -165,9 +170,9 @@ function StoreContent() {
           ))}
         </div>
       ) : visiblePackages.length > 0 ? (
-        <div key={refreshKey} className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visiblePackages.map((pkg, index) => (
-            <ProductCard key={pkg.id} package_={pkg} priority={index < 8} />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {visiblePackages.map((pkg) => (
+            <ProductCard key={`${pkg.id}-${refreshKey}`} package_={pkg} />
           ))}
         </div>
       ) : (

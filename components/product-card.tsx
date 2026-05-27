@@ -3,92 +3,88 @@
 import Link from 'next/link';
 import { TebexPackage } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ProductCardProps {
   package_: TebexPackage;
-  priority?: boolean; // If true, load image eagerly
+  priority?: boolean;
 }
 
 export function ProductCard({ package_, priority = false }: ProductCardProps) {
   const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
-  // discount = dollar amount off (Tebex Headless API absolute value, not percentage)
   const discountedPrice = hasDiscount ? Math.max(0, package_.base_price - package_.discount) : package_.total_price;
   
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const [retryCount, setRetryCount] = useState(0);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
 
-  // Force image load check on mount and when visibility changes
+  // Preload image using Image constructor - more reliable than relying on <img> lazy loading
   useEffect(() => {
-    if (!package_.image || imageLoaded || imageError) return;
-    
-    const img = imgRef.current;
-    if (!img) return;
-
-    // If image is already complete (cached), mark as loaded
-    if (img.complete && img.naturalHeight > 0) {
-      setImageLoaded(true);
+    if (!package_.image) {
+      setImageState('error');
       return;
     }
 
-    // Use IntersectionObserver as backup to force load when visible
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && img.src) {
-            // Force reload if not loaded
-            if (!img.complete || img.naturalHeight === 0) {
-              const src = img.src;
-              img.src = '';
-              img.src = src;
-            }
-          }
-        });
-      },
-      { rootMargin: '50px', threshold: 0.1 }
-    );
+    setImageState('loading');
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    
+    const loadImage = () => {
+      // Add cache buster on retry to force fresh load
+      const src = retryCount > 0 
+        ? `${package_.image}${package_.image.includes('?') ? '&' : '?'}v=${Date.now()}`
+        : package_.image;
+      
+      img.src = src;
+    };
 
-    observer.observe(img);
-    return () => observer.disconnect();
-  }, [package_.image, imageLoaded, imageError]);
+    img.onload = () => {
+      setImageSrc(img.src);
+      setImageState('loaded');
+    };
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
+    img.onerror = () => {
+      if (retryCount < 2) {
+        // Retry up to 2 times with delay
+        setTimeout(() => {
+          setRetryCount(prev => prev + 1);
+        }, 500 * (retryCount + 1));
+      } else {
+        setImageState('error');
+      }
+    };
 
-  const handleImageError = () => {
-    setImageError(true);
-  };
+    loadImage();
+
+    return () => {
+      img.onload = null;
+      img.onerror = null;
+    };
+  }, [package_.image, retryCount]);
 
   return (
     <Link
       href={`/product/${package_.id}`}
       className="group block bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-blue-500/50 transition-all duration-300"
     >
-      {/* Image - use object-contain to show full image */}
+      {/* Image */}
       <div className="relative aspect-video bg-neutral-800 overflow-hidden">
-        {package_.image && !imageError ? (
-          <>
-            {/* Loading placeholder */}
-            {!imageLoaded && (
-              <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
-            )}
-            <img
-              ref={imgRef}
-              src={package_.image}
-              alt={package_.name}
-              loading={priority ? 'eager' : 'lazy'}
-              decoding="async"
-              fetchPriority={priority ? 'high' : 'auto'}
-              onLoad={handleImageLoad}
-              onError={handleImageError}
-              className={`w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-            />
-          </>
-        ) : (
+        {imageState === 'loading' && (
+          <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
+        )}
+        
+        {imageState === 'loaded' && imageSrc && (
+          <img
+            src={imageSrc}
+            alt={package_.name}
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+          />
+        )}
+        
+        {imageState === 'error' && (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
             <span className="text-4xl font-bold text-blue-500/50">{package_.name.charAt(0)}</span>
           </div>
@@ -109,9 +105,9 @@ export function ProductCard({ package_, priority = false }: ProductCardProps) {
         )}
       </div>
 
-      {/* Content - badges above title */}
+      {/* Content */}
       <div className="p-4">
-        {/* Framework Tags - light variant style like Mantine */}
+        {/* Framework Tags */}
         <div className="flex gap-1.5 mb-2">
           <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-500/15 text-red-400">
             QBCore
