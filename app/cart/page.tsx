@@ -236,7 +236,7 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
+    <div className="min-h-screen bg-neutral-900 flex flex-col overflow-x-hidden">
       <Header />
 
       <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">

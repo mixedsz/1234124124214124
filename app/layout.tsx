@@ -83,6 +83,9 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: '#3b82f6',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 }
 
 export default function RootLayout({
@@ -91,7 +94,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark bg-black">
+    <html lang="en" className="dark bg-black overflow-x-hidden">
       <head>
         <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
@@ -123,7 +126,7 @@ export default function RootLayout({
           };
         `}} />
       </head>
-      <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen`}>
+      <body className={`${inter.variable} font-sans antialiased bg-black text-white min-h-screen overflow-x-hidden`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify([
