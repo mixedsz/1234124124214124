@@ -1212,7 +1212,13 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
       {/* FiveM connected toast */}
       {fiveMToast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
-          <img src="/fivem-logo.png" alt="FiveM" className="w-6 h-6 object-contain flex-shrink-0" />
+          <svg className="w-6 h-6 flex-shrink-0" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 5L15 95H35L50 55L65 95H85L50 5Z" fill="#F97316"/>
+            <path d="M50 5L35 45H25L50 5Z" fill="#F97316"/>
+            <path d="M50 5L75 45H65L50 5Z" fill="#F97316"/>
+            <path d="M30 35L20 55H30L40 35H30Z" fill="#F97316"/>
+            <path d="M70 35L80 55H70L60 35H70Z" fill="#F97316"/>
+          </svg>
           <div>
             <p className="text-white font-semibold text-sm">FiveM Connected!</p>
             <p className="text-orange-300 text-xs mt-0.5">{fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}</p>
