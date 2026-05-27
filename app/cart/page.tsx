@@ -528,7 +528,7 @@ export default function CartPage() {
                   <Link
                     key={pkg.id}
                     href={`/product/${pkg.id}`}
-                    className="group bg-neutral-950 rounded-xl border border-neutral-800 hover:border-blue-500/50 overflow-hidden transition-all duration-200"
+                    className="group bg-neutral-900 rounded-xl border border-neutral-800 hover:border-blue-500/50 overflow-hidden transition-all duration-200"
                   >
                     <div className="aspect-video bg-neutral-800 overflow-hidden">
                       {pkg.image ? (
