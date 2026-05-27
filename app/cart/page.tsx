@@ -236,12 +236,12 @@ export default function CartPage() {
   const isCartEmpty = packages.length === 0;
 
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col overflow-x-hidden">
+    <div className="min-h-screen bg-neutral-900 flex flex-col overflow-x-hidden w-full max-w-full">
       <Header />
 
-      <main className="flex-1 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 w-full">
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 overflow-hidden">
         <div className="flex justify-between items-end mb-8">
-          <h1 className="text-[40px] font-bold text-white leading-none">Cart</h1>
+          <h1 className="text-3xl sm:text-[40px] font-bold text-white leading-none">Cart</h1>
           <p className="text-neutral-600 font-medium text-sm">{(basket?.packages || []).length} package{(basket?.packages || []).length !== 1 ? 's' : ''}</p>
         </div>
 
@@ -252,7 +252,7 @@ export default function CartPage() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left column: Cart Items + Subscribe & Save */}
           <div className="lg:col-span-2">
             {isCartEmpty ? (
@@ -359,17 +359,17 @@ export default function CartPage() {
             )}
 
             {/* Subscribe & Save section */}
-            <div className="mt-10 lg:mt-16 flex items-start lg:items-center gap-6">
+            <div className="mt-10 lg:mt-16 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
               {/* FD+ badge graphic */}
-              <div className="flex-shrink-0 w-[90px] lg:w-[120px] h-[60px] lg:h-[80px] rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
+              <div className="flex-shrink-0 w-[80px] sm:w-[90px] lg:w-[120px] h-[55px] sm:h-[60px] lg:h-[80px] rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center">
                 <div className="text-center">
-                  <div className="text-blue-400 font-black text-2xl lg:text-3xl tracking-tight leading-none">FD</div>
-                  <div className="text-blue-300 font-black text-lg lg:text-xl leading-none">+</div>
+                  <div className="text-blue-400 font-black text-xl sm:text-2xl lg:text-3xl tracking-tight leading-none">FD</div>
+                  <div className="text-blue-300 font-black text-base sm:text-lg lg:text-xl leading-none">+</div>
                 </div>
               </div>
               {/* Text + CTA */}
-              <div>
-                <h2 className="text-xl font-extrabold text-white mb-2">Subscribe &amp; Save with Flake+</h2>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-lg sm:text-xl font-extrabold text-white mb-2">Subscribe &amp; Save with Flake+</h2>
                 <p className="text-sm text-neutral-500 mb-4">
                   Get our entire collection, including new scripts on release day, for one low monthly price.{' '}
                   <strong className="text-white">Save up to 85%</strong> when compared to the usual upfront cost; with no price increases while you remain subscribed.
@@ -401,7 +401,7 @@ export default function CartPage() {
                 <form onSubmit={handleApplyCoupon}>
                   <div className="flex h-9">
                     {/* Custom dropdown for coupon type */}
-                    <div className="relative w-[120px] flex-shrink-0">
+                    <div className="relative w-[100px] sm:w-[120px] flex-shrink-0">
                       <button
                         type="button"
                         onClick={() => setCouponTypeOpen(!couponTypeOpen)}
