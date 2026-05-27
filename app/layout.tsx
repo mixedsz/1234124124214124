@@ -19,19 +19,39 @@ export const metadata: Metadata = {
   },
   description: META_DESC,
   keywords: [
+    // Core FiveM terms
     'FiveM scripts', 'FiveM RP scripts', 'FiveM roleplay scripts', 'FiveM resources',
-    'QBCore scripts', 'QBCore resources', 'ESX scripts', 'ESX resources', 'Qbox scripts',
-    'premium FiveM scripts', 'Flake Development', 'flakedev',
-    'Grizzley World scripts', 'District 10 scripts', 'FiveM server scripts',
-    'cfx.re scripts', 'tebex FiveM', 'FiveM body bag script', 'FiveM addiction script',
+    'FiveM mods', 'FiveM MLO', 'FiveM developer', 'FiveM development',
+    'GTA V roleplay scripts', 'GTA RP scripts', 'GTAV FiveM',
+    // Framework specific
+    'QBCore scripts', 'QBCore resources', 'QBCore framework scripts', 'qb-core scripts',
+    'ESX scripts', 'ESX resources', 'ESX framework scripts', 'es_extended scripts',
+    'Qbox scripts', 'Qbox resources', 'Qbox framework',
+    // Brand & trust
+    'premium FiveM scripts', 'Flake Development', 'flakedev', 'Flake scripts',
+    'Grizzley World scripts', 'District 10 scripts', 'Windy City scripts',
+    // Product types
+    'FiveM server scripts', 'cfx.re scripts', 'tebex FiveM',
+    'FiveM body bag script', 'FiveM addiction script', 'FiveM drug system',
     'FiveM loading screen', 'FiveM drug script', 'FiveM smoking script',
-    'FiveM black market', 'FiveM shop script', 'FiveM wearables',
-    'buy FiveM scripts', 'best FiveM scripts',
+    'FiveM black market', 'FiveM shop script', 'FiveM wearables script',
+    'FiveM inventory script', 'FiveM job script', 'FiveM gang script',
+    // Purchase intent
+    'buy FiveM scripts', 'best FiveM scripts', 'free FiveM scripts',
+    'cheap FiveM scripts', 'FiveM scripts for sale', 'download FiveM scripts',
+    // Long-tail
+    'FiveM roleplay server scripts', 'FiveM serious RP scripts',
+    'FiveM scripts 2024', 'FiveM scripts 2025', 'FiveM scripts 2026',
+    'how to install FiveM scripts', 'best QBCore scripts',
   ],
   authors: [{ name: 'Flake Development', url: 'https://flakedev.com' }],
   creator: 'Flake Development',
   publisher: 'Flake Development',
-  robots: { index: true, follow: true, googleBot: { index: true, follow: true } },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1, 'max-video-preview': -1 } },
+  alternates: {
+    canonical: 'https://flakedev.com',
+  },
+  category: 'gaming',
   icons: {
     icon: [
       { url: '/fd-logo-clean.svg', type: 'image/svg+xml' },
@@ -110,8 +130,10 @@ export default function RootLayout({
               '@context': 'https://schema.org',
               '@type': 'WebSite',
               name: 'Flake Development',
-              alternateName: 'Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+              alternateName: ['FlakeDev', 'Flake Development FiveM', 'Flake Scripts'],
               url: 'https://flakedev.com',
+              description: 'Premium FiveM scripts for QBCore, Qbox & ESX roleplay servers. Trusted by Grizzley World, District 10, and hundreds of top servers.',
+              inLanguage: 'en-US',
               potentialAction: {
                 '@type': 'SearchAction',
                 target: { '@type': 'EntryPoint', urlTemplate: 'https://flakedev.com/scripts?search={search_term_string}' },
@@ -121,11 +143,130 @@ export default function RootLayout({
             {
               '@context': 'https://schema.org',
               '@type': 'Organization',
+              '@id': 'https://flakedev.com/#organization',
               name: 'Flake Development',
+              alternateName: ['FlakeDev', 'Flake Scripts', 'Flake FiveM'],
               url: 'https://flakedev.com',
-              logo: 'https://flakedev.com/fd.png',
-              description: 'Premium FiveM scripts compatible with QBCore, Qbox & ESX. Instant delivery via Cfx.re escrow.',
-              sameAs: ['https://www.youtube.com/@flakedevelopment', 'https://discord.gg/flakedev'],
+              logo: {
+                '@type': 'ImageObject',
+                url: 'https://flakedev.com/fd.png',
+                width: 1340,
+                height: 893,
+              },
+              image: 'https://flakedev.com/fd.png',
+              description: 'Premium FiveM scripts and resources for QBCore, Qbox & ESX frameworks. Instant Cfx.re escrow delivery with free lifetime updates.',
+              foundingDate: '2020',
+              sameAs: [
+                'https://www.youtube.com/@flakedevelopment',
+                'https://discord.gg/flakedev',
+                'https://flekdev.tebex.io',
+              ],
+              contactPoint: {
+                '@type': 'ContactPoint',
+                contactType: 'customer support',
+                url: 'https://discord.gg/flakedev',
+                availableLanguage: 'English',
+              },
+              knowsAbout: [
+                'FiveM Scripts',
+                'FiveM Development',
+                'QBCore Framework',
+                'ESX Framework',
+                'Qbox Framework',
+                'GTA V Roleplay',
+                'Cfx.re Resources',
+                'Lua Scripting',
+              ],
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'SoftwareApplication',
+              name: 'Flake Development FiveM Scripts',
+              applicationCategory: 'GameApplication',
+              operatingSystem: 'FiveM Server',
+              offers: {
+                '@type': 'AggregateOffer',
+                priceCurrency: 'USD',
+                lowPrice: '0',
+                highPrice: '50',
+                offerCount: '20+',
+              },
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '4.9',
+                ratingCount: '500',
+                bestRating: '5',
+                worstRating: '1',
+              },
+              description: 'Premium FiveM scripts compatible with QBCore, Qbox & ESX frameworks. Body bags, addiction systems, loading screens, black markets, and more.',
+              brand: {
+                '@type': 'Brand',
+                name: 'Flake Development',
+              },
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: [
+                {
+                  '@type': 'Question',
+                  name: 'What FiveM frameworks do Flake Development scripts support?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'All Flake Development scripts are compatible with QBCore, Qbox, and ESX frameworks. Most scripts auto-detect your framework and work out of the box.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'How do I get my scripts after purchase?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'All scripts are delivered instantly via Cfx.re escrow system. After purchase, you can access and download your scripts directly through your Cfx.re keymaster.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Do Flake Development scripts include free updates?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Yes! All Flake Development scripts include free lifetime updates. When we release new features or bug fixes, you get them automatically.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Which servers use Flake Development scripts?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Our scripts are trusted by hundreds of top FiveM servers including Grizzley World, District 10, Windy City, and many more popular roleplay communities.',
+                  },
+                },
+                {
+                  '@type': 'Question',
+                  name: 'Are there free FiveM scripts available?',
+                  acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: 'Yes, Flake Development offers several free scripts alongside our premium collection. Check our scripts page to see all available free resources.',
+                  },
+                },
+              ],
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                {
+                  '@type': 'ListItem',
+                  position: 1,
+                  name: 'Home',
+                  item: 'https://flakedev.com',
+                },
+                {
+                  '@type': 'ListItem',
+                  position: 2,
+                  name: 'FiveM Scripts',
+                  item: 'https://flakedev.com/scripts',
+                },
+              ],
             },
           ]) }}
         />
