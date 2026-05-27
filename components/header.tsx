@@ -58,6 +58,18 @@ export function Header() {
 
   const activeCurrency = CURRENCIES.find(c => c.code === currency) ?? CURRENCIES[0];
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   // Fetch Discord member count
   useEffect(() => {
     fetch(`https://discord.com/api/v9/invites/flakedev?with_counts=true`)
