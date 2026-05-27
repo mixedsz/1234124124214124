@@ -89,9 +89,9 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
   const activeLang = LANGUAGES.find(l => l.code === selectedLanguage) ?? LANGUAGES[0];
 
   return (
-    <footer className="bg-neutral-900 border-t border-neutral-800">
+    <footer className="bg-neutral-900 border-t border-neutral-800 overflow-hidden w-full max-w-full">
       {/* Support CTA Section */}
-      {showCta && <div className="bg-neutral-900 py-16">
+      {showCta && <div className="bg-neutral-900 py-16 overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-center py-12 px-10 rounded-3xl bg-gradient-to-br from-blue-950/60 to-neutral-900 border border-blue-900/20 text-center">
             <div className="bg-white/5 rounded-full relative w-[70px] h-[70px] p-[5px] mb-4 flex items-center justify-center">
@@ -117,19 +117,19 @@ export function Footer({ storeName = 'Flake Development', showCta = true }: Foot
       </div>}
 
       {/* Main Footer */}
-      <div className="py-12 border-t border-neutral-800">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="py-12 border-t border-neutral-800 overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 overflow-hidden">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {/* Brand */}
-            <div className="col-span-2 md:col-span-1">
-              <div className="mb-3 overflow-hidden" style={{height: '46px', width: '220px'}}>
+            <div className="col-span-2 md:col-span-1 overflow-hidden">
+              <div className="mb-3 overflow-hidden max-w-full" style={{height: '46px', width: 'min(220px, 100%)'}}>
                 <img
                   src="/fd-wordmark.png"
                   alt="Flake Development"
+                  className="max-w-none"
                   style={{
                     width: '461px',
                     height: '307px',
-                    maxWidth: 'none',
                     marginLeft: '-113px',
                     marginTop: '-119px',
                   }}
