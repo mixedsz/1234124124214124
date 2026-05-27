@@ -1113,11 +1113,11 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
 
       <Footer />
 
-      {/* Cart added notification — drops down from top right */}
+      {/* Cart added notification — drops down from top center */}
       {(added || giftAdded) && !lightboxOpen && (
-        <div className="fixed top-20 right-6 z-[60] pointer-events-none">
-          <div className="pointer-events-auto animate-slide-in-right drop-shadow-2xl">
-            <div className="bg-neutral-900 border border-blue-600/40 rounded-2xl overflow-hidden shadow-2xl w-80">
+        <div className="fixed top-4 inset-x-0 z-[60] flex justify-center px-4 pointer-events-none">
+          <div className="w-full max-w-md pointer-events-auto animate-in slide-in-from-top-3 duration-300 drop-shadow-2xl">
+            <div className="bg-neutral-900 border border-blue-600/40 rounded-2xl overflow-hidden shadow-2xl">
               <div className="p-4">
                 <div className="flex items-start gap-3">
                   {pkg?.image ? (
