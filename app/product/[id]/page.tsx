@@ -1,12 +1,18 @@
 import type { Metadata } from 'next';
+import { cache } from 'react';
 import { getPackage } from '@/lib/tebex';
 import ProductClientPage from './product-client';
+
+// Cache the getPackage call to dedupe between generateMetadata and page render
+const getCachedPackage = cache(async (id: number) => {
+  return getPackage(id).catch(() => null);
+});
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Metadata> {
   const { id } = await params;
-  const pkg = await getPackage(Number(id)).catch(() => null);
+  const pkg = await getCachedPackage(Number(id));
   if (!pkg) return { title: 'Product' };
 
   // Strip HTML tags from description for meta
@@ -42,8 +48,8 @@ export async function generateMetadata(
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  // Prefetch the package data on the server
-  const pkg = await getPackage(Number(id)).catch(() => null);
+  // Uses cached data from generateMetadata - no duplicate fetch
+  const pkg = await getCachedPackage(Number(id));
   
-  return <ProductClientPage params={params} initialPackage={pkg} />;
+  return <ProductClientPage initialPackage={pkg} />;
 }

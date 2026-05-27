@@ -2,7 +2,7 @@
 
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
-import { getPackage, TebexPackage, TebexPackageVariable, createBasket, getAuthUrl, addToBasket } from '@/lib/tebex';
+import { TebexPackage, TebexPackageVariable, createBasket, getAuthUrl, addToBasket } from '@/lib/tebex';
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
@@ -254,8 +254,8 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
   return { items: [], stripped: raw };
 }
 
-export default function ProductClientPage({ params, initialPackage }: { params: Promise<{ id: string }>; initialPackage?: TebexPackage | null }) {
-  const [pkg, setPkg] = useState<TebexPackage | null>(initialPackage ?? null);
+export default function ProductClientPage({ initialPackage }: { initialPackage?: TebexPackage | null }) {
+  const pkg = initialPackage ?? null;
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -374,9 +374,8 @@ export default function ProductClientPage({ params, initialPackage }: { params: 
   }, [isAuthenticated, username]);
 
   useEffect(() => {
-    // Skip loading if we already have the package from server
+    // Detect Discord requirement from initial package
     if (initialPackage) {
-      // Still need to detect Discord requirement
       const discordVar = initialPackage.variables?.find((v: TebexPackageVariable) =>
         v.identifier?.toLowerCase().includes('discord') ||
         v.description?.toLowerCase().includes('discord')
@@ -385,31 +384,8 @@ export default function ProductClientPage({ params, initialPackage }: { params: 
         setNeedsDiscord(true);
         setDiscordVarIdentifier(discordVar.identifier);
       }
-      return;
     }
-
-    const loadPackage = async () => {
-      try {
-        const resolvedParams = await params;
-        const data = await getPackage(Number(resolvedParams.id));
-        setPkg(data);
-        // Detect Discord requirement from package variables
-        const discordVar = data?.variables?.find((v: TebexPackageVariable) =>
-          v.identifier?.toLowerCase().includes('discord') ||
-          v.description?.toLowerCase().includes('discord')
-        );
-        if (discordVar) {
-          setNeedsDiscord(true);
-          setDiscordVarIdentifier(discordVar.identifier);
-        }
-      } catch (err) {
-        console.error('[ProductPage] Error:', err);
-        setError('Failed to load product');
-      }
-    };
-
-    loadPackage();
-  }, [params, initialPackage]);
+  }, [initialPackage]);
 
   useEffect(() => {
     if (pkg?.name) {
