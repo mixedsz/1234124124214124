@@ -13,6 +13,7 @@ const META_IMAGE = 'https://flakedev.com/fd.png';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://flakedev.com'),
+  applicationName: 'Flake Development',
   title: {
     default: META_TITLE,
     template: '%s | Flake Development | QBCore, Qbox & ESX FiveM Scripts',

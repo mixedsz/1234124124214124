@@ -254,9 +254,9 @@ function extractSection(raw: string, heading: string): { items: string[]; stripp
   return { items: [], stripped: raw };
 }
 
-export default function ProductClientPage({ params }: { params: Promise<{ id: string }> }) {
-  const [pkg, setPkg] = useState<TebexPackage | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function ProductClientPage({ params, initialPackage }: { params: Promise<{ id: string }>; initialPackage?: TebexPackage | null }) {
+  const [pkg, setPkg] = useState<TebexPackage | null>(initialPackage ?? null);
+  const [loading, setLoading] = useState(!initialPackage);
   const [error, setError] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [adding, setAdding] = useState(false);
@@ -375,6 +375,20 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
   }, [isAuthenticated, username]);
 
   useEffect(() => {
+    // Skip loading if we already have the package from server
+    if (initialPackage) {
+      // Still need to detect Discord requirement
+      const discordVar = initialPackage.variables?.find((v: TebexPackageVariable) =>
+        v.identifier?.toLowerCase().includes('discord') ||
+        v.description?.toLowerCase().includes('discord')
+      );
+      if (discordVar) {
+        setNeedsDiscord(true);
+        setDiscordVarIdentifier(discordVar.identifier);
+      }
+      return;
+    }
+
     const loadPackage = async () => {
       try {
         setLoading(true);
@@ -389,7 +403,6 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
         if (discordVar) {
           setNeedsDiscord(true);
           setDiscordVarIdentifier(discordVar.identifier);
-          console.log('[ProductPage] Discord variable identifier:', discordVar.identifier, '| description:', discordVar.description);
         }
       } catch (err) {
         console.error('[ProductPage] Error:', err);
@@ -400,7 +413,7 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
     };
 
     loadPackage();
-  }, [params]);
+  }, [params, initialPackage]);
 
   useEffect(() => {
     if (pkg?.name) {
