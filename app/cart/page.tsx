@@ -46,6 +46,7 @@ export default function CartPage() {
 
   // Coupon state
   const [couponType, setCouponType] = useState<'coupon' | 'creator_code'>('coupon');
+  const [couponTypeOpen, setCouponTypeOpen] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
@@ -399,14 +400,51 @@ export default function CartPage() {
                 </div>
                 <form onSubmit={handleApplyCoupon}>
                   <div className="flex h-9">
-                    <select
-                      value={couponType}
-                      onChange={(e) => setCouponType(e.target.value as 'coupon' | 'creator_code')}
-                      className="w-[110px] flex-shrink-0 bg-neutral-800 border border-neutral-700 border-r-0 rounded-l-lg px-2 text-white text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
-                    >
-                      <option value="coupon">Coupon</option>
-                      <option value="creator_code">Creator Code</option>
-                    </select>
+                    {/* Custom dropdown for coupon type */}
+                    <div className="relative w-[120px] flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setCouponTypeOpen(!couponTypeOpen)}
+                        className="w-full h-full flex items-center justify-between gap-1 bg-neutral-800 border border-neutral-700 border-r-0 rounded-l-lg px-3 text-white text-xs focus:outline-none hover:bg-neutral-750 transition"
+                      >
+                        <span>{couponType === 'coupon' ? 'Coupon' : 'Creator Code'}</span>
+                        <svg 
+                          xmlns="http://www.w3.org/2000/svg" 
+                          width="12" 
+                          height="12" 
+                          viewBox="0 0 24 24" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          strokeLinecap="round" 
+                          strokeLinejoin="round"
+                          className={`text-neutral-400 transition-transform ${couponTypeOpen ? 'rotate-180' : ''}`}
+                        >
+                          <path d="M6 9l6 6l6 -6"/>
+                        </svg>
+                      </button>
+                      {couponTypeOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setCouponTypeOpen(false)} />
+                          <div className="absolute top-full left-0 mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg shadow-xl z-50 overflow-hidden">
+                            <button
+                              type="button"
+                              onClick={() => { setCouponType('coupon'); setCouponTypeOpen(false); }}
+                              className={`w-full px-3 py-2 text-left text-xs transition ${couponType === 'coupon' ? 'bg-blue-600/20 text-blue-400' : 'text-white hover:bg-neutral-700'}`}
+                            >
+                              Coupon
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setCouponType('creator_code'); setCouponTypeOpen(false); }}
+                              className={`w-full px-3 py-2 text-left text-xs transition ${couponType === 'creator_code' ? 'bg-blue-600/20 text-blue-400' : 'text-white hover:bg-neutral-700'}`}
+                            >
+                              Creator Code
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
                     <input
                       type="text"
                       value={couponCode}
