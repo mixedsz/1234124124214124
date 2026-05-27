@@ -67,16 +67,16 @@ export const metadata: Metadata = {
     siteName: 'Flake Development',
     title: META_TITLE,
     description: OG_DESC,
-    images: [{ url: META_IMAGE, width: 1340, height: 893, alt: 'Flake Development logo' }],
+    images: [{ url: META_IMAGE, width: 800, height: 800, alt: 'Flake Development - Premium FiveM Scripts' }],
   },
   // Twitter / X card
   twitter: {
-    card: 'summary',
+    card: 'summary_large_image',
     site: '@flakedevelopment',
     creator: '@flakedevelopment',
     title: META_TITLE,
     description: OG_DESC,
-    images: [{ url: META_IMAGE, alt: 'Flake Development logo' }],
+    images: [{ url: META_IMAGE, alt: 'Flake Development - Premium FiveM Scripts' }],
   },
 }
 

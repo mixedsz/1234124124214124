@@ -8,6 +8,7 @@ import { useCurrency } from '@/contexts/currency-context';
 import { createBasket, getAuthUrl } from '@/lib/tebex';
 
 const BASKET_KEY = 'tebex_basket_ident';
+const DISCORD_SERVER_ID = '1056710846938361976'; // flakedev Discord server ID
 
 declare global {
   interface Window {
@@ -47,6 +48,8 @@ export function Header() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [discordHover, setDiscordHover] = useState(false);
+  const [discordMembers, setDiscordMembers] = useState<number | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const currencyRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +57,18 @@ export function Header() {
   const { currency, setCurrency } = useCurrency();
 
   const activeCurrency = CURRENCIES.find(c => c.code === currency) ?? CURRENCIES[0];
+
+  // Fetch Discord member count
+  useEffect(() => {
+    fetch(`https://discord.com/api/v9/invites/flakedev?with_counts=true`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.approximate_member_count) {
+          setDiscordMembers(data.approximate_member_count);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Avatar with localStorage caching — no flicker on navigation
   useEffect(() => {
@@ -173,15 +188,29 @@ export function Header() {
             </div>
 
             {/* Discord */}
-            <a
-              href="https://discord.gg/flakedev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:flex p-2 text-neutral-400 hover:text-[#5865F2] transition"
-              title="Join our Discord"
-            >
-              <DiscordIcon className="w-5 h-5" />
-            </a>
+            <div className="relative hidden sm:block">
+              <a
+                href="https://discord.gg/flakedev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex p-2 text-neutral-400 hover:text-[#5865F2] transition"
+                onMouseEnter={() => setDiscordHover(true)}
+                onMouseLeave={() => setDiscordHover(false)}
+              >
+                <DiscordIcon className="w-5 h-5" />
+              </a>
+              {discordHover && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 px-3 py-2 bg-[#5865F2] rounded-lg shadow-xl whitespace-nowrap z-50 animate-fade-in">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                    <span className="text-white text-xs font-medium">
+                      {discordMembers ? `${discordMembers.toLocaleString()} members` : 'Join Discord'}
+                    </span>
+                  </div>
+                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#5865F2] rotate-45" />
+                </div>
+              )}
+            </div>
 
             {/* Cart */}
             <Link href="/cart" className="relative p-2 text-neutral-300 hover:text-white transition">
