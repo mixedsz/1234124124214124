@@ -48,6 +48,8 @@ export function Header() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [discordHover, setDiscordHover] = useState(false);
   const [discordMembers, setDiscordMembers] = useState<number | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -69,6 +71,35 @@ export function Header() {
       document.body.style.overflow = '';
     };
   }, [mobileMenuOpen]);
+
+  // Show/hide header based on scroll direction
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollThreshold = 10; // Minimum scroll before hiding
+      
+      // Always show header at the top of the page
+      if (currentScrollY < 50) {
+        setHeaderVisible(true);
+        setLastScrollY(currentScrollY);
+        return;
+      }
+      
+      // Determine scroll direction
+      if (currentScrollY > lastScrollY + scrollThreshold) {
+        // Scrolling down - hide header
+        setHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY - scrollThreshold) {
+        // Scrolling up - show header
+        setHeaderVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Fetch Discord member count
   useEffect(() => {
@@ -153,7 +184,11 @@ export function Header() {
   const showProfile = !loading && isAuthenticated && username;
 
   return (
-    <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
+    <header 
+      className={`sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800 transition-transform duration-300 ease-in-out ${
+        headerVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
