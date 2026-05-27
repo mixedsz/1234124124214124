@@ -49,7 +49,6 @@ export function Header() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [headerVisible, setHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
   const [discordHover, setDiscordHover] = useState(false);
   const [discordMembers, setDiscordMembers] = useState<number | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -74,27 +73,28 @@ export function Header() {
 
   // Show/hide header based on scroll direction
   useEffect(() => {
+    let lastScroll = 0;
+    
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const scrollThreshold = 5; // Reduced threshold for more responsive detection
+      const currentScroll = window.scrollY;
       
-      // Always show header at the top of the page
-      if (currentScrollY < 50) {
+      // Always show at top
+      if (currentScroll <= 0) {
         setHeaderVisible(true);
-        lastScrollY.current = currentScrollY;
+        lastScroll = currentScroll;
         return;
       }
       
-      // Determine scroll direction
-      if (currentScrollY > lastScrollY.current + scrollThreshold) {
-        // Scrolling down - hide header
-        setHeaderVisible(false);
-        lastScrollY.current = currentScrollY;
-      } else if (currentScrollY < lastScrollY.current - scrollThreshold) {
-        // Scrolling up - show header
+      // Scrolling up - show header
+      if (currentScroll < lastScroll) {
         setHeaderVisible(true);
-        lastScrollY.current = currentScrollY;
+      } 
+      // Scrolling down - hide header
+      else if (currentScroll > lastScroll) {
+        setHeaderVisible(false);
       }
+      
+      lastScroll = currentScroll;
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
