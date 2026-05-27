@@ -48,7 +48,6 @@ export function Header() {
   const [currencyOpen, setCurrencyOpen] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [headerVisible, setHeaderVisible] = useState(true);
   const [discordHover, setDiscordHover] = useState(false);
   const [discordMembers, setDiscordMembers] = useState<number | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -70,36 +69,6 @@ export function Header() {
       document.body.style.overflow = '';
     };
   }, [mobileMenuOpen]);
-
-  // Show/hide header based on scroll direction
-  useEffect(() => {
-    let lastScroll = 0;
-    
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      
-      // Always show at top
-      if (currentScroll <= 0) {
-        setHeaderVisible(true);
-        lastScroll = currentScroll;
-        return;
-      }
-      
-      // Scrolling up - show header
-      if (currentScroll < lastScroll) {
-        setHeaderVisible(true);
-      } 
-      // Scrolling down - hide header
-      else if (currentScroll > lastScroll) {
-        setHeaderVisible(false);
-      }
-      
-      lastScroll = currentScroll;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Fetch Discord member count
   useEffect(() => {
@@ -184,11 +153,7 @@ export function Header() {
   const showProfile = !loading && isAuthenticated && username;
 
   return (
-    <header 
-      className={`sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800 transition-transform duration-300 ease-in-out ${
-        headerVisible ? 'translate-y-0' : '-translate-y-full'
-      }`}
-    >
+    <header className="sticky top-0 z-50 bg-neutral-900 border-b border-neutral-800">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
