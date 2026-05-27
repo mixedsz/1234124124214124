@@ -286,6 +286,7 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
   const [pendingAutoAdd, setPendingAutoAdd] = useState(false);
   const [fiveMToast, setFiveMToast] = useState(false);
   const [fiveMToastUsername, setFiveMToastUsername] = useState<string | null>(null);
+  const [showDiscordModal, setShowDiscordModal] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const handleAddToCartRef = useRef<() => void>(() => {});
   const { addItem, isAuthenticated, username, basket, refreshBasket } = useBasket();
@@ -843,13 +844,7 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
                   </div>
                 ) : (
                   <button
-                    onClick={() => {
-                      if (pkg) localStorage.setItem('tebex_pending_add_pkg', String(pkg.id));
-                      const url = basket
-                        ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${window.location.origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${encodeURIComponent(window.location.pathname)}`)}`
-                        : '#';
-                      window.location.href = url;
-                    }}
+                    onClick={() => setShowDiscordModal(true)}
                     className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl bg-[#5865F2]/10 hover:bg-[#5865F2]/20 border border-[#5865F2]/30 hover:border-[#5865F2]/50 text-[#7289da] hover:text-[#8da0e1] font-semibold transition"
                   >
                     <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 71 55" fill="currentColor">
@@ -1216,13 +1211,108 @@ export default function ProductClientPage({ params }: { params: Promise<{ id: st
 
       {/* FiveM connected toast */}
       {fiveMToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-red-600/20 border border-red-500/40 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
-          <svg width="20" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-red-400 flex-shrink-0" style={{ fill: 'currentColor' }}>
-            <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
-          </svg>
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
+          <img src="/fivem-logo.png" alt="FiveM" className="w-6 h-6 object-contain flex-shrink-0" />
           <div>
             <p className="text-white font-semibold text-sm">FiveM Connected!</p>
-            <p className="text-red-300 text-xs mt-0.5">{fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}</p>
+            <p className="text-orange-300 text-xs mt-0.5">{fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Discord Integration Modal */}
+      {showDiscordModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowDiscordModal(false); }}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden border border-neutral-800">
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#5865F2]/15 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                  </svg>
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white leading-tight">Discord Integration</h2>
+                  <p className="text-neutral-400 text-xs">Login with Discord so that we can identify you</p>
+                </div>
+              </div>
+              <button onClick={() => setShowDiscordModal(false)} className="text-neutral-400 hover:text-white transition p-1">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="px-6 pb-6">
+              {/* Discord status card */}
+              <div className="bg-neutral-800/50 border border-neutral-700/50 rounded-xl p-4 mb-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-8 h-8 rounded-full bg-neutral-700 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+                      <line x1="12" y1="2" x2="12" y2="12" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white font-medium text-sm">Discord Not Connected</p>
+                  </div>
+                </div>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Link your Discord account to automatically receive server roles and exclusive perks with your purchase.
+                </p>
+              </div>
+
+              {/* Connect button */}
+              <button
+                onClick={() => {
+                  if (pkg) localStorage.setItem('tebex_pending_add_pkg', String(pkg.id));
+                  const url = basket
+                    ? `https://ident.tebex.io/discord/?basketIdent=${basket.ident}&return=${encodeURIComponent(`${window.location.origin}/api/discord/ident-callback?basketIdent=${basket.ident}&returnTo=${encodeURIComponent(window.location.pathname)}`)}`
+                    : '#';
+                  window.location.href = url;
+                }}
+                className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-semibold transition mb-3"
+              >
+                <svg className="w-5 h-5 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+                </svg>
+                Connect Discord Account
+              </button>
+
+              {/* Skip info */}
+              <div className="flex items-center justify-center gap-2 text-neutral-500 text-xs">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4" />
+                  <path d="M12 8h.01" />
+                </svg>
+                <span>Click Continue if you want to skip Discord connection</span>
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => setShowDiscordModal(false)}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-medium transition text-sm"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDiscordModal(false);
+                    // Allow user to continue without Discord - they can add to cart anyway
+                    // The handleAddToCart will show an error if Discord is truly required
+                  }}
+                  className="flex-1 py-2.5 px-4 rounded-xl bg-green-600 hover:bg-green-500 text-white font-medium transition text-sm"
+                >
+                  Continue
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
