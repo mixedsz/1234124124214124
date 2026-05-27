@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     apple: '/fd-favicon.png',
   },
   // Open Graph — used by Discord, Facebook, LinkedIn, Slack, iMessage
-  // Note: No image specified to avoid large preview - Discord will show text-only embed
+  // Using square logo for small thumbnail in Discord
   openGraph: {
     type: 'website',
     locale: 'en_US',
@@ -68,6 +68,7 @@ export const metadata: Metadata = {
     siteName: 'Flake Development',
     title: META_TITLE,
     description: OG_DESC,
+    images: [{ url: 'https://flakedev.com/fd-square.png', width: 256, height: 256, alt: 'Flake Development' }],
   },
   // Twitter / X card - 'summary' gives small thumbnail on right in Discord
   twitter: {
@@ -76,6 +77,7 @@ export const metadata: Metadata = {
     creator: '@flakedevelopment',
     title: META_TITLE,
     description: OG_DESC,
+    images: [{ url: 'https://flakedev.com/fd-square.png', alt: 'Flake Development' }],
   },
 }
 
