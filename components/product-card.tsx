@@ -92,7 +92,7 @@ export function ProductCard({ package_, priority = false }: ProductCardProps) {
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
             <span className="text-4xl font-bold text-blue-500/50">{package_.name.charAt(0)}</span>
           </div>
-        )}}
+        )}
 
         {/* Sale Badge */}
         {hasDiscount && (
