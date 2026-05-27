@@ -18,7 +18,7 @@ export async function generateMetadata(
     title: pkg.name,
     description: plainDescription,
     openGraph: {
-      type: 'product',
+      type: 'website',
       siteName: 'Flake Development',
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
       description: plainDescription,
@@ -32,7 +32,7 @@ export async function generateMetadata(
       ] : undefined,
     },
     twitter: {
-      card: 'summary',
+      card: 'summary_large_image',
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
       description: plainDescription,
       images: pkg.image ? [pkg.image] : undefined,
