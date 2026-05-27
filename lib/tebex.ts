@@ -137,7 +137,7 @@ export async function getCategories(): Promise<TebexCategory[]> {
 
   try {
     const response = await fetch(`${TEBEX_API_BASE}/accounts/${PUBLIC_TOKEN}/categories?includePackages=1`, {
-      cache: 'no-store',
+      next: { revalidate: 30 },
     });
 
     if (!response.ok) {
