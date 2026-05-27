@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
 const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
 const META_DESC = 'Premium FiveM scripts trusted by Grizzley World, District 10, and hundreds of top servers. QBCore, Qbox & ESX compatible. Body bags, addiction systems, loading screens, black markets & more — instant Cfx.re delivery, free updates forever.';
 const OG_DESC = 'The most popular premium scripts for your FiveM server by Flake Development. Compatible with QBCore, Qbox & ESX.';
-const META_IMAGE = '/fd-logo-clean.svg';
+const META_IMAGE = 'https://flakedev.com/fd.png';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://flakedev.com'),
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     siteName: 'Flake Development',
     title: META_TITLE,
     description: OG_DESC,
-    images: [{ url: META_IMAGE, width: 512, height: 512, alt: 'Flake Development logo' }],
+    images: [{ url: META_IMAGE, width: 1340, height: 893, alt: 'Flake Development logo' }],
   },
   // Twitter / X card
   twitter: {
@@ -123,7 +123,7 @@ export default function RootLayout({
               '@type': 'Organization',
               name: 'Flake Development',
               url: 'https://flakedev.com',
-              logo: 'https://flakedev.com/fd-logo-clean.svg',
+              logo: 'https://flakedev.com/fd.png',
               description: 'Premium FiveM scripts compatible with QBCore, Qbox & ESX. Instant delivery via Cfx.re escrow.',
               sameAs: ['https://www.youtube.com/@flakedevelopment', 'https://discord.gg/flakedev'],
             },
