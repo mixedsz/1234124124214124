@@ -16,6 +16,7 @@ function StoreContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [fiveMToast, setFiveMToast] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const { refreshBasket, username } = useBasket();
   const searchParams = useSearchParams();
 
@@ -32,6 +33,8 @@ function StoreContent() {
       setFiveMToast(true);
       // Refresh basket to get authenticated state
       refreshBasket();
+      // Force re-render of product cards to reload images
+      setRefreshKey(prev => prev + 1);
       // Auto-hide message after 5 seconds
       setTimeout(() => setFiveMToast(false), 5000);
     }
@@ -150,9 +153,9 @@ function StoreContent() {
           ))}
         </div>
       ) : visiblePackages.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visiblePackages.map((pkg) => (
-            <ProductCard key={pkg.id} package_={pkg} />
+        <div key={refreshKey} className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {visiblePackages.map((pkg, index) => (
+            <ProductCard key={pkg.id} package_={pkg} priority={index < 8} />
           ))}
         </div>
       ) : (

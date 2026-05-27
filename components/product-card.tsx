@@ -6,9 +6,10 @@ import { useCurrency } from '@/contexts/currency-context';
 
 interface ProductCardProps {
   package_: TebexPackage;
+  priority?: boolean; // If true, load image eagerly
 }
 
-export function ProductCard({ package_ }: ProductCardProps) {
+export function ProductCard({ package_, priority = false }: ProductCardProps) {
   const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
@@ -26,8 +27,9 @@ export function ProductCard({ package_ }: ProductCardProps) {
           <img
             src={package_.image}
             alt={package_.name}
-            loading="lazy"
+            loading={priority ? 'eager' : 'lazy'}
             decoding="async"
+            fetchPriority={priority ? 'high' : 'auto'}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
