@@ -3,67 +3,19 @@
 import Link from 'next/link';
 import { TebexPackage } from '@/lib/tebex';
 import { useCurrency } from '@/contexts/currency-context';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface ProductCardProps {
   package_: TebexPackage;
-  priority?: boolean;
 }
 
-export function ProductCard({ package_, priority = false }: ProductCardProps) {
+export function ProductCard({ package_ }: ProductCardProps) {
   const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
   const discountedPrice = hasDiscount ? Math.max(0, package_.base_price - package_.discount) : package_.total_price;
   
-  const [imageState, setImageState] = useState<'loading' | 'loaded' | 'error'>('loading');
-  const [retryCount, setRetryCount] = useState(0);
-  const [imageSrc, setImageSrc] = useState<string | null>(null);
-
-  // Preload image using Image constructor - more reliable than relying on <img> lazy loading
-  useEffect(() => {
-    if (!package_.image) {
-      setImageState('error');
-      return;
-    }
-
-    setImageState('loading');
-    
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    
-    const loadImage = () => {
-      // Add cache buster on retry to force fresh load
-      const src = retryCount > 0 
-        ? `${package_.image}${package_.image.includes('?') ? '&' : '?'}v=${Date.now()}`
-        : package_.image;
-      
-      img.src = src;
-    };
-
-    img.onload = () => {
-      setImageSrc(img.src);
-      setImageState('loaded');
-    };
-
-    img.onerror = () => {
-      if (retryCount < 2) {
-        // Retry up to 2 times with delay
-        setTimeout(() => {
-          setRetryCount(prev => prev + 1);
-        }, 500 * (retryCount + 1));
-      } else {
-        setImageState('error');
-      }
-    };
-
-    loadImage();
-
-    return () => {
-      img.onload = null;
-      img.onerror = null;
-    };
-  }, [package_.image, retryCount]);
+  const [imageError, setImageError] = useState(false);
 
   return (
     <Link
@@ -72,19 +24,16 @@ export function ProductCard({ package_, priority = false }: ProductCardProps) {
     >
       {/* Image */}
       <div className="relative aspect-video bg-neutral-800 overflow-hidden">
-        {imageState === 'loading' && (
-          <div className="absolute inset-0 bg-neutral-800 animate-pulse" />
-        )}
-        
-        {imageState === 'loaded' && imageSrc && (
+        {package_.image && !imageError ? (
           <img
-            src={imageSrc}
+            src={package_.image}
             alt={package_.name}
+            loading="eager"
+            decoding="async"
+            onError={() => setImageError(true)}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
-        )}
-        
-        {imageState === 'error' && (
+        ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500/20 to-blue-600/10">
             <span className="text-4xl font-bold text-blue-500/50">{package_.name.charAt(0)}</span>
           </div>

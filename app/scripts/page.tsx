@@ -40,7 +40,7 @@ function StoreContent() {
       refreshBasket();
       // Force re-fetch of categories to ensure fresh data
       setLoading(true);
-      fetch('/api/categories')
+      fetch('/api/categories', { cache: 'no-store' })
         .then(r => r.json())
         .then(cats => {
           const filteredCats = cats.filter((cat: TebexCategory) => 
@@ -60,7 +60,7 @@ function StoreContent() {
   useEffect(() => {
     async function load() {
       try {
-        const cats = await fetch('/api/categories').then(r => r.json());
+        const cats = await fetch('/api/categories', { cache: 'no-store' }).then(r => r.json());
         // Filter out subscription categories - they should only be on subscription page
         const filteredCats = cats.filter((cat: TebexCategory) => 
           !cat.name.toLowerCase().includes('subscription') && 
