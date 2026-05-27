@@ -8,6 +8,7 @@ import { Search } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useBasket } from '@/contexts/basket-context';
 import { useSearchParams } from 'next/navigation';
+import Head from 'next/head';
 
 function StoreContent() {
   const [categories, setCategories] = useState<TebexCategory[]>([]);
@@ -87,6 +88,22 @@ function StoreContent() {
       pkg.description?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   })();
+
+  // Preload first 12 images for faster initial render
+  const preloadImages = visiblePackages.slice(0, 12).map(pkg => pkg.image).filter(Boolean);
+
+  // Preload images via useEffect for immediate loading
+  useEffect(() => {
+    preloadImages.forEach(src => {
+      if (src) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = src;
+        document.head.appendChild(link);
+      }
+    });
+  }, [categories, activeCategory, searchQuery]);
 
   return (
     <>
@@ -171,8 +188,8 @@ function StoreContent() {
         </div>
       ) : visiblePackages.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visiblePackages.map((pkg) => (
-            <ProductCard key={`${pkg.id}-${refreshKey}`} package_={pkg} />
+          {visiblePackages.map((pkg, index) => (
+            <ProductCard key={`${pkg.id}-${refreshKey}`} package_={pkg} priority={index < 12} />
           ))}
         </div>
       ) : (

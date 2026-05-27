@@ -7,9 +7,10 @@ import { useState } from 'react';
 
 interface ProductCardProps {
   package_: TebexPackage;
+  priority?: boolean;
 }
 
-export function ProductCard({ package_ }: ProductCardProps) {
+export function ProductCard({ package_, priority = false }: ProductCardProps) {
   const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
@@ -29,7 +30,8 @@ export function ProductCard({ package_ }: ProductCardProps) {
             src={package_.image}
             alt={package_.name}
             loading="eager"
-            decoding="async"
+            decoding={priority ? "sync" : "async"}
+            fetchPriority={priority ? "high" : "auto"}
             onError={() => setImageError(true)}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
