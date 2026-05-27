@@ -4,7 +4,7 @@ import { Header } from '@/components/header';
 import { getCategories, TebexCategory, TebexPackage } from '@/lib/tebex';
 import { ProductCard } from '@/components/product-card';
 import { Footer } from '@/components/footer';
-import { Search, CheckCircle } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useBasket } from '@/contexts/basket-context';
 import { useSearchParams } from 'next/navigation';
@@ -15,22 +15,24 @@ function StoreContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loginSuccess, setLoginSuccess] = useState(false);
-  const { refreshBasket } = useBasket();
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const { refreshBasket, username } = useBasket();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     document.title = 'Scripts | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
   }, []);
 
-  // Check for login success
+  // Check for login success - show FiveM toast
   useEffect(() => {
     if (searchParams.get('success') === 'true') {
-      setLoginSuccess(true);
+      setFiveMToast(true);
       // Refresh basket to get authenticated state
       refreshBasket();
       // Auto-hide message after 5 seconds
-      setTimeout(() => setLoginSuccess(false), 5000);
+      setTimeout(() => setFiveMToast(false), 5000);
+      // Clean up URL
+      window.history.replaceState({}, '', '/scripts');
     }
   }, [searchParams, refreshBasket]);
 
@@ -67,11 +69,19 @@ function StoreContent() {
 
   return (
     <>
-      {/* Login Success Message */}
-      {loginSuccess && (
-        <div className="mb-6 bg-green-900/20 border border-green-800 rounded-xl p-4 flex items-center gap-3 text-green-300">
-          <CheckCircle className="w-5 h-5 flex-shrink-0" />
-          <span className="text-sm">Successfully logged in with FiveM! You can now add items to your cart.</span>
+      {/* FiveM Connected Toast */}
+      {fiveMToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-fade-in">
+          <img 
+            src="/fivem-logo.png" 
+            alt="FiveM" 
+            className="w-7 h-7 object-contain flex-shrink-0"
+            style={{ mixBlendMode: 'lighten' }}
+          />
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-orange-300 text-xs mt-0.5">{username ? `Logged in as ${username}` : 'Authentication successful'}</p>
+          </div>
         </div>
       )}
 
