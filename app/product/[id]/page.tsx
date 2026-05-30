@@ -15,33 +15,30 @@ export async function generateMetadata(
   const pkg = await getCachedPackage(Number(id));
   if (!pkg) return { title: 'Product' };
 
-  // Strip HTML tags from description for meta
-  const plainDescription = pkg.description 
-    ? pkg.description.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim().slice(0, 160)
-    : 'Premium FiveM script for QBCore, Qbox & ESX.';
+  const SITE_DESC = 'Premium FiveM scripts trusted by Grizzley World, District 10, and hundreds of top servers. QBCore, Qbox & ESX compatible. Instant Cfx.re delivery, free updates forever.';
 
   return {
     title: pkg.name,
-    description: plainDescription,
+    description: SITE_DESC,
     openGraph: {
       type: 'website',
       siteName: 'Flake Development',
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
-      description: plainDescription,
+      description: SITE_DESC,
       images: pkg.image ? [
         {
           url: pkg.image,
-          width: 512,
-          height: 512,
+          width: 256,
+          height: 256,
           alt: pkg.name,
         }
-      ] : undefined,
+      ] : [{ url: 'https://flakedev.com/fd-square.png', width: 256, height: 256, alt: 'Flake Development' }],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: 'summary',
       title: `${pkg.name} | Flake Development | QBCore, Qbox & ESX FiveM Scripts`,
-      description: plainDescription,
-      images: pkg.image ? [pkg.image] : undefined,
+      description: SITE_DESC,
+      images: pkg.image ? [pkg.image] : ['https://flakedev.com/fd-square.png'],
     },
   };
 }
