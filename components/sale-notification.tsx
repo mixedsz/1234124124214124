@@ -39,7 +39,9 @@ export function SaleNotification() {
 
   useEffect(() => {
     if (products.length <= 1) return;
-    const id = setInterval(() => setIndex(i => (i + 1) % products.length), 7000);
+    const id = setInterval(() => {
+      if (!document.hidden) setIndex(i => (i + 1) % products.length);
+    }, 7000);
     return () => clearInterval(id);
   }, [products.length]);
 

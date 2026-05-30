@@ -94,12 +94,14 @@ function StoreContent() {
 
   // Preload images via useEffect for immediate loading
   useEffect(() => {
+    document.querySelectorAll('link[rel="preload"][as="image"][data-scripts-preload]').forEach(el => el.remove());
     preloadImages.forEach(src => {
       if (src) {
         const link = document.createElement('link');
         link.rel = 'preload';
         link.as = 'image';
         link.href = src;
+        link.dataset.scriptsPreload = '1';
         document.head.appendChild(link);
       }
     });
