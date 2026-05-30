@@ -2,6 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { Users } from 'lucide-react';
+import { getServerIds } from '@/lib/server-list';
+
+interface CfxData {
+  hostname?: string;
+  projectName?: string;
+  clients?: number;
+  sv_maxclients?: number;
+  iconVersion?: number;
+}
 
 interface Server {
   id: string;
@@ -11,8 +20,31 @@ interface Server {
   icon: string | null;
 }
 
+const DEFAULT_IDS = ['l7o9o4', 'ql64g9', 'javxzp', 'yjbqg5', '7b9kqrb'];
+
+function stripColors(s: string) {
+  return s.replace(/\^[0-9]/g, '').replace(/[^\x20-\x7E]/g, '').trim();
+}
+
 function cleanName(name: string): string {
   return name.split('|')[0].trim() || name;
+}
+
+async function fetchServer(id: string): Promise<Server | null> {
+  try {
+    const r = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${id}`);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const d: CfxData = j?.Data ?? {};
+    const iv = d.iconVersion;
+    return {
+      id,
+      name: stripColors(d.projectName || d.hostname || 'Unknown'),
+      players: d.clients ?? 0,
+      maxPlayers: d.sv_maxclients ?? 0,
+      icon: iv != null ? `https://frontend.cfx-services.net/api/servers/icon/${id}/${iv}.png` : null,
+    };
+  } catch { return null; }
 }
 
 export function FeaturedServers() {
@@ -20,9 +52,11 @@ export function FeaturedServers() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/fivem-servers')
-      .then(r => r.json())
-      .then(data => { if (Array.isArray(data) && data.length > 0) setServers(data); })
+    Promise.all(DEFAULT_IDS.map(fetchServer))
+      .then(results => {
+        const live = results.filter((s): s is Server => s !== null);
+        setServers(live);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
