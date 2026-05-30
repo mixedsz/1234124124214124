@@ -72,14 +72,14 @@ export function Header() {
 
   // Fetch Discord member count
   useEffect(() => {
-    fetch(`https://discord.com/api/v9/invites/flakedev?with_counts=true`)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    fetch(`https://discord.com/api/v9/invites/flakedev?with_counts=true`, { signal: controller.signal })
       .then(r => r.json())
-      .then(data => {
-        if (data.approximate_member_count) {
-          setDiscordMembers(data.approximate_member_count);
-        }
-      })
-      .catch(() => {});
+      .then(data => { if (data.approximate_member_count) setDiscordMembers(data.approximate_member_count); })
+      .catch(() => {})
+      .finally(() => clearTimeout(timeout));
+    return () => { controller.abort(); clearTimeout(timeout); };
   }, []);
 
   // Avatar with localStorage caching — no flicker on navigation

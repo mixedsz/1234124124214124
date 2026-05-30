@@ -30,36 +30,39 @@ export function RecentPurchases() {
   const [loaded, setLoaded] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  const loadAvatars = useCallback((list: { username: string; packageName: string }[]) => {
-    list.forEach(({ username }) => {
-      fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`)
+  const loadAvatars = useCallback(async (list: { username: string; packageName: string }[]) => {
+    const CONCURRENCY = 3;
+    let i = 0;
+    async function next() {
+      if (i >= list.length) return;
+      const { username } = list[i++];
+      await fetch(`/api/fivem-avatar?username=${encodeURIComponent(username)}`)
         .then(r => r.json())
         .then(({ url }) => {
-          if (url) {
-            setBuyers(prev => prev.map(b => b.username === username ? { ...b, avatarUrl: url } : b));
-          }
+          if (url) setBuyers(prev => prev.map(b => b.username === username ? { ...b, avatarUrl: url } : b));
         })
-        .catch(() => {});
-    });
+        .catch(() => {})
+        .finally(() => next());
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, list.length) }, next));
   }, []);
 
   const load = useCallback(async () => {
     try {
       const list: { username: string; packageName: string }[] = await fetch('/api/recent-purchases').then(r => r.json());
-      // Show names immediately with colored initials
       setBuyers(list.map(({ username, packageName }) => ({ username, packageName, avatarUrl: null })));
       setLoaded(true);
-      // Load avatars progressively in background
       loadAvatars(list);
     } catch {
-      /* silent */
       setLoaded(true);
     }
   }, [loadAvatars]);
 
   useEffect(() => {
     load();
-    const id = setInterval(load, 60_000);
+    const id = setInterval(() => {
+      if (!document.hidden) load();
+    }, 120_000);
     return () => clearInterval(id);
   }, [load]);
 

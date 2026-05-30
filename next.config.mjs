@@ -4,7 +4,14 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.tebex.io' },
+      { protocol: 'https', hostname: '**.cfx-services.net' },
+      { protocol: 'https', hostname: 'forum.cfx.re' },
+      { protocol: 'https', hostname: 'cdn.discordapp.com' },
+      { protocol: 'https', hostname: 'dunb17ur4ymx4.cloudfront.net' },
+    ],
   },
   async redirects() {
     return [

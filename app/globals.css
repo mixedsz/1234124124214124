@@ -138,12 +138,16 @@
   animation: marquee 250s linear infinite;
   display: flex;
   width: max-content;
+  will-change: transform;
+  contain: layout style;
 }
 
 .animate-marquee2 {
   animation: marquee2 250s linear infinite;
   display: flex;
   width: max-content;
+  will-change: transform;
+  contain: layout style;
 }
 
 .reviews-wrapper {
@@ -210,13 +214,13 @@ span.goog-text-highlight {
   height: 8px;
   border-radius: 50%;
   background: #22c55e;
-  box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
   animation: status-pulse 2s ease-in-out infinite;
   flex-shrink: 0;
+  will-change: opacity;
 }
 @keyframes status-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
-  50% { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 /* Prose styling for description content */

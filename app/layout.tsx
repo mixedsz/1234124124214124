@@ -4,7 +4,7 @@ import { Providers } from '@/components/providers'
 import Script from 'next/script'
 import './globals.css'
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-sans' });
+const inter = Inter({ subsets: ["latin"], variable: '--font-sans', display: 'swap' });
 
 const META_TITLE = 'Flake Development | QBCore, Qbox & ESX FiveM Scripts';
 const META_DESC = 'Premium FiveM scripts trusted by Grizzley World, District 10, and hundreds of top servers. QBCore, Qbox & ESX compatible. Body bags, addiction systems, loading screens, black markets & more — instant Cfx.re delivery, free updates forever.';
@@ -97,7 +97,6 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark bg-black">
       <head>
-        <script src="https://js.tebex.io/v/1.js" defer></script>
         <script dangerouslySetInnerHTML={{ __html: `
           (function() {
             var titleEl = document.querySelector('title');
@@ -287,6 +286,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <Script src="https://js.tebex.io/v/1.js" strategy="afterInteractive" />
         <Script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" strategy="afterInteractive" />
       </body>
     </html>
