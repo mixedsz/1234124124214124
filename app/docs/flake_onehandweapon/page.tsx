@@ -106,16 +106,24 @@ export default function FlakeOneHandWeaponDocsPage() {
                 <span key={b.label} className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${b.color}`}>{b.label}</span>
               ))}
             </div>
-            <div className="mt-5">
-              <Link
-                href="/product/7451961"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-                Purchase Script
-              </Link>
-            </div>
           </div>
+
+          {/* Purchase link card */}
+          <Link
+            href="/product/7451961"
+            className="flex items-center gap-3 mb-10 px-4 py-3 rounded-xl border border-neutral-700/60 bg-neutral-800/40 hover:border-blue-500/50 hover:bg-neutral-800/80 transition group"
+          >
+            <span className="flex-shrink-0 w-8 h-8 rounded-lg bg-neutral-700/60 flex items-center justify-center text-neutral-400 group-hover:text-blue-400 transition">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-white text-sm font-medium group-hover:text-blue-400 transition">Purchase Script</div>
+              <div className="text-neutral-500 text-xs mt-0.5">flakedev.com</div>
+            </div>
+            <span className="flex-shrink-0 text-neutral-600 group-hover:text-blue-400 transition">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </span>
+          </Link>
 
           {/* ── Overview ─────────────────────────────────────────────── */}
           <section id="overview">
