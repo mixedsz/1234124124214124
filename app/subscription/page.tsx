@@ -1,7 +1,8 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { TebexCategory, TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexCategory, TebexPackage } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 import { Footer } from '@/components/footer';
 import { Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
@@ -19,9 +20,14 @@ export default function SubscriptionPage() {
   const [scripts, setScripts] = useState<TebexPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
+  const [groupIndex, setGroupIndex] = useState(0);
   const { itemCount } = useBasket();
+  const { formatPrice } = useCurrency();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    document.title = 'Subscriptions | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -42,9 +48,12 @@ export default function SubscriptionPage() {
         const allSubs = subCats.flatMap((cat: TebexCategory) => cat.packages || []);
         setSubscriptions(allSubs);
         
-        // Get ALL scripts for rotating display
-        const allScripts = scriptCats.flatMap((cat: TebexCategory) => cat.packages || []);
-        setScripts(allScripts);
+        // Get ALL scripts for rotating display, deduplicated by id, shuffled
+        const seen = new Set<number>();
+        const allScripts = scriptCats
+          .flatMap((cat: TebexCategory) => cat.packages || [])
+          .filter(pkg => { if (seen.has(pkg.id)) return false; seen.add(pkg.id); return true; });
+        setScripts([...allScripts].sort(() => Math.random() - 0.5));
       } catch (err) {
         console.error('Error loading subscriptions:', err);
         setError('Failed to load subscriptions. Please try again later.');
@@ -55,35 +64,20 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // Rotate through scripts every 3 seconds
+  // Rotate through scripts every 3 seconds in clean non-overlapping groups of 5
   useEffect(() => {
     if (scripts.length <= 5) return;
-    
     intervalRef.current = setInterval(() => {
-      setCurrentScriptIndex((prev) => {
-        const nextIndex = prev + 1;
-        // Reset when we've shown all scripts
-        if (nextIndex >= scripts.length - 4) {
-          return 0;
-        }
-        return nextIndex;
+      setGroupIndex(prev => {
+        const totalGroups = Math.ceil(scripts.length / 5);
+        return (prev + 1) % totalGroups;
       });
     }, 3000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [scripts.length]);
 
-  // Get 5 scripts starting from current index
-  const displayedScripts = scripts.slice(currentScriptIndex, currentScriptIndex + 5);
-  // If we don't have enough scripts from current index, wrap around
-  if (displayedScripts.length < 5 && scripts.length >= 5) {
-    const remaining = 5 - displayedScripts.length;
-    displayedScripts.push(...scripts.slice(0, remaining));
-  }
+  // Slice a clean non-overlapping batch — no modulo wrap within a batch
+  const displayedScripts = scripts.slice(groupIndex * 5, groupIndex * 5 + 5);
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -144,7 +138,7 @@ export default function SubscriptionPage() {
                   {/* Price - DO NOT divide by 100, Tebex returns actual price */}
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-white">
-                      {formatPrice(sub.total_price, sub.currency)}
+                      {formatPrice(sub.total_price)}
                     </span>
                     <p className="text-neutral-400 text-sm mt-2">
                       {sub.name.toLowerCase().includes('month') ? 'per month' : 'per period'}
@@ -204,7 +198,7 @@ export default function SubscriptionPage() {
             <p className="text-neutral-400 text-lg mb-4">No subscriptions available at the moment.</p>
             <p className="text-neutral-500 text-sm">
               Check back soon or{' '}
-              <Link href="/store" className="text-blue-400 hover:text-blue-300">
+              <Link href="/scripts" className="text-blue-400 hover:text-blue-300">
                 browse our scripts
               </Link>
             </p>
@@ -214,6 +208,38 @@ export default function SubscriptionPage() {
         {/* What's Included Section */}
         {scripts.length > 0 && (
           <section className="mt-20">
+            {/* Stats bar */}
+            {(() => {
+              const totalValue = scripts.reduce((sum, s) => sum + s.total_price, 0);
+              const monthlySub = subscriptions.find(s => s.name.toLowerCase().includes('month'));
+              const monthsWorth = monthlySub && monthlySub.total_price > 0 ? Math.floor(totalValue / monthlySub.total_price) : 0;
+              const years = Math.floor(monthsWorth / 12);
+              const months = monthsWorth % 12;
+              const worthLabel = years > 0 && months > 0
+                ? `${years} Year${years !== 1 ? 's' : ''} ${months} Month${months !== 1 ? 's' : ''}`
+                : years > 0
+                ? `${years} Year${years !== 1 ? 's' : ''}`
+                : `${months} Month${months !== 1 ? 's' : ''}`;
+              return (
+                <div className="flex flex-wrap justify-center gap-4 mb-14">
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{scripts.length}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Products Included</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{formatPrice(totalValue)}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Total Value</span>
+                  </div>
+                  {monthsWorth > 0 && (
+                    <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                      <span className="text-3xl font-black text-white mb-1">{worthLabel}</span>
+                      <span className="text-neutral-500 text-sm font-medium">Worth of Subscriptions</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <h2 className="text-4xl font-bold text-white text-center mb-3">{"What's Included"}</h2>
             <p className="text-neutral-500 text-center mb-12">
               Get all of our current scripts, plus new scripts on release day, automatically.

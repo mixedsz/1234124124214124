@@ -4,10 +4,11 @@ import { Header } from '@/components/header';
 import { getCategories, TebexCategory, TebexPackage } from '@/lib/tebex';
 import { ProductCard } from '@/components/product-card';
 import { Footer } from '@/components/footer';
-import { Search, CheckCircle } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useState, useEffect, Suspense } from 'react';
 import { useBasket } from '@/contexts/basket-context';
 import { useSearchParams } from 'next/navigation';
+import Head from 'next/head';
 
 function StoreContent() {
   const [categories, setCategories] = useState<TebexCategory[]>([]);
@@ -15,25 +16,52 @@ function StoreContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [loginSuccess, setLoginSuccess] = useState(false);
-  const { refreshBasket } = useBasket();
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { refreshBasket, username, isAuthenticated } = useBasket();
   const searchParams = useSearchParams();
 
-  // Check for login success
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      setLoginSuccess(true);
+    document.title = 'Scripts | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+  }, []);
+
+  // Force refresh when auth state changes (login/logout)
+  useEffect(() => {
+    setRefreshKey(prev => prev + 1);
+  }, [isAuthenticated]);
+
+  // Check for login success - show FiveM toast
+  useEffect(() => {
+    const hasSuccess = searchParams.get('success') === 'true' || searchParams.has('success');
+    if (hasSuccess) {
+      // Clean up URL immediately
+      window.history.replaceState({}, '', '/scripts');
+      setFiveMToast(true);
       // Refresh basket to get authenticated state
       refreshBasket();
+      // Force re-fetch of categories to ensure fresh data
+      setLoading(true);
+      fetch('/api/categories', { cache: 'no-store' })
+        .then(r => r.json())
+        .then(cats => {
+          const filteredCats = cats.filter((cat: TebexCategory) => 
+            !cat.name.toLowerCase().includes('subscription') && 
+            !cat.name.toLowerCase().includes('recurring')
+          );
+          setCategories(filteredCats);
+          setRefreshKey(prev => prev + 1);
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
       // Auto-hide message after 5 seconds
-      setTimeout(() => setLoginSuccess(false), 5000);
+      setTimeout(() => setFiveMToast(false), 5000);
     }
   }, [searchParams, refreshBasket]);
 
   useEffect(() => {
     async function load() {
       try {
-        const cats = await fetch('/api/categories').then(r => r.json());
+        const cats = await fetch('/api/categories', { cache: 'no-store' }).then(r => r.json());
         // Filter out subscription categories - they should only be on subscription page
         const filteredCats = cats.filter((cat: TebexCategory) => 
           !cat.name.toLowerCase().includes('subscription') && 
@@ -61,13 +89,41 @@ function StoreContent() {
     );
   })();
 
+  // Preload first 12 images for faster initial render
+  const preloadImages = visiblePackages.slice(0, 12).map(pkg => pkg.image).filter(Boolean);
+
+  // Preload images via useEffect for immediate loading
+  useEffect(() => {
+    document.querySelectorAll('link[rel="preload"][as="image"][data-scripts-preload]').forEach(el => el.remove());
+    preloadImages.forEach(src => {
+      if (src) {
+        const link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.href = src;
+        link.dataset.scriptsPreload = '1';
+        document.head.appendChild(link);
+      }
+    });
+  }, [categories, activeCategory, searchQuery]);
+
   return (
     <>
-      {/* Login Success Message */}
-      {loginSuccess && (
-        <div className="mb-6 bg-green-900/20 border border-green-800 rounded-xl p-4 flex items-center gap-3 text-green-300">
-          <CheckCircle className="w-5 h-5 flex-shrink-0" />
-          <span className="text-sm">Successfully logged in with FiveM! You can now add items to your cart.</span>
+      {/* FiveM Connected Toast - top right slide in */}
+      {fiveMToast && (
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-slide-in-right">
+          <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="5,45 9,34 21,22 15,45"/>
+            <polygon points="25,18 33,45 43,45 32,12"/>
+            <polygon points="16.059,14.164 20,3 28,3"/>
+            <polygon points="10.731,29.002 23,17 23,15 11.58,26.667"/>
+            <polygon points="15.142,16.429 13,22 29.724,5.725 28.818,3.178"/>
+            <polygon points="23.932,14.055 24.377,15.626 30.941,9.178 30.385,7.702"/>
+          </svg>
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-orange-300 text-xs mt-0.5">{username ? `Logged in as ${username}` : 'Authentication successful'}</p>
+          </div>
         </div>
       )}
 
@@ -134,8 +190,8 @@ function StoreContent() {
         </div>
       ) : visiblePackages.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visiblePackages.map((pkg) => (
-            <ProductCard key={pkg.id} package_={pkg} />
+          {visiblePackages.map((pkg, index) => (
+            <ProductCard key={`${pkg.id}-${refreshKey}`} package_={pkg} priority={index < 12} />
           ))}
         </div>
       ) : (
@@ -145,6 +201,26 @@ function StoreContent() {
           <p className="text-neutral-500 text-sm mt-2">Try another category or check back later.</p>
         </div>
       )}
+
+      {/* Feature strip */}
+      <div className="mt-12 pt-8 border-t border-neutral-800 grid grid-cols-2 md:grid-cols-4 gap-6">
+        {[
+          { icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5c0 1.1-.1 2.12-.1 3.14A2.86 2.86 0 0013 11c1.6 0 2.5-1.56 2.5-3a3.5 3.5 0 013.5 3.5c0 2.5-2 4.5-4.5 4.5H4zm0 0v4"/></svg>, title: "Instant Delivery", desc: "Available within minutes in your Cfx.re Portal account." },
+          { icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg>, title: "Free Updates Forever", desc: "We promise to never charge you for an update, not even a v2." },
+          { icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, title: "Secure & Performant", desc: "Low resmon usage, secured events & designed for scale." },
+          { icon: <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>, title: "Easy Setup", desc: "Quick and easy setup, with support available 24/7." },
+        ].map((f, i) => (
+          <div key={i} className="flex gap-3 items-start">
+            <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-blue-600/15 flex items-center justify-center text-blue-400">
+              {f.icon}
+            </div>
+            <div>
+              <p className="text-white font-semibold text-sm">{f.title}</p>
+              <p className="text-neutral-500 text-xs mt-0.5 leading-snug">{f.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
     </>
   );
 }

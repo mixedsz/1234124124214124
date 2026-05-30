@@ -1,159 +1,331 @@
-import { Header } from '@/components/header';
-import { Footer } from '@/components/footer';
+import type { Metadata } from 'next';
+import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
+import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
-import { Book, ExternalLink, Search } from 'lucide-react';
+import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check, ArrowRight, Zap } from 'lucide-react';
 
-export default function DocsPage() {
-  const docCategories = [
-    {
-      title: 'Getting Started',
-      items: [
-        { title: 'Installation Guide', href: '#installation' },
-        { title: 'Server Requirements', href: '#requirements' },
-        { title: 'Configuration Basics', href: '#configuration' },
-      ],
-    },
-    {
-      title: 'Scripts',
-      items: [
-        { title: 'Vehicle Scripts', href: '#vehicle' },
-        { title: 'UI/HUD Scripts', href: '#ui' },
-        { title: 'Utility Scripts', href: '#utility' },
-      ],
-    },
-    {
-      title: 'Troubleshooting',
-      items: [
-        { title: 'Common Issues', href: '#common-issues' },
-        { title: 'Error Messages', href: '#errors' },
-        { title: 'Performance Tips', href: '#performance' },
-      ],
-    },
-  ];
+export const metadata: Metadata = { title: 'Documentation' };
 
+function Callout({ type = 'warning', children }: { type?: 'warning' | 'info' | 'tip'; children: React.ReactNode }) {
+  const s = {
+    warning: { border: 'border-yellow-500/40', bg: 'bg-yellow-500/8',  icon: <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" /> },
+    info:    { border: 'border-blue-500/40',   bg: 'bg-blue-500/8',    icon: <BookOpen className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" /> },
+    tip:     { border: 'border-green-500/40',  bg: 'bg-green-500/8',   icon: <Check className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" /> },
+  }[type];
   return (
-    <div className="min-h-screen bg-neutral-900 flex flex-col">
-      <Header />
+    <div className={`flex gap-3 rounded-xl border ${s.border} ${s.bg} px-4 py-3 my-4`}>
+      {s.icon}
+      <div className="text-sm text-neutral-300 leading-relaxed">{children}</div>
+    </div>
+  );
+}
 
-      <main className="flex-1">
+function EmbedCard({ title, url }: { title: string; url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-3 p-4 my-3 rounded-xl border border-neutral-700 hover:border-blue-500/50 bg-neutral-800/40 hover:bg-neutral-800/80 transition group"
+    >
+      <div className="w-8 h-8 rounded-lg bg-neutral-700 flex items-center justify-center flex-shrink-0">
+        <ExternalLink className="w-4 h-4 text-neutral-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-white text-sm font-medium group-hover:text-blue-400 transition">{title}</p>
+        <p className="text-neutral-500 text-xs mt-0.5 truncate">{url}</p>
+      </div>
+      <ExternalLink className="w-4 h-4 text-neutral-600 group-hover:text-blue-400 transition flex-shrink-0" />
+    </a>
+  );
+}
+
+function Inline({ children }: { children: React.ReactNode }) {
+  return (
+    <code className="bg-neutral-800 border border-neutral-700 px-1.5 py-0.5 rounded text-xs text-blue-300 font-mono">
+      {children}
+    </code>
+  );
+}
+
+function StepperStep({ n, emoji, title, children }: { n: number; emoji: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="flex gap-5 relative">
+      <div className="flex flex-col items-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-sm z-10 flex-shrink-0">
+          {n}
+        </div>
+        <div className="w-px flex-1 bg-neutral-800 mt-2 mb-0" />
+      </div>
+      <div className="flex-1 pb-10 min-w-0">
+        <h3 className="text-white font-semibold text-base mb-3">
+          <span className="mr-1.5">{emoji}</span>
+          {title}
+        </h3>
+        <div className="text-neutral-400 text-sm leading-relaxed space-y-2">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const SCRIPTS = [
+  {
+    emoji: '🚬',
+    title: 'Flake Smoking & Vaping',
+    desc: 'Realistic smoking and vaping system with animations, items, and health effects.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/smoking',
+    color: 'from-blue-600/20 to-blue-900/10',
+    border: 'border-blue-700/30',
+  },
+  {
+    emoji: '🛒',
+    title: 'Flake Shops',
+    desc: 'Fully configurable shop system with custom UI, stock management, and job restrictions.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/shops',
+    color: 'from-purple-600/20 to-purple-900/10',
+    border: 'border-purple-700/30',
+  },
+  {
+    emoji: '💊',
+    title: 'Flake Addiction',
+    desc: 'Drug addiction and withdrawal system with configurable substances and effects.',
+    tags: ['QBCore', 'Qbox'],
+    href: '/docs/addiction',
+    color: 'from-rose-600/20 to-rose-900/10',
+    border: 'border-rose-700/30',
+  },
+  {
+    emoji: '⚰️',
+    title: 'Flake Bodybag',
+    desc: 'Bodybag, burial, and character-kill system with CK backup and restoration support.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake_bodybag',
+    color: 'from-neutral-600/20 to-neutral-900/10',
+    border: 'border-neutral-700/30',
+  },
+  {
+    emoji: '🎬',
+    title: 'Flake Loading Screen',
+    desc: 'Modern FiveM loading screen with video playback, audio controls, staff showcase, and social links.',
+    tags: ['FiveM', 'HTML/JS'],
+    href: '/docs/flake_loading',
+    color: 'from-blue-600/20 to-blue-900/10',
+    border: 'border-blue-700/30',
+  },
+  {
+    emoji: '🏥',
+    title: 'Flake Physical Therapy',
+    desc: 'Guided rehabilitation system — players complete exercise steps to recover from injuries and remove crutches.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake_physicaltherapy',
+    color: 'from-green-600/20 to-green-900/10',
+    border: 'border-green-700/30',
+  },
+  {
+    emoji: '🔫',
+    title: 'Flake One-Hand Weapons',
+    desc: 'Toggle a realistic one-handed weapon animation for any weapon via keybind or always-on mode.',
+    tags: ['Standalone', 'FiveM'],
+    href: '/docs/flake_onehandweapon',
+    color: 'from-orange-600/20 to-orange-900/10',
+    border: 'border-orange-700/30',
+  },
+  {
+    emoji: '🕵️',
+    title: 'Flake Blackmarkets',
+    desc: 'Hidden illicit shops with police detection, dynamic stock, NPC vendors, and admin controls.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake_blackmarkets',
+    color: 'from-neutral-600/20 to-neutral-900/10',
+    border: 'border-neutral-700/30',
+  },
+  {
+    emoji: '👕',
+    title: 'Flake Wearables',
+    desc: 'Equippable accessories — chains, watches, bags, vests, decals and t-shirts via ox_lib context menu.',
+    tags: ['QBCore', 'Qbox', 'ESX'],
+    href: '/docs/flake_wearables',
+    color: 'from-purple-600/20 to-purple-900/10',
+    border: 'border-purple-700/30',
+  },
+];
+
+export default function DocsIntroPage() {
+  return (
+    <div className="flex flex-1 w-full">
+      <DocsSidebar />
+
+      <main className="flex-1 min-w-0">
+        <DocsMobileNav />
+
         {/* Hero */}
-        <section className="py-16 border-b border-neutral-800">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
-                <Book className="w-6 h-6 text-blue-500" />
-              </div>
-              <h1 className="text-4xl font-bold text-white">Documentation</h1>
+        <div className="border-b border-neutral-800 bg-gradient-to-b from-neutral-800/30 to-transparent">
+          <div className="max-w-3xl mx-auto px-6 lg:px-10 pt-12 pb-10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-600/20 text-blue-400 text-xs font-semibold uppercase tracking-widest mb-5">
+              <Zap className="w-3 h-3" />
+              Documentation
             </div>
-            <p className="text-xl text-neutral-400 max-w-2xl">
-              Everything you need to install, configure, and customize our scripts.
+            <h1 className="text-4xl font-black text-white mb-4 leading-tight">
+              Everything you need to{' '}
+              <span className="text-blue-400">get started</span>
+            </h1>
+            <p className="text-neutral-400 text-base leading-relaxed mb-8 max-w-xl">
+              Follow the guides below to install and configure your Flake Development scripts. Each script has its own dedicated page with full configuration reference.
             </p>
-
-            {/* Search */}
-            <div className="mt-8 max-w-xl">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-500" />
-                <input
-                  type="text"
-                  placeholder="Search documentation..."
-                  className="w-full pl-12 pr-4 py-3 rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 focus:outline-none focus:border-blue-500 transition"
-                />
-              </div>
+            <div className="flex flex-wrap gap-3 mb-10">
+              <Link
+                href="#getting-started"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold transition"
+              >
+                Quick Start
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <a
+                href="https://discord.gg/flakedev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 text-sm font-semibold transition"
+              >
+                <svg className="w-4 h-4 text-[#5865F2]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 00.0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 00-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189Z"/>
+                </svg>
+                Join Discord
+              </a>
             </div>
-          </div>
-        </section>
 
-        {/* Doc Categories */}
-        <section className="py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid md:grid-cols-3 gap-8">
-              {docCategories.map((category) => (
-                <div key={category.title} className="bg-neutral-900 rounded-2xl border border-neutral-800 p-6">
-                  <h2 className="text-xl font-semibold text-white mb-4">{category.title}</h2>
-                  <ul className="space-y-3">
-                    {category.items.map((item) => (
-                      <li key={item.title}>
-                        <Link
-                          href={item.href}
-                          className="flex items-center justify-between text-neutral-400 hover:text-blue-400 transition"
-                        >
-                          {item.title}
-                          <ExternalLink className="w-4 h-4" />
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+            {/* Stats */}
+            <div className="flex flex-wrap gap-6 border-t border-neutral-800 pt-6">
+              {[
+                { value: '40K+', label: 'Sales' },
+                { value: '3+', label: 'Years' },
+                { value: '400+', label: 'Five-Star Reviews' },
+              ].map(s => (
+                <div key={s.label}>
+                  <p className="text-white font-black text-xl">{s.value}</p>
+                  <p className="text-neutral-600 text-xs mt-0.5">{s.label}</p>
                 </div>
               ))}
             </div>
           </div>
-        </section>
+        </div>
 
-        {/* Quick Start */}
-        <section className="py-16 bg-neutral-900/50" id="installation">
-          <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <h2 className="text-3xl font-bold text-white mb-8">Quick Start Guide</h2>
-            
-            <div className="prose prose-invert max-w-none">
-              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 mb-6">
-                <h3 className="text-xl font-semibold text-white mb-4">1. Download Your Script</h3>
-                <p className="text-neutral-400">
-                  After purchasing, go to your Tebex account and download the script files. You will receive a .zip file containing all necessary resources.
-                </p>
-              </div>
+        <div className="max-w-3xl mx-auto px-6 lg:px-10 py-10">
 
-              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 mb-6">
-                <h3 className="text-xl font-semibold text-white mb-4">2. Extract to Resources</h3>
-                <p className="text-neutral-400 mb-4">
-                  Extract the contents to your server&apos;s resources folder:
-                </p>
-                <pre className="bg-neutral-900 rounded-lg p-4 overflow-x-auto">
-                  <code className="text-green-400">
-                    /resources/[scripts]/your-script-name/
-                  </code>
-                </pre>
-              </div>
-
-              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6 mb-6">
-                <h3 className="text-xl font-semibold text-white mb-4">3. Configure server.cfg</h3>
-                <p className="text-neutral-400 mb-4">
-                  Add the resource to your server.cfg:
-                </p>
-                <pre className="bg-neutral-900 rounded-lg p-4 overflow-x-auto">
-                  <code className="text-green-400">
-                    ensure your-script-name
-                  </code>
-                </pre>
-              </div>
-
-              <div className="bg-neutral-900 rounded-xl border border-neutral-800 p-6">
-                <h3 className="text-xl font-semibold text-white mb-4">4. Configure the Script</h3>
-                <p className="text-neutral-400">
-                  Open the config.lua file in the script folder and adjust settings to your preferences. Each option is documented with comments explaining its purpose.
-                </p>
-              </div>
-            </div>
+          {/* Script cards */}
+          <h2 className="text-xs text-neutral-500 uppercase tracking-widest font-bold mb-4">Browse Scripts</h2>
+          <div className="grid sm:grid-cols-3 gap-4 mb-12">
+            {SCRIPTS.map(s => (
+              <Link
+                key={s.href}
+                href={s.href}
+                className={`group flex flex-col p-4 rounded-xl bg-gradient-to-br ${s.color} border ${s.border} hover:border-blue-500/50 transition`}
+              >
+                <span className="text-2xl mb-3">{s.emoji}</span>
+                <p className="text-white font-semibold text-sm mb-1.5 group-hover:text-blue-400 transition leading-tight">{s.title}</p>
+                <p className="text-neutral-500 text-xs leading-relaxed mb-3 flex-1">{s.desc}</p>
+                <div className="flex flex-wrap gap-1">
+                  {s.tags.map(tag => (
+                    <span key={tag} className="px-1.5 py-0.5 rounded bg-neutral-800/80 text-neutral-400 text-[10px] font-medium border border-neutral-700/60">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </Link>
+            ))}
           </div>
-        </section>
 
-        {/* Need Help */}
-        <section className="py-16">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Need More Help?</h2>
-            <p className="text-neutral-400 mb-6">
-              Our support team is ready to assist you with any questions.
+          {/* Getting Started stepper */}
+          <div id="getting-started">
+            <h2 className="text-xs text-neutral-500 uppercase tracking-widest font-bold mb-6">Getting Started</h2>
+
+            <StepperStep n={1} emoji="⚠️" title="Check your server artifacts">
+              <p>
+                Double check you are not using a broken, out of date or incompatible artifact.
+                At an absolute minimum, our scripts require artifact <strong className="text-white font-semibold">7290</strong>, but we strongly recommend using the latest recommended artifact.
+              </p>
+              <EmbedCard
+                title="FiveM Server Artifacts"
+                url="https://runtime.fivem.net/artifacts/fivem/build_server_windows/master/"
+              />
+            </StepperStep>
+
+            <StepperStep n={2} emoji="⬇️" title="Downloading your script">
+              <p>
+                Head over to the <strong className="text-white font-semibold">Cfx.re Portal</strong>, log in, then go to the{' '}
+                <strong className="text-white font-semibold">Assets</strong> tab →{' '}
+                <strong className="text-white font-semibold">Granted Assets</strong>.
+              </p>
+              <p>
+                Search for <Inline>flake_</Inline> to filter our scripts. After purchase, allow up to{' '}
+                <strong className="text-white font-semibold">5 minutes</strong> for the asset to appear.
+              </p>
+              <EmbedCard
+                title="Cfx.re Portal — Granted Assets"
+                url="https://portal.cfx.re/assets/granted-assets"
+              />
+            </StepperStep>
+
+            <StepperStep n={3} emoji="📂" title="Extracting the zip">
+              <p>
+                Extract the <Inline>.pack.zip</Inline> you downloaded. It contains a folder ending in <Inline>-bundle</Inline> such as{' '}
+                <Inline>flake_drugselling-bundle</Inline>.
+              </p>
+              <Callout type="warning">
+                Do <strong>NOT</strong> drag the bundle folder directly into your server — open it first. The folders <em>inside</em> are the resources that belong in your server&apos;s resources folder.
+              </Callout>
+            </StepperStep>
+
+            <StepperStep n={4} emoji="🔄" title="Restart your server">
+              <p>
+                Fully restart your FiveM server. Starting a script via console or txAdmin while the server is live will likely cause a{' '}
+                <strong className="text-white font-semibold">Keymaster escrow error</strong>.
+              </p>
+            </StepperStep>
+
+            <StepperStep n={5} emoji="☑️" title="Done!">
+              <p>
+                Script files are on your server — head to the specific script page in the sidebar for installation instructions, exports, and troubleshooting. Have fun! 🎉
+              </p>
+            </StepperStep>
+          </div>
+
+          {/* Discord CTA */}
+          <div className="mt-2 pt-8 border-t border-neutral-800">
+            <p className="text-neutral-500 text-sm">
+              Need help?{' '}
+              <a
+                href="https://discord.gg/flakedev"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:text-blue-300 underline transition"
+              >
+                Join our Discord
+              </a>
             </p>
+          </div>
+
+          {/* Footer nav */}
+          <div className="flex items-center justify-end mt-10">
             <Link
-              href="/support"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold transition"
+              href="/docs/escrow-errors"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-neutral-300 hover:text-white text-sm font-medium transition"
             >
-              Contact Support
+              Next: FiveM Escrow Errors
+              <ChevronRight className="w-4 h-4" />
             </Link>
           </div>
-        </section>
+        </div>
       </main>
 
-      <Footer />
+      {/* Right TOC sidebar */}
+      <DocsOnThisPage items={[
+        { label: 'Browse Scripts', href: '#browse' },
+        { label: 'Getting Started', href: '#getting-started' },
+      ]} />
     </div>
   );
 }

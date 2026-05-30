@@ -1,26 +1,38 @@
+'use client';
+
 import Link from 'next/link';
-import { TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexPackage } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
+import { useState } from 'react';
 
 interface ProductCardProps {
   package_: TebexPackage;
+  priority?: boolean;
 }
 
-export function ProductCard({ package_ }: ProductCardProps) {
+export function ProductCard({ package_, priority = false }: ProductCardProps) {
+  const { formatPrice } = useCurrency();
   const hasDiscount = package_.discount > 0;
   const originalPrice = package_.base_price;
-  const discountedPrice = package_.total_price;
+  const discountedPrice = hasDiscount ? Math.max(0, package_.base_price - package_.discount) : package_.total_price;
+  
+  const [imageError, setImageError] = useState(false);
 
   return (
     <Link
       href={`/product/${package_.id}`}
       className="group block bg-neutral-900 rounded-xl overflow-hidden border border-neutral-800 hover:border-blue-500/50 transition-all duration-300"
     >
-      {/* Image - use object-contain to show full image */}
+      {/* Image */}
       <div className="relative aspect-video bg-neutral-800 overflow-hidden">
-        {package_.image ? (
+        {package_.image && !imageError ? (
           <img
             src={package_.image}
             alt={package_.name}
+            loading="eager"
+            decoding={priority ? "sync" : "async"}
+            fetchPriority={priority ? "high" : "auto"}
+            onError={() => setImageError(true)}
             className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
@@ -31,7 +43,7 @@ export function ProductCard({ package_ }: ProductCardProps) {
 
         {/* Sale Badge */}
         {hasDiscount && (
-          <div className="absolute top-3 right-3 px-2 py-1 bg-green-500 text-white text-xs font-bold rounded">
+          <div className="absolute top-3 right-3 px-2.5 py-1 bg-blue-600 text-white text-xs font-bold rounded-md shadow shadow-blue-500/40">
             SALE
           </div>
         )}
@@ -44,9 +56,9 @@ export function ProductCard({ package_ }: ProductCardProps) {
         )}
       </div>
 
-      {/* Content - badges above title */}
+      {/* Content */}
       <div className="p-4">
-        {/* Framework Tags - light variant style like Mantine */}
+        {/* Framework Tags */}
         <div className="flex gap-1.5 mb-2">
           <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-500/15 text-red-400">
             QBCore
@@ -75,13 +87,13 @@ export function ProductCard({ package_ }: ProductCardProps) {
             </>
           ) : (
             <span className="text-lg font-bold text-white">
-              {package_.total_price === 0 ? 'Free' : formatPrice(package_.total_price, package_.currency)}
+              {discountedPrice === 0 ? 'Free' : formatPrice(discountedPrice, package_.currency)}
             </span>
           )}
         </div>
 
         <p className="mt-1 text-xs text-neutral-500">
-          {package_.total_price > 0 ? 'Tax Included' : ''}
+          {discountedPrice > 0 ? 'Tax Included' : ''}
         </p>
       </div>
     </Link>
@@ -92,5 +104,5 @@ function isNewProduct(createdAt: string): boolean {
   const created = new Date(createdAt);
   const now = new Date();
   const daysDiff = (now.getTime() - created.getTime()) / (1000 * 60 * 60 * 24);
-  return daysDiff <= 30;
+  return daysDiff <= 7;
 }
