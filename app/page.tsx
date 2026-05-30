@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 import { ScriptShowcase } from '@/components/script-showcase';
 import { FeaturedServers } from '@/components/featured-servers';
+import { AchievementsSection } from '@/components/achievements-section';
 
 export const revalidate = 60;
 
@@ -236,24 +237,7 @@ export default async function HomePage() {
             <p className="text-neutral-500 mb-16">
               {"We've been around for over 3 years and are one of the fastest growing creators on the platform."}
             </p>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-2">
-              {[
-                { value: '15', suffix: 'K', label: 'Sales' },
-                { value: '20', suffix: 'K', label: 'Servers using Flake Scripts*' },
-                { value: '65', suffix: 'K', label: 'Players enjoying Flake Scripts*' },
-              ].map((stat) => (
-                <div key={stat.label} className="w-full text-center leading-none">
-                  <div
-                    className="font-black text-[80px] leading-[67.5px] xl:leading-[100px] xl:text-[120px] bg-gradient-to-br from-blue-400 to-blue-700 inline-block text-transparent bg-clip-text"
-                    style={{ textShadow: '0 0 100px rgba(59,130,246,0.3)' }}
-                  >
-                    <span>{stat.value}</span>
-                    <span className="text-[60px] xl:text-[80px]">{stat.suffix}</span>
-                  </div>
-                  <p className="font-medium text-neutral-500 text-base xl:text-lg mt-4 xl:mt-8">{stat.label}</p>
-                </div>
-              ))}
-            </div>
+            <AchievementsSection />
           </div>
         </section>
 
@@ -340,16 +324,7 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Used by top servers */}
-        <section className="py-16 bg-neutral-900 border-t border-neutral-800">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold text-white mb-3">Used by top FiveM servers</h2>
-            <p className="text-neutral-500 mb-10">
-              Some of the biggest names in the FiveM community are running our scripts.
-            </p>
-            <FeaturedServers />
-          </div>
-        </section>
+        <FeaturedServers />
       </main>
 
       <Footer storeName={storeName} />
