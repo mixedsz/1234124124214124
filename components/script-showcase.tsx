@@ -7,7 +7,6 @@ type Video = { videoId: string; title: string };
 export function ScriptShowcase() {
   const [video, setVideo] = useState<Video | null>(null);
   const [loading, setLoading] = useState(true);
-  const [playing, setPlaying] = useState(false);
 
   useEffect(() => {
     fetch('/api/latest-video')
@@ -39,37 +38,14 @@ export function ScriptShowcase() {
             </svg>
           </div>
         ) : video ? (
-          playing ? (
-            <iframe
-              src={`https://www.youtube.com/embed/${video.videoId}?autoplay=1`}
-              title={video.title}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          ) : (
-            <button
-              onClick={() => setPlaying(true)}
-              className="relative w-full h-full group"
-              aria-label={`Play ${video.title}`}
-            >
-              <img
-                src={`https://i.ytimg.com/vi/${video.videoId}/hqdefault.jpg`}
-                alt={video.title}
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/20 transition">
-                <div className="w-16 h-16 rounded-full bg-red-600 flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white">
-                    <path d="M8 5v14l11-7z"/>
-                  </svg>
-                </div>
-              </div>
-            </button>
-          )
+          <iframe
+            src={`https://www.youtube.com/embed/${video.videoId}`}
+            title={video.title}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+          />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <p className="text-neutral-600 text-sm">No video available</p>
