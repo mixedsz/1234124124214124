@@ -32,7 +32,7 @@ function cleanName(name: string): string {
 
 async function fetchServer(id: string): Promise<Server | null> {
   try {
-    const r = await fetch(`https://servers-frontend.fivem.net/api/servers/single/${id}`);
+    const r = await fetch(`https://frontend.cfx-services.net/api/servers/single/${id}`);
     if (!r.ok) return null;
     const j = await r.json();
     const d: CfxData = j?.Data ?? {};
