@@ -26,7 +26,9 @@ export default function SubscriptionPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [pendingSubId, setPendingSubId] = useState<number | null>(null);
   const [adding, setAdding] = useState<number | null>(null);
-  const { itemCount, isAuthenticated, addItem, basket, refreshBasket } = useBasket();
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const [fiveMToastUsername, setFiveMToastUsername] = useState<string | null>(null);
+  const { itemCount, isAuthenticated, addItem, basket, refreshBasket, username } = useBasket();
   const { formatPrice } = useCurrency();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const router = useRouter();
@@ -63,7 +65,7 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // After returning from FiveM auth, auto-add the pending subscription
+  // After returning from FiveM auth, show toast then auto-add the pending subscription
   useEffect(() => {
     if (!isAuthenticated) return;
     const pending = localStorage.getItem('tebex_fivem_auth_pending');
@@ -71,12 +73,18 @@ export default function SubscriptionPage() {
     if (!pending || !pendingId) return;
     localStorage.removeItem('tebex_fivem_auth_pending');
     localStorage.removeItem('tebex_pending_sub_id');
+    // Show toast first
+    setFiveMToastUsername(username ?? null);
+    setFiveMToast(true);
     const subId = Number(pendingId);
     setAdding(subId);
-    addItem(subId, 1)
-      .then(() => router.push('/cart'))
-      .catch(() => setAdding(null));
-  }, [isAuthenticated, addItem, router]);
+    // Add to basket after a short delay so the user sees the toast
+    setTimeout(() => {
+      addItem(subId, 1)
+        .then(() => router.push('/cart'))
+        .catch(() => { setAdding(null); setFiveMToast(false); });
+    }, 1500);
+  }, [isAuthenticated, username, addItem, router]);
 
   useEffect(() => {
     if (scripts.length <= 5) return;
@@ -344,6 +352,26 @@ export default function SubscriptionPage() {
       </div>
 
       <Footer />
+
+      {/* FiveM Connected Toast */}
+      {fiveMToast && (
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-slide-in-right">
+          <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="5,45 9,34 21,22 15,45"/>
+            <polygon points="25,18 33,45 43,45 32,12"/>
+            <polygon points="16.059,14.164 20,3 28,3"/>
+            <polygon points="10.731,29.002 23,17 23,15 11.58,26.667"/>
+            <polygon points="15.142,16.429 13,22 29.724,5.725 28.818,3.178"/>
+            <polygon points="23.932,14.055 24.377,15.626 30.941,9.178 30.385,7.702"/>
+          </svg>
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-orange-300 text-xs mt-0.5">
+              {fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* FiveM Login Modal */}
       {showLoginModal && (
