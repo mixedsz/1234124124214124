@@ -4,7 +4,7 @@ import { DocsOnThisPage } from '@/components/docs-on-this-page';
 import Link from 'next/link';
 import { ChevronRight, AlertTriangle, ExternalLink, BookOpen, Check, ArrowRight, Zap } from 'lucide-react';
 
-export const metadata: Metadata = { title: 'Documentation' };
+export const metadata: Metadata = { title: 'Documentation', alternates: { canonical: 'https://flakedev.com/docs' } };
 
 function Callout({ type = 'warning', children }: { type?: 'warning' | 'info' | 'tip'; children: React.ReactNode }) {
   const s = {

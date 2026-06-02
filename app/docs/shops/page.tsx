@@ -6,7 +6,7 @@ import { CodeBlock } from '@/components/docs-code-block';
 
 
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Shops' };
+export const metadata: Metadata = { title: 'Flake Shops', alternates: { canonical: 'https://flakedev.com/docs/shops' } };
 // ── Primitives ────────────────────────────────────────────────────────────────
 
 function Inline({ children }: { children: React.ReactNode }) {

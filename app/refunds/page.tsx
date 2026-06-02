@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Refund Policy | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+  alternates: { canonical: 'https://flakedev.com/refunds' },
 }
 export default function RefundsPage() {
   return (

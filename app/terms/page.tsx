@@ -4,6 +4,7 @@ import { Footer } from '@/components/footer';
 
 export const metadata: Metadata = {
   title: 'Terms of Sale | Flake Development | QBCore, Qbox & ESX FiveM Scripts',
+  alternates: { canonical: 'https://flakedev.com/terms' },
 }
 
 export default function TermsPage() {

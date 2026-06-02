@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Wearables' };
+export const metadata: Metadata = { title: 'Flake Wearables', alternates: { canonical: 'https://flakedev.com/docs/flake_wearables' } };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Body Bag' };
+export const metadata: Metadata = { title: 'Flake Body Bag', alternates: { canonical: 'https://flakedev.com/docs/flake_bodybag' } };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';

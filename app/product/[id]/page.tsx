@@ -20,6 +20,7 @@ export async function generateMetadata(
   return {
     title: pkg.name,
     description: SITE_DESC,
+    alternates: { canonical: `https://flakedev.com/product/${id}` },
     openGraph: {
       type: 'website',
       siteName: 'Flake Development',

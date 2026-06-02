@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-export const metadata: Metadata = { title: 'Flake Loading Screen' };
+export const metadata: Metadata = { title: 'Flake Loading Screen', alternates: { canonical: 'https://flakedev.com/docs/flake_loading' } };
 
 import { DocsSidebar, DocsMobileNav } from '@/components/docs-sidebar';
 import { DocsOnThisPage } from '@/components/docs-on-this-page';
