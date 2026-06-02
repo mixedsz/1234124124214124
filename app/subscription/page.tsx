@@ -65,7 +65,7 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // After returning from FiveM auth, show toast then auto-add the pending subscription
+  // After returning from FiveM auth, show toast + redirect simultaneously
   useEffect(() => {
     if (!isAuthenticated) return;
     const pending = localStorage.getItem('tebex_fivem_auth_pending');
@@ -73,17 +73,17 @@ export default function SubscriptionPage() {
     if (!pending || !pendingId) return;
     localStorage.removeItem('tebex_fivem_auth_pending');
     localStorage.removeItem('tebex_pending_sub_id');
-    // Show toast first
+    // Show toast on this page while redirect is happening
     setFiveMToastUsername(username ?? null);
     setFiveMToast(true);
+    // Store flag so the cart page also shows the toast on arrival
+    if (username) sessionStorage.setItem('fivem_toast_username', username);
     const subId = Number(pendingId);
     setAdding(subId);
-    // Add to basket after a short delay so the user sees the toast
-    setTimeout(() => {
-      addItem(subId, 1)
-        .then(() => router.push('/cart'))
-        .catch(() => { setAdding(null); setFiveMToast(false); });
-    }, 1500);
+    // Add to basket and redirect immediately — no delay
+    addItem(subId, 1)
+      .then(() => router.push('/cart'))
+      .catch(() => { setAdding(null); setFiveMToast(false); });
   }, [isAuthenticated, username, addItem, router]);
 
   useEffect(() => {

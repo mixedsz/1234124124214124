@@ -31,10 +31,22 @@ export default function CartPage() {
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const [fiveMToastUsername, setFiveMToastUsername] = useState<string | null>(null);
   const [upsellProducts, setUpsellProducts] = useState<Array<{ id: number; name: string; image?: string; base_price: number; total_price: number; discount: number; currency: string }>>([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [discordLinked, setDiscordLinked] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  // Show FiveM connected toast if redirected here after login
+  useEffect(() => {
+    const u = sessionStorage.getItem('fivem_toast_username');
+    if (!u) return;
+    sessionStorage.removeItem('fivem_toast_username');
+    setFiveMToastUsername(u);
+    setFiveMToast(true);
+    setTimeout(() => setFiveMToast(false), 4000);
+  }, []);
 
   useEffect(() => {
     if (!basket?.username) { setAvatarUrl(null); return; }
@@ -238,6 +250,25 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col" style={{ maxWidth: '100vw', overflowX: 'hidden' }}>
       <Header />
+
+      {fiveMToast && (
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-slide-in-right">
+          <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="5,45 9,34 21,22 15,45"/>
+            <polygon points="25,18 33,45 43,45 32,12"/>
+            <polygon points="16.059,14.164 20,3 28,3"/>
+            <polygon points="10.731,29.002 23,17 23,15 11.58,26.667"/>
+            <polygon points="15.142,16.429 13,22 29.724,5.725 28.818,3.178"/>
+            <polygon points="23.932,14.055 24.377,15.626 30.941,9.178 30.385,7.702"/>
+          </svg>
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-orange-300 text-xs mt-0.5">
+              {fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}
+            </p>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex justify-between items-end mb-8">
