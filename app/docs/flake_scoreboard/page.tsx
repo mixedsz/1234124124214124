@@ -276,8 +276,8 @@ export default function FlakeScoreboardDocsPage() {
 Config.UseCharacterNames = true     -- Use character names instead of FiveM names`} />
 
             <SectionH3>Server Information</SectionH3>
-            <CodeBlock filename="config.lua" whitespace py="py-4" my="my-4" code={`Config.ServerName = "HoodVille RP"
-Config.ServerIcon = "https://i.postimg.cc/TYSmbXV1/TEXT.png"
+            <CodeBlock filename="config.lua" whitespace py="py-4" my="my-4" code={`Config.ServerName = "YOURSERVERNAME"
+Config.ServerIcon = "YOUR_ICON_URL_HERE"  -- Paste a direct image link (PNG/JPG, 42x42px)
 Config.MaxPlayers = 250             -- Max shown in the player counter`} />
 
             <SectionH3>Controls</SectionH3>

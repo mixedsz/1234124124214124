@@ -153,6 +153,17 @@ const NAV: NavGroup[] = [
         ],
       },
       {
+        title: 'Flake AI EMS',
+        href: '/docs/flake_aiems',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Framework Compatibility', id: 'frameworks' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
+      {
         title: 'Flake Scoreboard',
         href: '/docs/flake_scoreboard',
         sections: [
