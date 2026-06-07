@@ -153,6 +153,17 @@ const NAV: NavGroup[] = [
         ],
       },
       {
+        title: 'Flake Scoreboard',
+        href: '/docs/flake_scoreboard',
+        sections: [
+          { label: 'Overview', id: 'overview' },
+          { label: 'Installation', id: 'installation' },
+          { label: 'Configuration', id: 'configuration' },
+          { label: 'Customization', id: 'customization' },
+          { label: 'Troubleshooting', id: 'troubleshooting' },
+        ],
+      },
+      {
         title: 'Flake Wearables',
         href: '/docs/flake_wearables',
         sections: [
