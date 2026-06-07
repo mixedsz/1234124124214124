@@ -169,19 +169,21 @@ export default function FlakeBlackmarketsDocsPage() {
             </Callout>
 
             <SectionH3>File Structure</SectionH3>
-            <div className="bg-neutral-900 border border-neutral-700/60 rounded-xl px-5 py-4 font-mono text-sm leading-7 mb-4">
-              <span className="text-blue-400">flake_blackmarkets/</span>{'\n'}
-              {'├── '}<span className="text-blue-400">client/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">client.lua</span><span className="text-neutral-600">      — Shop UI, peds, blips, pickup logic</span>{'\n'}
-              {'├── '}<span className="text-blue-400">server/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">server.lua</span><span className="text-neutral-600">      — Purchase validation, money, items</span>{'\n'}
-              {'├── '}<span className="text-blue-400">config/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">config.lua</span><span className="text-neutral-600">      — Framework, settings, notifications (escrow-ignored)</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">edits.lua</span><span className="text-neutral-600">       — Notification overrides (escrow-ignored)</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">sv_config.lua</span><span className="text-neutral-600">   — Markets, items, prices, pickups (escrow-ignored)</span>{'\n'}
-              {'├── '}<span className="text-blue-400">html/</span>{'\n'}
-              {'│   └── '}<span className="text-blue-400">build/</span><span className="text-neutral-600">          — Shop UI files</span>{'\n'}
-              {'└── '}<span className="text-neutral-300">fxmanifest.lua</span><span className="text-neutral-600">      — Resource manifest</span>
+            <div className="rounded-xl border border-neutral-700/60 bg-neutral-800/50 px-4 py-4 my-4 overflow-x-auto">
+              <pre className="text-sm font-mono leading-6">
+                <span className="text-blue-400 font-medium">{'flake_blackmarkets/\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'client/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'client.lua'}</span><span className="text-neutral-600">{'       -- Shop UI, peds, blips, pickup logic\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'server/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'server.lua'}</span><span className="text-neutral-600">{'       -- Purchase validation, money, items\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'config/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'config.lua'}</span><span className="text-neutral-600">{'       -- Framework, settings, notifications (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'edits.lua'}</span><span className="text-neutral-600">{'        -- Notification overrides (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'sv_config.lua'}</span><span className="text-neutral-600">{'    -- Markets, items, prices, pickups (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'html/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-blue-400 font-medium">{'build/'}</span><span className="text-neutral-600">{'           -- Shop UI files\n'}</span>
+                <span className="text-neutral-600">{'└── '}</span><span className="text-neutral-300">{'fxmanifest.lua'}</span><span className="text-neutral-600">{'   -- Resource manifest\n'}</span>
+              </pre>
             </div>
           </section>
 

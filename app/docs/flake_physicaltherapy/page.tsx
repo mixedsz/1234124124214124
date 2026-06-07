@@ -192,18 +192,20 @@ export default function FlakePhysicalTherapyDocsPage() {
             </Callout>
 
             <SectionH3>File Structure</SectionH3>
-            <div className="bg-neutral-900 border border-neutral-700/60 rounded-xl px-5 py-4 font-mono text-sm leading-7 mb-4">
-              <span className="text-blue-400">flake_physicaltherapy/</span>{'\n'}
-              {'├── '}<span className="text-blue-400">client/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">client.lua</span><span className="text-neutral-600">          — Therapy logic, animations, steps</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">cl_notifications.lua</span><span className="text-neutral-600"> — Notification overrides</span>{'\n'}
-              {'├── '}<span className="text-blue-400">server/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">server.lua</span><span className="text-neutral-600">          — EMS checks, money, cooldowns</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">sv_notifications.lua</span><span className="text-neutral-600"> — Notification server bridge</span>{'\n'}
-              {'├── '}<span className="text-blue-400">config/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">config.lua</span><span className="text-neutral-600">          — Main settings (escrow-ignored)</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">editable.lua</span><span className="text-neutral-600">        — Notifications and TextUI (escrow-ignored)</span>{'\n'}
-              {'└── '}<span className="text-neutral-300">fxmanifest.lua</span><span className="text-neutral-600">          — Resource manifest</span>
+            <div className="rounded-xl border border-neutral-700/60 bg-neutral-800/50 px-4 py-4 my-4 overflow-x-auto">
+              <pre className="text-sm font-mono leading-6">
+                <span className="text-blue-400 font-medium">{'flake_physicaltherapy/\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'client/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'client.lua'}</span><span className="text-neutral-600">{'            -- Therapy logic, animations, steps\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'cl_notifications.lua'}</span><span className="text-neutral-600">{'  -- Notification overrides\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'server/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'server.lua'}</span><span className="text-neutral-600">{'            -- EMS checks, money, cooldowns\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'sv_notifications.lua'}</span><span className="text-neutral-600">{'  -- Notification server bridge\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'config/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'config.lua'}</span><span className="text-neutral-600">{'            -- Main settings (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'editable.lua'}</span><span className="text-neutral-600">{'          -- Notifications and TextUI (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'└── '}</span><span className="text-neutral-300">{'fxmanifest.lua'}</span><span className="text-neutral-600">{'        -- Resource manifest\n'}</span>
+              </pre>
             </div>
           </section>
 

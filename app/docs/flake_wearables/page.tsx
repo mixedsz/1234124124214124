@@ -191,21 +191,23 @@ export default function FlakeWearablesDocsPage() {
             </Callout>
 
             <SectionH3>File Structure</SectionH3>
-            <div className="bg-neutral-900 border border-neutral-700/60 rounded-xl px-5 py-4 font-mono text-sm leading-7 mb-4">
-              <span className="text-blue-400">flake_wearables/</span>{'\n'}
-              {'├── '}<span className="text-blue-400">wearables/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">chains.lua</span><span className="text-neutral-600">          — Chain presets (escrow-ignored)</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">watches.lua</span><span className="text-neutral-600">         — Watch presets (escrow-ignored)</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">bag.lua</span><span className="text-neutral-600">             — Bag presets (escrow-ignored)</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">bproof.lua</span><span className="text-neutral-600">          — Bulletproof vest presets (escrow-ignored)</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">decals.lua</span><span className="text-neutral-600">          — Decal presets (escrow-ignored)</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">tshirt.lua</span><span className="text-neutral-600">          — T-shirt presets (escrow-ignored)</span>{'\n'}
-              {'├── '}<span className="text-blue-400">client/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">main.lua</span><span className="text-neutral-600">            — Menu logic, component application</span>{'\n'}
-              {'├── '}<span className="text-blue-400">server/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">main.lua</span><span className="text-neutral-600">            — Item registration, callbacks</span>{'\n'}
-              {'├── '}<span className="text-neutral-300">shared.lua</span><span className="text-neutral-600">              — Item-to-category mapping (escrow-ignored)</span>{'\n'}
-              {'└── '}<span className="text-neutral-300">fxmanifest.lua</span><span className="text-neutral-600">          — Resource manifest</span>
+            <div className="rounded-xl border border-neutral-700/60 bg-neutral-800/50 px-4 py-4 my-4 overflow-x-auto">
+              <pre className="text-sm font-mono leading-6">
+                <span className="text-blue-400 font-medium">{'flake_wearables/\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'wearables/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'chains.lua'}</span><span className="text-neutral-600">{'   -- Chain presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'watches.lua'}</span><span className="text-neutral-600">{'  -- Watch presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'bag.lua'}</span><span className="text-neutral-600">{'      -- Bag presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'bproof.lua'}</span><span className="text-neutral-600">{'   -- Bulletproof vest presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'decals.lua'}</span><span className="text-neutral-600">{'   -- Decal presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'tshirt.lua'}</span><span className="text-neutral-600">{'   -- T-shirt presets (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'client/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'main.lua'}</span><span className="text-neutral-600">{'     -- Menu logic, component application\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'server/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'main.lua'}</span><span className="text-neutral-600">{'     -- Item registration, callbacks\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-neutral-300">{'shared.lua'}</span><span className="text-neutral-600">{'   -- Item-to-category mapping (escrow-ignored)\n'}</span>
+                <span className="text-neutral-600">{'└── '}</span><span className="text-neutral-300">{'fxmanifest.lua'}</span><span className="text-neutral-600">{'  -- Resource manifest\n'}</span>
+              </pre>
             </div>
           </section>
 

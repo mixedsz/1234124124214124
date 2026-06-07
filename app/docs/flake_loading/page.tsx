@@ -173,19 +173,21 @@ export default function FlakeLoadingDocsPage() {
             </Callout>
 
             <SectionH3>File Structure</SectionH3>
-            <div className="bg-neutral-900 border border-neutral-700/60 rounded-xl px-5 py-4 font-mono text-sm leading-7 mb-4">
-              <span className="text-blue-400">flake_loading/</span>{'\n'}
-              {'├── '}<span className="text-blue-400">web/build/</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">index.html</span><span className="text-neutral-600">          — Main loading screen HTML</span>{'\n'}
-              {'│   ├── '}<span className="text-neutral-300">config.js</span><span className="text-neutral-600">            — All settings (edit this)</span>{'\n'}
-              {'│   ├── '}<span className="text-blue-400">css/</span><span className="text-neutral-600">                 — Stylesheets</span>{'\n'}
-              {'│   ├── '}<span className="text-blue-400">js/</span><span className="text-neutral-600">                  — Application logic</span>{'\n'}
-              {'│   └── '}<span className="text-blue-400">font/</span><span className="text-neutral-600">                — Custom fonts</span>{'\n'}
-              {'├── '}<span className="text-blue-400">client/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">main.lua</span>{'\n'}
-              {'├── '}<span className="text-blue-400">server/</span>{'\n'}
-              {'│   └── '}<span className="text-neutral-300">main.lua</span>{'\n'}
-              {'└── '}<span className="text-neutral-300">fxmanifest.lua</span>
+            <div className="rounded-xl border border-neutral-700/60 bg-neutral-800/50 px-4 py-4 my-4 overflow-x-auto">
+              <pre className="text-sm font-mono leading-6">
+                <span className="text-blue-400 font-medium">{'flake_loading/\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'web/build/\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'index.html'}</span><span className="text-neutral-600">{'  -- Main loading screen HTML\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-neutral-300">{'config.js'}</span><span className="text-neutral-600">{'   -- All settings (edit this)\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-blue-400 font-medium">{'css/'}</span><span className="text-neutral-600">{'        -- Stylesheets\n'}</span>
+                <span className="text-neutral-600">{'│   ├── '}</span><span className="text-blue-400 font-medium">{'js/'}</span><span className="text-neutral-600">{'         -- Application logic\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-blue-400 font-medium">{'font/'}</span><span className="text-neutral-600">{'       -- Custom fonts\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'client/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'main.lua\n'}</span>
+                <span className="text-neutral-600">{'├── '}</span><span className="text-blue-400 font-medium">{'server/\n'}</span>
+                <span className="text-neutral-600">{'│   └── '}</span><span className="text-neutral-300">{'main.lua\n'}</span>
+                <span className="text-neutral-600">{'└── '}</span><span className="text-neutral-300">{'fxmanifest.lua\n'}</span>
+              </pre>
             </div>
           </section>
 
