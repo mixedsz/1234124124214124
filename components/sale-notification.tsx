@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { X, Percent } from 'lucide-react';
+import { X, Percent, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface SaleProduct {
   id: number;
@@ -37,23 +37,17 @@ export function SaleNotification() {
       .catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (products.length <= 1) return;
-    const id = setInterval(() => {
-      if (!document.hidden) setIndex(i => (i + 1) % products.length);
-    }, 7000);
-    return () => clearInterval(id);
-  }, [products.length]);
-
   const dismiss = () => {
     setVisible(false);
     sessionStorage.setItem('sale_dismissed', '1');
   };
 
+  const prev = () => setIndex(i => (i - 1 + products.length) % products.length);
+  const next = () => setIndex(i => (i + 1) % products.length);
+
   if (!visible || products.length === 0) return null;
 
   const p = products[index];
-  // discount = dollar amount off (Tebex Headless API absolute value)
   const discountedPrice = Math.max(0, p.base_price - p.discount);
   const save = p.discount;
   const pct = Math.round((p.discount / p.base_price) * 100);
@@ -71,9 +65,21 @@ export function SaleNotification() {
             <span className="text-neutral-500 text-[10px] ml-1">{index + 1}/{products.length}</span>
           )}
         </div>
-        <button onClick={dismiss} className="text-neutral-500 hover:text-white transition">
-          <X className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex items-center gap-1">
+          {products.length > 1 && (
+            <>
+              <button onClick={prev} className="text-neutral-500 hover:text-white transition p-0.5">
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={next} className="text-neutral-500 hover:text-white transition p-0.5">
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </>
+          )}
+          <button onClick={dismiss} className="text-neutral-500 hover:text-white transition ml-1">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
 
       {/* Product row */}
