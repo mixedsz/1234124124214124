@@ -6,10 +6,11 @@ import { SaleNotification } from '@/components/sale-notification';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
 import { readReviews } from '@/lib/reviews';
 import Link from 'next/link';
-import { ArrowRight, Star, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
+import { ArrowRight, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 import { ScriptShowcase } from '@/components/script-showcase';
 import { FeaturedServers } from '@/components/featured-servers';
 import { AchievementsSection } from '@/components/achievements-section';
+import { ReviewsPaginated } from '@/components/reviews-paginated';
 
 export const revalidate = 60;
 
@@ -36,16 +37,6 @@ const FEATURES = [
   },
 ];
 
-const AVATAR_COLORS = ['bg-blue-600','bg-purple-600','bg-green-600','bg-rose-600','bg-orange-500','bg-indigo-600','bg-teal-600','bg-pink-600'];
-function avatarBg(str: string) {
-  const hash = [...str].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
-function fmtDate(s: string) {
-  const d = new Date(s);
-  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
-}
-function isSnowflake(id: string) { return /^\d{17,19}$/.test(id); }
 
 export default async function HomePage() {
   const [webstore, categories] = await Promise.all([
@@ -80,8 +71,6 @@ export default async function HomePage() {
     .map(r => ({ text: r.content, author: r.username, avatar_url: r.avatar_url, discord_id: r.discord_id, created_at: r.created_at }));
   const displayReviews = mappedApiReviews;
 
-  // Double the reviews for seamless infinite scroll
-  const doubledReviews = [...displayReviews, ...displayReviews];
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -241,71 +230,14 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Reviews Section - Infinite Scroll */}
+        {/* Reviews Section - Paginated */}
         <section className="py-20 bg-neutral-900 border-t border-neutral-800">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <h2 className="text-4xl font-bold text-white text-center mb-3">Reviews</h2>
             <p className="text-neutral-500 text-center mb-0">
               {"We've received 400+ five star reviews from our customers."}
             </p>
-          </div>
-
-          <div className="reviews-wrapper flex flex-row overflow-hidden mt-12">
-            <div className="animate-marquee flex gap-4 pl-4">
-              {doubledReviews.map((review, i) => {
-                const name = review.author.startsWith('@') ? review.author.slice(1) : review.author;
-                const discordId = (review as {discord_id?: string}).discord_id;
-                const storedUrl = (review as {avatar_url?: string}).avatar_url;
-                const avatarSrc = storedUrl
-                  || (discordId && isSnowflake(discordId)
-                    ? `/api/discord-avatar?id=${discordId}`
-                    : null);
-                const createdAt = (review as {created_at?: string}).created_at;
-                return (
-                  <div
-                    key={i}
-                    className="w-[300px] lg:w-[340px] flex-shrink-0 flex flex-col bg-[#1e1f22] border border-white/[0.06] rounded-2xl p-5 shadow-lg"
-                  >
-                    {/* Avatar + name + stars — all left-aligned */}
-                    <div className="flex items-start gap-3 mb-4">
-                      {avatarSrc ? (
-                        <img
-                          src={avatarSrc}
-                          alt={name}
-                          className="w-10 h-10 rounded-full object-cover flex-shrink-0 ring-2 ring-white/10 mt-0.5"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/10 mt-0.5 ${avatarBg(name)}`}>
-                          {name.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-white font-semibold text-sm leading-tight truncate max-w-[200px]">{name}</p>
-                        <div className="flex gap-0.5 mt-1.5">
-                          {[1,2,3,4,5].map(s => (
-                            <Star key={s} className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Review text */}
-                    <p className="text-neutral-400 text-sm leading-relaxed line-clamp-5 flex-1">
-                      &ldquo;{review.text}&rdquo;
-                    </p>
-
-                    {/* Bottom row */}
-                    <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/[0.06]">
-                      <span className="text-neutral-600 text-xs">{createdAt ? fmtDate(createdAt) : ''}</span>
-                      <span className="px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/40 text-emerald-400 text-[10px] font-bold tracking-widest uppercase">
-                        VERIFIED
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <ReviewsPaginated reviews={displayReviews} />
           </div>
 
           {/* Discord CTA under reviews */}

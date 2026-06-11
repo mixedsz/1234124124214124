@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -292,10 +292,107 @@ function SidebarContent({ activePath, expandedPages, onTogglePage, filter, onNav
   );
 }
 
+function DocsSearchModal({ onClose }: { onClose: () => void }) {
+  const [query, setQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  const results = query.trim()
+    ? NAV.flatMap(g => g.items.filter(item =>
+        item.title.toLowerCase().includes(query.toLowerCase()) ||
+        item.sections?.some(s => s.label.toLowerCase().includes(query.toLowerCase()))
+      ).map(item => ({ ...item, group: g.label }))
+    )
+    : [];
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-start justify-center pt-20 px-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg bg-neutral-900 border border-neutral-700/80 rounded-2xl shadow-2xl overflow-hidden"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Input row */}
+        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-neutral-800">
+          <svg className="w-4 h-4 text-neutral-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search across all pages…"
+            className="flex-1 bg-transparent text-white placeholder-neutral-500 text-sm focus:outline-none"
+          />
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1 px-2 py-1 rounded-md bg-neutral-800 border border-neutral-700 text-neutral-400 hover:text-white transition text-[11px] font-mono"
+          >
+            ESC
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="max-h-80 overflow-y-auto">
+          {query.trim() === '' ? (
+            <div className="flex flex-col items-center justify-center py-12 text-neutral-600">
+              <svg className="w-10 h-10 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+              </svg>
+              <span className="text-sm">Type to search across all pages…</span>
+            </div>
+          ) : results.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-neutral-600">
+              <span className="text-sm">No results for &ldquo;{query}&rdquo;</span>
+            </div>
+          ) : (
+            <div className="py-2">
+              {results.map(item => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={onClose}
+                  className="flex flex-col px-4 py-3 hover:bg-neutral-800 transition"
+                >
+                  <span className="text-white text-sm font-medium">{item.title}</span>
+                  <span className="text-neutral-500 text-xs mt-0.5">{item.group}</span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function DocsSidebar() {
   const pathname = usePathname();
-  const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
   const [expandedPages, setExpandedPages] = useState<Set<string>>(() => new Set([pathname]));
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === '/' && !(e.target instanceof HTMLInputElement) && !(e.target instanceof HTMLTextAreaElement)) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   function togglePage(href: string) {
     setExpandedPages(prev => {
@@ -308,6 +405,7 @@ export function DocsSidebar() {
 
   return (
     <div className="hidden lg:flex flex-col w-64 xl:w-72 flex-shrink-0 border-r border-blue-500/20 bg-blue-950/10">
+      {searchOpen && <DocsSearchModal onClose={() => setSearchOpen(false)} />}
       <aside className="flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto py-6 px-4 docs-scrollbar">
         {/* Brand label */}
         <div className="mb-4 px-2">
@@ -315,23 +413,21 @@ export function DocsSidebar() {
           <p className="text-white font-bold text-base">Documentation</p>
         </div>
 
-        {/* Search */}
-        <div className="mb-5 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-600 pointer-events-none" />
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search docs..."
-            className="w-full pl-8 pr-3 py-2 rounded-lg bg-neutral-800/60 border border-neutral-700/60 text-sm text-neutral-300 placeholder-neutral-600 focus:outline-none focus:border-blue-500/60 focus:bg-neutral-800 transition"
-          />
-        </div>
+        {/* Search trigger */}
+        <button
+          onClick={() => setSearchOpen(true)}
+          className="mb-5 w-full flex items-center gap-2.5 px-3 py-2 rounded-lg bg-neutral-800/60 border border-neutral-700/60 text-sm text-neutral-500 hover:border-neutral-600 hover:text-neutral-400 transition text-left"
+        >
+          <Search className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="flex-1">Search docs...</span>
+          <kbd className="text-[10px] px-1.5 py-0.5 rounded bg-neutral-700/60 text-neutral-500 font-mono">/</kbd>
+        </button>
 
         <SidebarContent
           activePath={pathname}
           expandedPages={expandedPages}
           onTogglePage={togglePage}
-          filter={search}
+          filter=""
         />
 
         {/* Bottom links */}
