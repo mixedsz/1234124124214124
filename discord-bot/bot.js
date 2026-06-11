@@ -281,74 +281,23 @@ async function handleLeaveReviewButton(interaction) {
   await interaction.showModal(buildReviewModal());
 }
 
-// ── Modal submit ──────────────────────────────────────────────────────────────
+// ── Shared helper: post embed then save review with message ID ────────────────
 
-async function handleReviewModal(interaction) {
-  await interaction.deferReply({ ephemeral: true });
-
-  const ratingStr  = interaction.fields.getTextInputValue('modal_rating').trim();
-  const title      = interaction.fields.getTextInputValue('modal_title').trim();
-  const reviewText = interaction.fields.getTextInputValue('modal_review').trim();
-
-  // Validate rating
-  const rating = parseInt(ratingStr, 10);
-  if (isNaN(rating) || rating < 1 || rating > 5) {
-    return interaction.editReply({
-      content: '❌ Rating must be a number between **1** and **5**.',
-    });
-  }
-
-  const user = interaction.user;
-
-  // Fetch results channel from config
-  const config        = readConfig();
-  const guildConfig   = config[interaction.guildId];
+async function postAndSaveReview({ interaction, user, rating, productName, reviewText }) {
+  const config           = readConfig();
+  const guildConfig      = config[interaction.guildId];
   const resultsChannelId = guildConfig?.resultsChannelId;
 
-  // Post to website API
-  const payload = {
-    discord_id:        user.id,
-    username:          user.username,
-    avatar_url:        user.displayAvatarURL({ extension: 'png', size: 128 }),
-    rating,
-    content:           reviewText,
-    product_name:      title,
-    verified_purchase: false,
-  };
-
-  try {
-    if (!WEBSITE_URL) {
-      console.warn('⚠️  WEBSITE_URL is not set — skipping API call.');
-    } else {
-      const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error('API error:', res.status, err);
-        return interaction.editReply({
-          content: `❌ Failed to submit review: ${err.error || `HTTP ${res.status}`}`,
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Network error submitting review:', err);
-    return interaction.editReply({
-      content: '❌ Network error — could not reach the store API. Please try again later.',
-    });
-  }
-
-  // Post result embed to results_channel
+  // 1. Post embed to results channel first to get the message ID
+  let messageId = null;
   if (resultsChannelId) {
     try {
       const resultsChannel = await client.channels.fetch(resultsChannelId).catch(() => null);
       if (resultsChannel?.isTextBased()) {
-        await resultsChannel.send({
-          embeds: [buildResultEmbed(user, rating, title, reviewText)],
+        const msg = await resultsChannel.send({
+          embeds: [buildResultEmbed(user, rating, productName, reviewText)],
         });
+        messageId = msg.id;
       } else {
         console.warn(`Results channel ${resultsChannelId} not found or not text-based.`);
       }
@@ -359,8 +308,72 @@ async function handleReviewModal(interaction) {
     console.warn('No results channel configured for this guild — skipping results embed.');
   }
 
+  // 2. Save to website API using the Discord message ID so /deletereview can reference it
+  if (WEBSITE_URL) {
+    const payload = {
+      id:                messageId ?? undefined,
+      discord_id:        user.id,
+      username:          user.username,
+      avatar_url:        user.displayAvatarURL({ extension: 'png', size: 128 }),
+      rating,
+      content:           reviewText,
+      product_name:      productName,
+      verified_purchase: false,
+    };
+
+    try {
+      const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error('API error saving review:', res.status, err);
+        return { ok: false, error: err.error || `HTTP ${res.status}` };
+      }
+    } catch (err) {
+      console.error('Network error submitting review:', err);
+      return { ok: false, error: 'Network error — could not reach the store API.' };
+    }
+  } else {
+    console.warn('⚠️  WEBSITE_URL is not set — skipping API call.');
+  }
+
+  return { ok: true, messageId };
+}
+
+// ── Modal submit ──────────────────────────────────────────────────────────────
+
+async function handleReviewModal(interaction) {
+  await interaction.deferReply({ ephemeral: true });
+
+  const ratingStr  = interaction.fields.getTextInputValue('modal_rating').trim();
+  const title      = interaction.fields.getTextInputValue('modal_title').trim();
+  const reviewText = interaction.fields.getTextInputValue('modal_review').trim();
+
+  const rating = parseInt(ratingStr, 10);
+  if (isNaN(rating) || rating < 1 || rating > 5) {
+    return interaction.editReply({
+      content: '❌ Rating must be a number between **1** and **5**.',
+    });
+  }
+
+  const { ok, error, messageId } = await postAndSaveReview({
+    interaction,
+    user:        interaction.user,
+    rating,
+    productName: title,
+    reviewText,
+  });
+
+  if (!ok) {
+    return interaction.editReply({ content: `❌ Failed to submit review: ${error}` });
+  }
+
   await interaction.editReply({
-    content: '✅ Thanks for your review! It\'s been submitted successfully.',
+    content: `✅ Thanks for your review! It's been submitted successfully.${messageId ? `\n\n🆔 Message ID: \`${messageId}\`` : ''}`,
   });
 }
 
@@ -372,59 +385,22 @@ async function handleReviewCommand(interaction) {
   const rating      = interaction.options.getInteger('rating', true);
   const reviewText  = interaction.options.getString('review', true);
   const productName = interaction.options.getString('product') ?? 'N/A';
-  const user        = interaction.user;
 
-  const payload = {
-    discord_id:        user.id,
-    username:          user.username,
-    avatar_url:        user.displayAvatarURL({ extension: 'png', size: 128 }),
+  const { ok, error, messageId } = await postAndSaveReview({
+    interaction,
+    user:        interaction.user,
     rating,
-    content:           reviewText,
-    product_name:      productName,
-    verified_purchase: false,
-  };
+    productName,
+    reviewText,
+  });
 
-  try {
-    if (!WEBSITE_URL) {
-      console.warn('⚠️  WEBSITE_URL is not set — skipping API call.');
-    } else {
-      const res = await fetch(`${WEBSITE_URL}/api/reviews`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        return interaction.editReply({
-          content: `❌ Failed to submit review: ${err.error || `HTTP ${res.status}`}`,
-        });
-      }
-    }
-  } catch (err) {
-    console.error('Network error submitting review:', err);
-    return interaction.editReply({
-      content: '❌ Network error — could not reach the store API.',
-    });
-  }
-
-  // Post to results channel if configured
-  const config           = readConfig();
-  const guildConfig      = config[interaction.guildId];
-  const resultsChannelId = guildConfig?.resultsChannelId;
-
-  if (resultsChannelId) {
-    const resultsChannel = await client.channels.fetch(resultsChannelId).catch(() => null);
-    if (resultsChannel?.isTextBased()) {
-      await resultsChannel
-        .send({ embeds: [buildResultEmbed(user, rating, productName, reviewText)] })
-        .catch(console.error);
-    }
+  if (!ok) {
+    return interaction.editReply({ content: `❌ Failed to submit review: ${error}` });
   }
 
   const stars = '⭐'.repeat(rating);
   await interaction.editReply({
-    content: `✅ Your review has been submitted!\n\n${stars} — ${reviewText.slice(0, 100)}${reviewText.length > 100 ? '…' : ''}`,
+    content: `✅ Your review has been submitted!\n\n${stars} — ${reviewText.slice(0, 100)}${reviewText.length > 100 ? '…' : ''}${messageId ? `\n\n🆔 Message ID: \`${messageId}\`` : ''}`,
   });
 }
 
@@ -433,17 +409,16 @@ async function handleReviewCommand(interaction) {
 async function handleDeleteReview(interaction) {
   await interaction.deferReply({ ephemeral: true });
 
-  const id = interaction.options.getString('id', true);
+  const messageId = interaction.options.getString('id', true).trim();
 
   if (!WEBSITE_URL) {
-    return interaction.editReply({
-      content: '❌ WEBSITE_URL is not configured.',
-    });
+    return interaction.editReply({ content: '❌ WEBSITE_URL is not configured.' });
   }
 
+  // 1. Delete from website API (review ID = Discord message ID)
   try {
     const res = await fetch(
-      `${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(id)}`,
+      `${WEBSITE_URL}/api/reviews?id=${encodeURIComponent(messageId)}`,
       { method: 'DELETE' },
     );
 
@@ -453,12 +428,29 @@ async function handleDeleteReview(interaction) {
         content: `❌ ${err.error || `Failed to delete review (HTTP ${res.status})`}`,
       });
     }
-
-    await interaction.editReply({ content: `✅ Review \`${id}\` deleted successfully.` });
   } catch (err) {
     console.error('Error deleting review:', err);
-    await interaction.editReply({ content: '❌ Network error — could not reach the store API.' });
+    return interaction.editReply({ content: '❌ Network error — could not reach the store API.' });
   }
+
+  // 2. Also delete the embed message from the results channel
+  const config           = readConfig();
+  const guildConfig      = config[interaction.guildId];
+  const resultsChannelId = guildConfig?.resultsChannelId;
+
+  if (resultsChannelId) {
+    try {
+      const resultsChannel = await client.channels.fetch(resultsChannelId).catch(() => null);
+      if (resultsChannel?.isTextBased()) {
+        const msg = await resultsChannel.messages.fetch(messageId).catch(() => null);
+        if (msg) await msg.delete().catch(() => {});
+      }
+    } catch {
+      // Non-fatal — review is already deleted from the website
+    }
+  }
+
+  await interaction.editReply({ content: `✅ Review \`${messageId}\` deleted from the website and results channel.` });
 }
 
 // ── /updatevideo ──────────────────────────────────────────────────────────────
