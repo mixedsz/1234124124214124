@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { DOCS_SEARCH_INDEX } from '@/data/docs-search-index';
 import {
   BookOpen,
   Terminal,
@@ -306,11 +307,14 @@ function DocsSearchModal({ onClose }: { onClose: () => void }) {
   }, [onClose]);
 
   const results = query.trim()
-    ? NAV.flatMap(g => g.items.filter(item =>
-        item.title.toLowerCase().includes(query.toLowerCase()) ||
-        item.sections?.some(s => s.label.toLowerCase().includes(query.toLowerCase()))
-      ).map(item => ({ ...item, group: g.label }))
-    )
+    ? DOCS_SEARCH_INDEX.filter(entry => {
+        const q = query.toLowerCase();
+        return (
+          entry.title.toLowerCase().includes(q) ||
+          entry.content.toLowerCase().includes(q) ||
+          (entry.section?.toLowerCase().includes(q) ?? false)
+        );
+      })
     : [];
 
   return (
@@ -359,17 +363,34 @@ function DocsSearchModal({ onClose }: { onClose: () => void }) {
             </div>
           ) : (
             <div className="py-2">
-              {results.map(item => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={onClose}
-                  className="flex flex-col px-4 py-3 hover:bg-neutral-800 transition"
-                >
-                  <span className="text-white text-sm font-medium">{item.title}</span>
-                  <span className="text-neutral-500 text-xs mt-0.5">{item.group}</span>
-                </Link>
-              ))}
+              {results.map((entry, i) => {
+                const q = query.toLowerCase();
+                const idx = entry.content.toLowerCase().indexOf(q);
+                let excerpt = '';
+                if (idx !== -1) {
+                  const start = Math.max(0, idx - 40);
+                  const raw = entry.content.slice(start, idx + query.length + 60);
+                  excerpt = (start > 0 ? '…' : '') + raw + (start + raw.length < entry.content.length ? '…' : '');
+                } else {
+                  excerpt = entry.content.slice(0, 100) + '…';
+                }
+                return (
+                  <Link
+                    key={i}
+                    href={entry.href}
+                    onClick={onClose}
+                    className="flex flex-col px-4 py-3 hover:bg-neutral-800 transition border-b border-neutral-800/60 last:border-0"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-white text-sm font-medium">{entry.title}</span>
+                      {entry.section && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-600/20 text-blue-400 font-medium">{entry.section}</span>
+                      )}
+                    </div>
+                    <span className="text-neutral-500 text-xs mt-1 leading-relaxed line-clamp-2">{excerpt}</span>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>
