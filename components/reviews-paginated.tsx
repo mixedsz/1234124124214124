@@ -30,7 +30,7 @@ export function ReviewsPaginated({ reviews }: { reviews: Review[] }) {
 
   return (
     <div>
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
         {pageReviews.map((review, i) => {
           const name = review.author.startsWith('@') ? review.author.slice(1) : review.author;
           const avatarSrc = review.avatar_url || null;
