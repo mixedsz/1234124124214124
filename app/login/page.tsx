@@ -3,13 +3,15 @@
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { getAuthUrl, createBasket } from '@/lib/tebex';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, LogIn } from 'lucide-react';
 
 const BASKET_KEY = 'tebex_basket_ident';
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
+  useEffect(() => { document.title = 'Login | Flake Development | QBCore, Qbox & ESX FiveM Scripts'; }, []);
+
   const [error, setError] = useState<string | null>(null);
 
   const handleFiveMLogin = async () => {
@@ -29,7 +31,7 @@ export default function LoginPage() {
         localStorage.setItem(BASKET_KEY, ident);
       }
       
-      const returnUrl = `${window.location.origin}/store?success=true`;
+      const returnUrl = `${window.location.origin}/scripts?success=true`;
       const authUrl = await getAuthUrl(ident, returnUrl);
 
       if (!authUrl) {

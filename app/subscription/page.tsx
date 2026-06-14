@@ -1,14 +1,15 @@
 'use client';
 
 import { Header } from '@/components/header';
-import { TebexCategory, TebexPackage, formatPrice } from '@/lib/tebex';
+import { TebexCategory, TebexPackage, createBasket, getAuthUrl } from '@/lib/tebex';
+import { useCurrency } from '@/contexts/currency-context';
 import { Footer } from '@/components/footer';
 import { Check } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useBasket } from '@/contexts/basket-context';
+import { useRouter } from 'next/navigation';
 
-// Helper to strip HTML tags and convert to plain text
 function stripHtml(html: string): string {
   if (!html) return '';
   return html.replace(/<[^>]*>/g, '').trim();
@@ -19,34 +20,43 @@ export default function SubscriptionPage() {
   const [scripts, setScripts] = useState<TebexPackage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [currentScriptIndex, setCurrentScriptIndex] = useState(0);
-  const { itemCount } = useBasket();
+  const [groupIndex, setGroupIndex] = useState(0);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [pendingSubId, setPendingSubId] = useState<number | null>(null);
+  const [adding, setAdding] = useState<number | null>(null);
+  const [fiveMToast, setFiveMToast] = useState(false);
+  const [fiveMToastUsername, setFiveMToastUsername] = useState<string | null>(null);
+  const { itemCount, isAuthenticated, addItem, basket, refreshBasket, username } = useBasket();
+  const { formatPrice } = useCurrency();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    document.title = 'Subscriptions | Flake Development | QBCore, Qbox & ESX FiveM Scripts';
+  }, []);
 
   useEffect(() => {
     async function load() {
       try {
         const cats: TebexCategory[] = await fetch('/api/categories').then(r => r.json());
-        // Find subscription categories
-        const subCats = cats.filter((cat: TebexCategory) => 
-          cat.name.toLowerCase().includes('subscription') || 
+        const subCats = cats.filter((cat: TebexCategory) =>
+          cat.name.toLowerCase().includes('subscription') ||
           cat.name.toLowerCase().includes('recurring')
         );
-        // Get non-subscription categories for "What's Included"
-        const scriptCats = cats.filter((cat: TebexCategory) => 
-          !cat.name.toLowerCase().includes('subscription') && 
+        const scriptCats = cats.filter((cat: TebexCategory) =>
+          !cat.name.toLowerCase().includes('subscription') &&
           !cat.name.toLowerCase().includes('recurring')
         );
-        
-        // Combine all subscription packages
         const allSubs = subCats.flatMap((cat: TebexCategory) => cat.packages || []);
         setSubscriptions(allSubs);
-        
-        // Get ALL scripts for rotating display
-        const allScripts = scriptCats.flatMap((cat: TebexCategory) => cat.packages || []);
-        setScripts(allScripts);
-      } catch (err) {
-        console.error('Error loading subscriptions:', err);
+        const seen = new Set<number>();
+        const allScripts = scriptCats
+          .flatMap((cat: TebexCategory) => cat.packages || [])
+          .filter(pkg => { if (seen.has(pkg.id)) return false; seen.add(pkg.id); return true; });
+        setScripts([...allScripts].sort(() => Math.random() - 0.5));
+      } catch {
         setError('Failed to load subscriptions. Please try again later.');
       } finally {
         setLoading(false);
@@ -55,35 +65,79 @@ export default function SubscriptionPage() {
     load();
   }, []);
 
-  // Rotate through scripts every 3 seconds
+  // After returning from FiveM auth, show toast + redirect simultaneously
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const pending = localStorage.getItem('tebex_fivem_auth_pending');
+    const pendingId = localStorage.getItem('tebex_pending_sub_id');
+    if (!pending || !pendingId) return;
+    localStorage.removeItem('tebex_fivem_auth_pending');
+    localStorage.removeItem('tebex_pending_sub_id');
+    // Show toast on this page while redirect is happening
+    setFiveMToastUsername(username ?? null);
+    setFiveMToast(true);
+    // Store flag so the cart page also shows the toast on arrival
+    if (username) sessionStorage.setItem('fivem_toast_username', username);
+    const subId = Number(pendingId);
+    setAdding(subId);
+    // Add to basket and redirect immediately — no delay
+    addItem(subId, 1)
+      .then(() => router.push('/cart'))
+      .catch(() => { setAdding(null); setFiveMToast(false); });
+  }, [isAuthenticated, username, addItem, router]);
+
   useEffect(() => {
     if (scripts.length <= 5) return;
-    
     intervalRef.current = setInterval(() => {
-      setCurrentScriptIndex((prev) => {
-        const nextIndex = prev + 1;
-        // Reset when we've shown all scripts
-        if (nextIndex >= scripts.length - 4) {
-          return 0;
-        }
-        return nextIndex;
+      setGroupIndex(prev => {
+        const totalGroups = Math.ceil(scripts.length / 5);
+        return (prev + 1) % totalGroups;
       });
     }, 3000);
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [scripts.length]);
 
-  // Get 5 scripts starting from current index
-  const displayedScripts = scripts.slice(currentScriptIndex, currentScriptIndex + 5);
-  // If we don't have enough scripts from current index, wrap around
-  if (displayedScripts.length < 5 && scripts.length >= 5) {
-    const remaining = 5 - displayedScripts.length;
-    displayedScripts.push(...scripts.slice(0, remaining));
-  }
+  const displayedScripts = scripts.slice(groupIndex * 5, groupIndex * 5 + 5);
+
+  const handleSubscribeNow = useCallback(async (sub: TebexPackage) => {
+    if (!isAuthenticated) {
+      setPendingSubId(sub.id);
+      setShowLoginModal(true);
+      return;
+    }
+    setAdding(sub.id);
+    try {
+      await addItem(sub.id, 1);
+      router.push('/cart');
+    } catch {
+      setAdding(null);
+    }
+  }, [isAuthenticated, addItem, router]);
+
+  const handleFiveMLogin = async () => {
+    setLoginLoading(true);
+    setLoginError(null);
+    try {
+      const BASKET_KEY = 'tebex_basket_ident';
+      let ident = localStorage.getItem(BASKET_KEY);
+      if (!ident) {
+        const origin = window.location.origin;
+        const b = await createBasket(`${origin}/cart`, `${origin}/checkout-complete`);
+        if (!b) throw new Error('Could not create a session. Please try again.');
+        ident = b.ident;
+        localStorage.setItem(BASKET_KEY, ident);
+      }
+      const returnUrl = `${window.location.origin}/subscription`;
+      const authUrl = await getAuthUrl(ident, returnUrl);
+      if (!authUrl) throw new Error('Could not get authentication URL. Please try again.');
+      localStorage.setItem('tebex_fivem_auth_pending', '1');
+      if (pendingSubId !== null) localStorage.setItem('tebex_pending_sub_id', String(pendingSubId));
+      window.location.replace(authUrl);
+    } catch (err) {
+      setLoginError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+      setLoginLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-neutral-900 flex flex-col">
@@ -122,7 +176,8 @@ export default function SubscriptionPage() {
               const isRecommended = idx === subscriptions.length - 1 && subscriptions.length > 1;
               const hasDiscount = sub.discount && sub.discount > 0;
               const cleanDescription = stripHtml(sub.description);
-              
+              const isAdding = adding === sub.id;
+
               return (
                 <div
                   key={sub.id}
@@ -132,7 +187,6 @@ export default function SubscriptionPage() {
                       : 'border-neutral-700 bg-neutral-800/30'
                   }`}
                 >
-                  {/* Badge for recommended */}
                   {isRecommended && hasDiscount ? (
                     <div className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full mb-4">
                       BEST VALUE
@@ -140,61 +194,55 @@ export default function SubscriptionPage() {
                   ) : null}
 
                   <h3 className="text-2xl font-bold text-white mb-2">{sub.name}</h3>
-                  
-                  {/* Price - DO NOT divide by 100, Tebex returns actual price */}
+
                   <div className="mb-6">
                     <span className="text-5xl font-bold text-white">
-                      {formatPrice(sub.total_price, sub.currency)}
+                      {formatPrice(sub.total_price)}
                     </span>
                     <p className="text-neutral-400 text-sm mt-2">
                       {sub.name.toLowerCase().includes('month') ? 'per month' : 'per period'}
                     </p>
                   </div>
 
-                  {/* Description - stripped of HTML */}
                   {cleanDescription && (
                     <p className="text-neutral-300 mb-6">{cleanDescription}</p>
                   )}
 
-                  {/* Features */}
                   <ul className="space-y-3 mb-8">
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Access to all current scripts
-                    </li>
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Access to all future scripts
-                    </li>
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Priority support
-                    </li>
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Early access to new features
-                    </li>
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Exclusive Discord channels
-                    </li>
-                    <li className="flex items-center gap-3 text-neutral-300">
-                      <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                      Script customization help
-                    </li>
+                    {[
+                      'Access to all current scripts',
+                      'Access to all future scripts',
+                      'Priority support',
+                      'Early access to new features',
+                      'Exclusive Discord channels',
+                      'Script customization help',
+                    ].map(f => (
+                      <li key={f} className="flex items-center gap-3 text-neutral-300">
+                        <Check className="w-5 h-5 text-blue-500 flex-shrink-0" />
+                        {f}
+                      </li>
+                    ))}
                   </ul>
 
-                  {/* Subscribe Button */}
-                  <Link
-                    href={`/product/${sub.id}`}
-                    className={`block text-center px-6 py-3 font-semibold rounded-lg transition ${
+                  <button
+                    onClick={() => handleSubscribeNow(sub)}
+                    disabled={isAdding}
+                    className={`w-full text-center px-6 py-3 font-semibold rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed ${
                       isRecommended
                         ? 'bg-blue-600 text-white hover:bg-blue-700'
                         : 'bg-neutral-700 text-white hover:bg-neutral-600'
                     }`}
                   >
-                    Subscribe Now
-                  </Link>
+                    {isAdding ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                        </svg>
+                        Adding...
+                      </span>
+                    ) : 'Subscribe Now'}
+                  </button>
                 </div>
               );
             })}
@@ -204,7 +252,7 @@ export default function SubscriptionPage() {
             <p className="text-neutral-400 text-lg mb-4">No subscriptions available at the moment.</p>
             <p className="text-neutral-500 text-sm">
               Check back soon or{' '}
-              <Link href="/store" className="text-blue-400 hover:text-blue-300">
+              <Link href="/scripts" className="text-blue-400 hover:text-blue-300">
                 browse our scripts
               </Link>
             </p>
@@ -214,6 +262,37 @@ export default function SubscriptionPage() {
         {/* What's Included Section */}
         {scripts.length > 0 && (
           <section className="mt-20">
+            {(() => {
+              const totalValue = scripts.reduce((sum, s) => sum + s.total_price, 0);
+              const monthlySub = subscriptions.find(s => s.name.toLowerCase().includes('month'));
+              const monthsWorth = monthlySub && monthlySub.total_price > 0 ? Math.floor(totalValue / monthlySub.total_price) : 0;
+              const years = Math.floor(monthsWorth / 12);
+              const months = monthsWorth % 12;
+              const worthLabel = years > 0 && months > 0
+                ? `${years} Year${years !== 1 ? 's' : ''} ${months} Month${months !== 1 ? 's' : ''}`
+                : years > 0
+                ? `${years} Year${years !== 1 ? 's' : ''}`
+                : `${months} Month${months !== 1 ? 's' : ''}`;
+              return (
+                <div className="flex flex-wrap justify-center gap-4 mb-14">
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{scripts.length}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Products Included</span>
+                  </div>
+                  <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                    <span className="text-3xl font-black text-white mb-1">{formatPrice(totalValue)}</span>
+                    <span className="text-neutral-500 text-sm font-medium">Total Value</span>
+                  </div>
+                  {monthsWorth > 0 && (
+                    <div className="flex flex-col items-center bg-neutral-800/50 border border-neutral-700/50 rounded-2xl px-8 py-5 min-w-[150px]">
+                      <span className="text-3xl font-black text-white mb-1">{worthLabel}</span>
+                      <span className="text-neutral-500 text-sm font-medium">Worth of Subscriptions</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
             <h2 className="text-4xl font-bold text-white text-center mb-3">{"What's Included"}</h2>
             <p className="text-neutral-500 text-center mb-12">
               Get all of our current scripts, plus new scripts on release day, automatically.
@@ -221,11 +300,11 @@ export default function SubscriptionPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {displayedScripts.map((script, idx) => (
-                <Link 
-                  key={`${script.id}-${idx}`} 
+                <Link
+                  key={`${script.id}-${idx}`}
                   href={`/product/${script.id}`}
                   className="block bg-neutral-800 rounded-2xl overflow-hidden border border-neutral-700 hover:border-blue-500/50 transition-all duration-500 group animate-fade-in"
-                  style={{ 
+                  style={{
                     animationDelay: `${idx * 100}ms`,
                     opacity: 0,
                     animation: 'fadeIn 0.5s ease forwards'
@@ -233,8 +312,8 @@ export default function SubscriptionPage() {
                 >
                   <div className="aspect-video bg-neutral-700 overflow-hidden">
                     {script.image ? (
-                      <img 
-                        src={script.image} 
+                      <img
+                        src={script.image}
                         alt={script.name}
                         className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                       />
@@ -244,7 +323,6 @@ export default function SubscriptionPage() {
                       </div>
                     )}
                   </div>
-                  {/* Framework badges - light variant style */}
                   <div className="flex gap-1.5 px-4 pt-4">
                     <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-red-500/15 text-red-400">QBCore</span>
                     <span className="px-2 py-0.5 text-[11px] font-semibold rounded bg-yellow-500/15 text-yellow-400">Qbox</span>
@@ -256,7 +334,6 @@ export default function SubscriptionPage() {
                 </Link>
               ))}
 
-              {/* "+ all current & future releases!" card */}
               <div className="bg-gradient-to-b from-neutral-700/50 to-transparent h-full rounded-2xl p-[1px] hidden lg:block">
                 <div className="w-full h-full bg-gradient-to-b from-neutral-800 to-neutral-900 rounded-2xl flex flex-col items-center justify-center min-h-[280px] gap-4">
                   <div className="text-blue-400 font-bold text-6xl leading-none" style={{ textShadow: '0 0 30px rgba(59,130,246,0.6)' }}>+</div>
@@ -276,16 +353,88 @@ export default function SubscriptionPage() {
 
       <Footer />
 
+      {/* FiveM Connected Toast */}
+      {fiveMToast && (
+        <div className="fixed top-20 right-6 z-50 flex items-center gap-3 bg-orange-500/15 border border-orange-500/30 backdrop-blur-sm rounded-2xl px-5 py-4 shadow-2xl animate-slide-in-right">
+          <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 48 48" fill="#F97316" xmlns="http://www.w3.org/2000/svg">
+            <polygon points="5,45 9,34 21,22 15,45"/>
+            <polygon points="25,18 33,45 43,45 32,12"/>
+            <polygon points="16.059,14.164 20,3 28,3"/>
+            <polygon points="10.731,29.002 23,17 23,15 11.58,26.667"/>
+            <polygon points="15.142,16.429 13,22 29.724,5.725 28.818,3.178"/>
+            <polygon points="23.932,14.055 24.377,15.626 30.941,9.178 30.385,7.702"/>
+          </svg>
+          <div>
+            <p className="text-white font-semibold text-sm">FiveM Connected!</p>
+            <p className="text-orange-300 text-xs mt-0.5">
+              {fiveMToastUsername ? `Logged in as ${fiveMToastUsername}` : 'Authentication successful'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* FiveM Login Modal */}
+      {showLoginModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLoginModal(false); }}
+        >
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          <div className="relative w-full max-w-md bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden border border-neutral-800">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <h2 className="text-xl font-bold text-white">Login with FiveM</h2>
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="text-neutral-400 hover:text-white transition p-1"
+              >
+                <svg viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-5 h-5">
+                  <path d="M11.7816 4.03157C12.0062 3.80702 12.0062 3.44295 11.7816 3.2184C11.5571 2.99385 11.193 2.99385 10.9685 3.2184L7.50005 6.68682L4.03164 3.2184C3.80708 2.99385 3.44301 2.99385 3.21846 3.2184C2.99391 3.44295 2.99391 3.80702 3.21846 4.03157L6.68688 7.49999L3.21846 10.9684C2.99391 11.193 2.99391 11.557 3.21846 11.7816C3.44301 12.0061 3.80708 12.0061 4.03164 11.7816L7.50005 8.31316L10.9685 11.7816C11.193 12.0061 11.5571 12.0061 11.7816 11.7816C12.0062 11.557 12.0062 11.193 11.7816 10.9684L8.31322 7.49999L11.7816 4.03157Z" fill="currentColor" fillRule="evenodd" clipRule="evenodd"/>
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 pb-6">
+              <p className="text-neutral-300 mb-4 leading-relaxed">
+                Before subscribing, we need you to log in with your Cfx.re/FiveM account so we know which Keymaster to send the assets to after checkout.
+              </p>
+              <p className="text-neutral-400 text-sm mb-6">
+                Click the button below — it&apos;ll take just a couple of seconds!
+              </p>
+              {loginError && (
+                <p className="mb-4 text-red-400 text-sm text-center">{loginError}</p>
+              )}
+              <div className="flex justify-center">
+                <button
+                  onClick={handleFiveMLogin}
+                  disabled={loginLoading}
+                  className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl font-bold text-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 disabled:cursor-not-allowed text-white transition"
+                >
+                  {loginLoading ? (
+                    <>
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                      Connecting...
+                    </>
+                  ) : (
+                    <>
+                      <svg width="18" height="20" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 0C4.03 0 0 4.03 0 9C0 13.97 4.03 18 9 18C13.97 18 18 13.97 18 9C18 4.03 13.97 0 9 0ZM9 2.7C10.49 2.7 11.7 3.91 11.7 5.4C11.7 6.89 10.49 8.1 9 8.1C7.51 8.1 6.3 6.89 6.3 5.4C6.3 3.91 7.51 2.7 9 2.7ZM9 15.48C6.75 15.48 4.76 14.33 3.6 12.59C3.63 10.84 7.2 9.882 9 9.882C10.791 9.882 14.37 10.84 14.4 12.59C13.24 14.33 11.25 15.48 9 15.48Z" fill="currentColor"/>
+                      </svg>
+                      Login with FiveM
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <style jsx>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>
