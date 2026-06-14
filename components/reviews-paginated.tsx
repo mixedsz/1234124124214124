@@ -20,6 +20,7 @@ function fmtDate(s: string) {
   const d = new Date(s);
   return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
+function isSnowflake(id?: string) { return !!id && /^\d{17,19}$/.test(id); }
 
 const PAGE_SIZE = 6;
 
@@ -33,7 +34,8 @@ export function ReviewsPaginated({ reviews }: { reviews: Review[] }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
         {pageReviews.map((review, i) => {
           const name = review.author.startsWith('@') ? review.author.slice(1) : review.author;
-          const avatarSrc = review.avatar_url || null;
+          const avatarSrc = review.avatar_url
+            || (isSnowflake(review.discord_id) ? `/api/discord-avatar?id=${review.discord_id}` : null);
           return (
             <div
               key={i}

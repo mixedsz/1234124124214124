@@ -68,7 +68,7 @@ export default async function HomePage() {
       return true;
     })
     .slice(0, 50)
-    .map(r => ({ text: r.content, author: r.username, avatar_url: (r as {avatar_url?: string}).avatar_url, created_at: r.created_at }));
+    .map(r => ({ text: r.content, author: r.username, avatar_url: (r as {avatar_url?: string}).avatar_url, discord_id: r.discord_id, created_at: r.created_at }));
 
 
   return (
