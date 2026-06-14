@@ -4,7 +4,7 @@ import { ProductCard } from '@/components/product-card';
 import { RecentPurchases } from '@/components/recent-purchases';
 import { SaleNotification } from '@/components/sale-notification';
 import { getCategories, getWebstore, TebexPackage } from '@/lib/tebex';
-import { readReviews } from '@/lib/reviews';
+import { readReviews, STATIC_REVIEWS } from '@/lib/reviews';
 import Link from 'next/link';
 import { ArrowRight, CloudDownload, Heart, Shield, Headphones } from 'lucide-react';
 import { ScriptShowcase } from '@/components/script-showcase';
@@ -56,10 +56,10 @@ export default async function HomePage() {
 
   const bestSellers = allPackages.slice(0, 6);
 
-  // Fetch real reviews; pad with static if fewer than 6 to keep marquee speed consistent
   const apiReviews = await readReviews().catch(() => []);
+  const source = apiReviews.length > 0 ? apiReviews : STATIC_REVIEWS;
   const seen = new Set<string>();
-  const mappedApiReviews = apiReviews
+  const displayReviews = source
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .filter(r => {
       const key = `${r.discord_id}:${r.content.trim()}`;
@@ -68,8 +68,7 @@ export default async function HomePage() {
       return true;
     })
     .slice(0, 50)
-    .map(r => ({ text: r.content, author: r.username, avatar_url: r.avatar_url, discord_id: r.discord_id, created_at: r.created_at }));
-  const displayReviews = mappedApiReviews;
+    .map(r => ({ text: r.content, author: r.username, avatar_url: (r as {avatar_url?: string}).avatar_url, created_at: r.created_at }));
 
 
   return (
